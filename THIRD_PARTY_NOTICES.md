@@ -45,7 +45,7 @@ must not override this current model list.
 
 This file summarizes third-party software, models, data, and runtime components
 used by Mitsukotoba Web. It is intended to make redistribution and attribution
-requirements visible. The accompanying `LICENSE_AUDIT.md` records the
+requirements visible. The accompanying `DEPENDENCY_AUDIT.md` records the
 GPL/eSpeak-focused technical audit.
 
 ## Adopted prerecorded voice
