@@ -1,6 +1,6 @@
 {
-  "version": "v1.0.0",
-  "source_commit": "4b6228c05546427affdeb71c1380634b66653c0f",
+  "version": "v1.0.1",
+  "source_commit": "4b2ef8ef195245c0c2a4968a8fc4f63045485051",
   "baseline_commit": "151f6c9396948221660e1e926f145cb4af73afb6",
   "models": {
     "ruri": {
@@ -6062,8 +6062,8 @@
     },
     {
       "path": "index.html",
-      "bytes": 97098,
-      "sha256": "76a8af166bd70018640d2e7d8d8a6903935bf4efd25e369ec79fa3a82d66fb9c"
+      "bytes": 97128,
+      "sha256": "60a2295a97d7d62db288b927a76ecb64158c3165660a359ce0ea8eaa39143c6d"
     },
     {
       "path": "licenses/CURRENT-LICENSE-DIGESTS.json",
@@ -6332,8 +6332,8 @@
     },
     {
       "path": "service-worker.js",
-      "bytes": 17666,
-      "sha256": "b436f6e736604f5515432ab1d044f97e73a431d5c511e164e4dfe95f8eba145a"
+      "bytes": 17675,
+      "sha256": "ec1bbba8d8dbac81e47b569ff22df15cf8b3ac666345d4467e065fb82a4e9bd6"
     },
     {
       "path": "shared/play-topics.json",
@@ -6482,8 +6482,8 @@
     },
     {
       "path": "src/multilingual/assets.js",
-      "bytes": 8032,
-      "sha256": "bbc30474481696237c7fb533eb156fc12aaa63b2dc64d6b2624b6299c6d2b16f"
+      "bytes": 8190,
+      "sha256": "af14bec4dd354bcaba50a8d7ae3d8e237b3b0bc86ae36e1f04e1e72adb76a8f7"
     },
     {
       "path": "src/multilingual/assets.json",
@@ -6592,8 +6592,8 @@
     },
     {
       "path": "src/multilingual/vosk-asr.js",
-      "bytes": 10315,
-      "sha256": "a6fe70f3462570881fa6fdc6c2f996c4db5b4335fd6b265fed34b3eecc951b63"
+      "bytes": 10322,
+      "sha256": "708d294c5ff6ed498233cedaca600b36af4b1037f6611b83ad88e44f2440b8a9"
     },
     {
       "path": "src/multilingual/vosk-models.js",
@@ -6647,8 +6647,8 @@
     },
     {
       "path": "src/semantic/panel.js",
-      "bytes": 5072,
-      "sha256": "87892c5da0569d97eed90589b63450160e4fa91f6ad6d74c6e43f533cd97d710"
+      "bytes": 4970,
+      "sha256": "bd75001159b61d45b82a64215c009a9f95bb53255fc1681c05a1496b7682bad3"
     },
     {
       "path": "src/semantic/tokenize.js",

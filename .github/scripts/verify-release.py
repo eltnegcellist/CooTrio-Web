@@ -25,6 +25,10 @@ for name,path in files.items():
     if path.suffix in {'.js','.mjs'}:
         refs+=re.findall(r'''(?:from\s*|import\s*\(\s*|import\s*)['"](\.[^'"\n]+)['"]''',s)
         refs+=re.findall(r'''new URL\(\s*['"](\.[^'"\n]+)['"]\s*,\s*import\.meta\.url''',s)
+        # Literal page links rendered by JS resolve from the document, not the module.
+        for ref in re.findall(r'''href=["'](\./[^"'\n]+\.html(?:[?#][^"'\n]*)?)["']''',s):
+            target=root/urllib.parse.unquote(ref.split('?')[0].split('#')[0])
+            if not target.is_file():errors.append('missing rendered page:'+name+' -> '+ref)
     if path.suffix=='.html':refs+=re.findall(r'''(?:src|href|data-source)=["'](\.?\.?/[^"']+)["']''',s)
     if path.suffix=='.css':refs+=re.findall(r'''url\(['"]?(\.[^)'"\s]+)''',s)
     for ref in refs:

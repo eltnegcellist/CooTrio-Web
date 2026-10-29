@@ -81,7 +81,7 @@ async function loadVoskRuntime(){
       const cache=await caches.open(CACHE_NAME);
       let bytes=await (await cache.match(scriptURL))?.arrayBuffer();
       if(!bytes||await sha256(bytes)!==scriptHash){
-        const response=await fetch(scriptURL,{credentials:'omit',signal:AbortSignal.timeout(60000)});
+        const response=await fetch(scriptURL,{credentials:'same-origin',signal:AbortSignal.timeout(60000)});
         if(!response.ok)throw Error('Vosk library download HTTP '+response.status);
         bytes=await response.arrayBuffer();
         if(await sha256(bytes)!==scriptHash)throw Error('Vosk library SHA-256 mismatch');

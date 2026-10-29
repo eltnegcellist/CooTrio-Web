@@ -11,7 +11,7 @@ export function installSemanticPanel({controller,engine,beforeChange,storage=loc
     <div class="semantic-actions"><button data-semantic="prepare" class="outline-button compact-button">モデルを準備・再試行</button></div>
     <p data-semantic="status" class="small" role="status"></p><progress data-semantic="progress" class="hidden" max="100" value="0"></progress>
     <details ${openInput ? 'open' : ''}><summary>日本語テキストで比較する</summary><label for="${inputId}">入力言語：日本語</label><textarea id="${inputId}" data-semantic="input" name="parent-speech" rows="3" inputmode="text" autocomplete="off" spellcheck="false" placeholder="ここに日本語を入力してください"></textarea><button data-semantic="try" class="outline-button compact-button">この内容で判定する</button><button data-semantic="reset" class="text-button">直前の話題をクリア</button></details>
-    <div data-semantic="result" class="semantic-result" aria-live="polite"></div><a class="text-button" href="./semantic-test.html">日本語でSemanticを試すページを開く</a>`;
+    <div data-semantic="result" class="semantic-result" aria-live="polite"></div>`;
   const $=key=>mount.querySelector(`[data-semantic="${key}"]`);
   let renderedResponse;
   controller.subscribe(({requested,mode,status,lastResponse,result,routingHistory})=>{
