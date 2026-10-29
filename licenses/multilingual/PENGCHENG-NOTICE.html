@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>PengChengStarling — model license and attribution</title>
+<style>body{font:1rem/1.6 system-ui,sans-serif;margin:2rem auto;padding:0 1rem;max-width:54rem}a{overflow-wrap:anywhere}h1{line-height:1.25}code{overflow-wrap:anywhere}</style>
+<main>
+<h1>PengChengStarling: model license and attribution</h1>
+<p lang="th">ใบอนุญาตและแหล่งที่มาของโมเดลรู้จำเสียงภาษาไทย</p>
+<p>The Thai recognizer uses the PengChengStarling model released by PCL-Voice / Yang Bo (stdo). Its original model repository declares <strong>Apache License 2.0</strong>. This notice accompanies CooTrio's use of that model and identifies its conversion and runtime changes.</p>
+<ul>
+<li><a href="./PENGCHENG-APACHE-2.0.txt">Complete Apache License 2.0</a></li>
+<li><a href="./PENGCHENG-MODEL-CARD.md">Retained original model card</a> at revision <code>3afca1d0cdbda6b0cde440e31539be81df5d1301</code></li>
+<li><a href="./PENGCHENG-PROVENANCE.json">Pinned sources, file identities and modification record</a></li>
+<li><a href="./NOTICE.md">Additional multilingual component notices</a></li>
+</ul>
+<h2>Original and converted model</h2>
+<p><a href="https://huggingface.co/stdo/PengChengStarling">Original model: stdo/PengChengStarling</a>, linked by <a href="https://github.com/PCL-Voice/PengChengStarling">the PCL-Voice project</a>.</p>
+<p>Fangjun Kuang (csukuangfj) / sherpa-onnx converted the encoder and joiner to INT8 using ONNX Runtime dynamic quantization. The decoder, BPE vocabulary and tokens retain their original file identities. The app downloads the converted model from an immutable revision, <code>c6726c1147387ad2a11148b33973135d92a55e6c</code>, and checks each file's full SHA-256. The converted repository has no separate license metadata; the original model's Apache-2.0 grant is the stated basis, with the identifiable conversion recorded above.</p>
+<h2>Runtime and local modifications</h2>
+<p>The ASR-only Sherpa-ONNX 1.12.32 runtime is Apache-2.0. CooTrio changes the build to omit bundled weights and applies the author's Thai decoder start token, <code>&lt;TH&gt;</code> (ID 8), before decoding. These runtime modifications do not alter the model weights. The runtime and its license are retained under <code>src/vendor/sherpa-pengcheng-1.12.32-th/</code>.</p>
+<p>The project does not bundle the unlicensed PCL-Voice training toolkit. Its lack of a repository-wide LICENSE file must not be treated as a license for that training code.</p>
+<h2>License terms</h2>
+<p>When distributing this model or derived versions, provide the Apache-2.0 license, retain applicable notices and identify modifications. The license contains warranty and liability limitations; it grants no endorsement or trademark rights. This published-license review does not certify every training-data right.</p>
+<p>Weights are fetched to the user's device rather than bundled in this website. Speech processing remains on the device.</p>
+<p><a href="../../index.html">Return to CooTrio</a></p>
+</main>
+</html>

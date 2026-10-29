@@ -1,0 +1,25 @@
+{
+  "runtime": "Sherpa 1.12.32 ASR-only SIMD + PengChengStarling Thai SOS",
+  "sourceCommit": "5f3dcc1dce87e8a6d16887d516bb35aaca4c23eb",
+  "sourceArchiveSha256": "939edf03e8465951237d338ade35adaade453456982bcb145a65273a03729281",
+  "patch": "scripts/patch-pengcheng-wasm.py",
+  "patchSha256": "cf37a66d96c6a416036a6d22d5ed444a7410330f9941cda249913a2783b317c7",
+  "algorithmSource": "yangb05/sherpa-onnx@1f007f546562d0e8dbecdf0d6c29bf2c6733fe3e",
+  "emscripten": "4.0.23",
+  "license": "Apache-2.0",
+  "modelWeightsIncluded": false,
+  "files": {
+    "sherpa-onnx-asr.js": {
+      "bytes": 49519,
+      "sha256": "c71a9817c2dd3ab69fd1967a81260428650890980d11d97cfa8e00d551e34f2b"
+    },
+    "sherpa-onnx-wasm-main-asr.js": {
+      "bytes": 76344,
+      "sha256": "6a4ed91c7b0cd85c4af568b9df376bff242aee3f172684cd0ed8d4d36f6f50fb"
+    },
+    "sherpa-onnx-wasm-main-asr.wasm": {
+      "bytes": 10967247,
+      "sha256": "5d9e3a0c420530876adcf3a93768b4822c0ebae12c0ed640711397e11288168e"
+    }
+  }
+}

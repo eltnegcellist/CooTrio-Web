@@ -1,0 +1,334 @@
+import { SileroCaptureDetector } from './silero-capture.js';
+
+const MIC_REQUEST={audio:{channelCount:1,echoCancellation:false,
+  noiseSuppression:false,autoGainControl:false},video:false};
+const stopStream=stream=>stream?.getTracks?.().forEach(track=>track.stop());
+const safeMicError=error=>['NotAllowedError','NotReadableError','NotFoundError',
+  'AbortError','NotSupportedError','SecurityError','TimeoutError'].includes(error?.name)
+  ? error.name : 'Error';
+export class EmmaMicrophone {
+  constructor({ onState, onUtterance, shouldIgnore, onDiagnostic, endpointMode = 'silero', onWarning, onError }) {
+    this.endpointMode = endpointMode;
+    this.onWarning = onWarning;
+    this.onError = onError;
+    this.onState = onState;
+    this.onUtterance = onUtterance;
+    this.shouldIgnore = shouldIgnore;
+    this.onDiagnostic = onDiagnostic;
+    this.generation = 0;
+    this.stream = null;
+    this.context = null;
+    this.node = null;
+    this.source = null;
+    this.recoveryPending = false;
+    this.vad = new AdaptiveEndpointDetector();
+    // Aggregate levels only: diagnostics never retain or export microphone PCM.
+    this.captureStats = {frames:0,samples:0,lastRms:0,peakRms:0};
+  }
+
+  async start() {
+    const generation = ++this.generation;
+    const requested = navigator.mediaDevices.getUserMedia(MIC_REQUEST);
+    requested.then(stream=>{ if(generation !== this.generation) stream.getTracks().forEach(track=>track.stop()); },()=>{});
+    let stream;
+    try { stream = await withTimeout(requested, 15000,
+      'マイクの開始が完了しませんでした。サイト設定でマイクを許可し、Androidで他アプリのバブルやオーバーレイが表示されている場合は閉じてから、もう一度お試しください。'); }
+    catch(error) { if(generation === this.generation) this.generation++; throw error; }
+    if(generation !== this.generation) return;
+    this.stream = stream;
+    const context = this.context = new AudioContext({ latencyHint: 'interactive' });
+    if (this.context.state === 'suspended') {
+      await withTimeout(
+        this.context.resume(),
+        5000,
+        'マイク音声処理を開始できませんでした。「会話を始める」をもう一度押してください。'
+      );
+    }
+    if(generation !== this.generation) return;
+    try {
+      await withTimeout(
+        context.audioWorklet.addModule(new URL('../worklets/pcm-capture-worklet.js', import.meta.url)),
+        15000,
+        'マイク音声処理の読み込みが完了しませんでした。ページを再読み込みして、もう一度お試しください。'
+      );
+    } catch(error) {
+      // A user Stop during post-TTS microphone restoration closes this
+      // context and aborts addModule. That superseded start is cancellation.
+      if(generation!==this.generation || context!==this.context)return;
+      throw error;
+    }
+    if(generation !== this.generation) return;
+    if(this.endpointMode === 'silero') {
+      try {
+        this.vadAbort=new AbortController();
+        const detector=await SileroCaptureDetector.create({
+          signal:this.vadAbort.signal,
+          sampleRate:context.sampleRate,
+          onDiagnostic:details=>{if(generation===this.generation)this.onDiagnostic?.('vad-worker',details);},
+          onResult:result=>{if(generation===this.generation && !this.shouldIgnore?.())this.handleResult(result);},
+          onError:error=>{if(generation===this.generation)this.onError?.(error);}
+        });
+        if(generation!==this.generation){detector.close();return;}
+        this.vad=detector;
+      } catch(error) {
+        if(generation!==this.generation)return;
+        console.warn('Silero preparation failed; using volume-based detection.',error);
+        this.vad=new AdaptiveEndpointDetector();
+        this.onWarning?.('声の判定を準備できなかったため、今回は従来方式で会話します。設定で判定方式を変更できます。');
+      }
+    } else this.vad=new AdaptiveEndpointDetector();
+    const source = this.source = this.context.createMediaStreamSource(this.stream);
+    this.node = new AudioWorkletNode(this.context, 'emma-pcm-capture');
+    const silent = this.context.createGain();
+    silent.gain.value = 0;
+    source.connect(this.node).connect(silent).connect(this.context.destination);
+    this.node.port.onmessage = (event) => {
+      if(generation===this.generation && this.context===context)this.handleFrame(event.data);
+    };
+    this.onState?.('listening');
+  }
+
+  handleFrame(frame) {
+    if(!this.context)return;
+    let power=0;
+    for(const sample of frame)power+=sample*sample;
+    const rms=frame.length?Math.sqrt(power/frame.length):0;
+    this.captureStats.frames++;this.captureStats.samples+=frame.length;
+    this.captureStats.lastRms=rms;this.captureStats.peakRms=Math.max(this.captureStats.peakRms,rms);
+    const ignored=Boolean(this.shouldIgnore?.());
+    this.onDiagnostic?.('frame',{rms,samples:frame.length,ignored});
+    if (ignored) {
+      this.vad.resetSpeechOnly();
+      return;
+    }
+    const result = this.vad.push(frame, this.context.sampleRate, performance.now());
+    this.handleResult(result);
+  }
+
+  // Developer-only, one-shot recovery in hidden persistent-mic sessions. Keep
+  // the original source alive until a replacement has connected successfully.
+  // A blocked/late background permission request never discards the old track.
+  async reacquireInput({canApply=()=>true,timeoutMs=7000}={}) {
+    if(this.recoveryPending)return {status:'busy'};
+    if(!this.context||!this.node||!this.stream)return {status:'unavailable'};
+    this.recoveryPending=true;
+    const generation=this.generation,context=this.context,node=this.node;
+    let expired=false,accepted=false,released=false,nextStream=null,nextSource=null;
+    const release=stream=>{if(!stream||released)return;released=true;try{stopStream(stream);}catch{}};
+    try {
+      const request=Promise.resolve().then(()=>navigator.mediaDevices.getUserMedia(MIC_REQUEST));
+      request.then(stream=>{
+        if(expired||generation!==this.generation||context!==this.context||!canApply())
+          release(stream);
+      },()=>{});
+      nextStream=await withTimeout(request,timeoutMs,'Microphone recovery timed out');
+      if(generation!==this.generation||context!==this.context||node!==this.node||!canApply())
+        return {status:'cancelled'};
+      nextSource=context.createMediaStreamSource(nextStream);
+      nextSource.connect(node);
+      if(generation!==this.generation||context!==this.context||node!==this.node||!canApply())
+        return {status:'cancelled'};
+      const oldStream=this.stream,oldSource=this.source;
+      // A new capture may become active after a quiet period; reset partial VAD.
+      this.vad.resetSpeechOnly();
+      this.source=nextSource;
+      this.stream=nextStream;
+      accepted=true;
+      try{oldSource?.disconnect?.();}catch{}
+      try{stopStream(oldStream);}catch{}
+      return {status:'replaced-no-signal'};
+    } catch(error) {
+      return {status:'failed',errorName:error?.message==='Microphone recovery timed out'
+        ? 'TimeoutError' : safeMicError(error)};
+    } finally {
+      expired=true;
+      if(!accepted){
+        try{nextSource?.disconnect?.();}catch{}
+        release(nextStream);
+      }
+      this.recoveryPending=false;
+    }
+  }
+
+  getVADDiagnostics() {
+    return this.vad instanceof SileroCaptureDetector
+      ? this.vad.getDiagnostics() : {backend:'legacy'};
+  }
+
+  getDiagnostics() {
+    const tracks=this.stream?.getAudioTracks?.()||[];
+    return {...this.captureStats,contextState:this.context?.state||'closed',
+      liveTracks:tracks.filter(track=>track.readyState==='live').length,
+      mutedTracks:tracks.filter(track=>track.muted).length};
+  }
+
+  handleResult(result) {
+    if(!this.context)return;
+    if (result.event === 'speech-start') {
+      this.onDiagnostic?.('speech-start');
+      this.onState?.('endpoint');
+    }
+    if (result.event === 'utterance') {
+      const downsampled = resampleLinear(result.audio, this.context.sampleRate, 16000);
+      if (downsampled.length >= 16000 * 0.32) {
+        this.onDiagnostic?.('utterance');
+        this.onUtterance?.(downsampled);
+      }
+      // The caller owns the state now (ASR may already be running).
+    }
+  }
+
+  resetDetector() {
+    this.vad.reset();
+  }
+
+  forceUtterance() {
+    if (!this.context) return null;
+    const audio = this.vad.forceCurrentUtterance();
+    if (!audio || !audio.length) return null;
+    const downsampled = resampleLinear(audio, this.context.sampleRate, 16000);
+    if (downsampled.length < 16000 * 0.32) return null;
+    this.onState?.('listening');
+    return downsampled;
+  }
+
+  async ensureActive() {
+    if (this.context && this.context.state === 'suspended') {
+      await withTimeout(
+        this.context.resume(),
+        5000,
+        'マイク音声処理を再開できませんでした。「会話を始める」をもう一度押してください。'
+      );
+    }
+  }
+
+  async stop() {
+    this.generation++;
+    this.vadAbort?.abort();
+    this.vadAbort=null;
+    if(this.node?.port)this.node.port.onmessage=null;
+    this.node?.disconnect();
+    this.source?.disconnect?.();
+    this.source=null;
+    stopStream(this.stream);
+    if (this.context && this.context.state !== 'closed') await this.context.close();
+    this.stream = null;
+    this.context = null;
+    this.node = null;
+    this.vad.reset();
+    this.vad.close?.();
+  }
+}
+
+export class AdaptiveEndpointDetector {
+  constructor() { this.reset(); }
+  reset() {
+    this.noiseFloor = 0.006;
+    this.preRoll = [];
+    this.preRollSamples = 0;
+    this.inSpeech = false;
+    this.frames = [];
+    this.speechStartAt = 0;
+    this.lastVoiceAt = 0;
+    this.aboveSince = 0;
+  }
+  resetSpeechOnly() {
+    this.inSpeech = false;
+    this.frames = [];
+    this.aboveSince = 0;
+    this.preRoll = [];
+    this.preRollSamples = 0;
+  }
+  forceCurrentUtterance() {
+    const chunks = this.inSpeech ? this.frames : this.preRoll;
+    const audio = chunks.length ? concatFloat32(chunks) : null;
+    this.resetSpeechOnly();
+    return audio;
+  }
+  push(frame, sampleRate, now) {
+    const rms = rootMeanSquare(frame);
+    const speechThreshold = Math.max(0.012, this.noiseFloor * 3.0);
+    const silenceThreshold = Math.max(0.008, this.noiseFloor * 1.65);
+
+    if (!this.inSpeech && rms < speechThreshold) {
+      const capped = Math.min(rms, 0.04);
+      this.noiseFloor = this.noiseFloor * 0.985 + capped * 0.015;
+    }
+
+    if (!this.inSpeech) {
+      this.preRoll.push(frame);
+      this.preRollSamples += frame.length;
+      const target = Math.floor(sampleRate * 0.35);
+      while (this.preRollSamples > target && this.preRoll.length > 1) {
+        this.preRollSamples -= this.preRoll[0].length;
+        this.preRoll.shift();
+      }
+
+      if (rms >= speechThreshold) {
+        if (!this.aboveSince) this.aboveSince = now;
+        if (now - this.aboveSince >= 110) {
+          this.inSpeech = true;
+          this.speechStartAt = this.aboveSince;
+          this.lastVoiceAt = now;
+          this.frames = [...this.preRoll];
+          this.preRoll = [];
+          this.preRollSamples = 0;
+          return { event: 'speech-start' };
+        }
+      } else {
+        this.aboveSince = 0;
+      }
+      return { event: 'none' };
+    }
+
+    this.frames.push(frame);
+    if (rms >= silenceThreshold) this.lastVoiceAt = now;
+    const speechMs = now - this.speechStartAt;
+    const silenceMs = now - this.lastVoiceAt;
+    const neededSilence = speechMs < 2000 ? 850 : speechMs < 4000 ? 1100 : speechMs < 8000 ? 1400 : 1750;
+    if ((speechMs > 320 && silenceMs >= neededSilence) || speechMs >= 30000) {
+      const audio = concatFloat32(this.frames);
+      this.inSpeech = false;
+      this.frames = [];
+      this.aboveSince = 0;
+      return { event: 'utterance', audio };
+    }
+    return { event: 'none' };
+  }
+}
+
+function rootMeanSquare(frame) {
+  let sum = 0;
+  for (let i = 0; i < frame.length; i++) sum += frame[i] * frame[i];
+  return Math.sqrt(sum / Math.max(1, frame.length));
+}
+function concatFloat32(chunks) {
+  const length = chunks.reduce((n, c) => n + c.length, 0);
+  const out = new Float32Array(length);
+  let offset = 0;
+  for (const c of chunks) { out.set(c, offset); offset += c.length; }
+  return out;
+}
+function resampleLinear(input, sourceRate, targetRate) {
+  if (sourceRate === targetRate) return input.slice();
+  const ratio = sourceRate / targetRate;
+  const length = Math.floor(input.length / ratio);
+  const out = new Float32Array(length);
+  for (let i = 0; i < length; i++) {
+    const p = i * ratio;
+    const a = Math.floor(p);
+    const b = Math.min(a + 1, input.length - 1);
+    const t = p - a;
+    out[i] = input[a] * (1 - t) + input[b] * t;
+  }
+  return out;
+}
+
+
+function withTimeout(promise, ms, message) {
+  let timer;
+  const timeout = new Promise((_, reject) => {
+    timer = setTimeout(() => reject(new Error(message)), ms);
+  });
+  return Promise.race([promise, timeout]).finally(() => clearTimeout(timer));
+}

@@ -1,0 +1,57 @@
+name: CooTrio release validation and Pages
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: cootrio-release-${{ github.ref }}
+  cancel-in-progress: false
+jobs:
+  release-validation:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate exact release snapshot
+        run: python3 .github/scripts/verify-release.py .
+      - name: Assemble deployment from the verified manifest only
+        run: |
+          python3 - <<'PY'
+          import hashlib,json,shutil
+          from pathlib import Path
+          root=Path('.')
+          manifest=json.loads(Path('release-manifest.json').read_text())
+          dest=Path('_site');dest.mkdir()
+          for entry in manifest['files']:
+              src=Path(entry['path'])
+              assert not src.is_absolute() and '..' not in src.parts
+              assert src.is_file() and not src.is_symlink()
+              assert src.stat().st_size==entry['bytes']<=25*1024*1024
+              assert hashlib.sha256(src.read_bytes()).hexdigest()==entry['sha256'],str(src)
+              target=dest/src;target.parent.mkdir(parents=True,exist_ok=True);shutil.copyfile(src,target)
+          shutil.copyfile('release-manifest.json',dest/'release-manifest.json')
+          assert len(list(dest.rglob('*'))) < 20000
+          assert all(p.stat().st_size<=25*1024*1024 for p in dest.rglob('*') if p.is_file())
+          print('Validated Pages artifact files and hashes')
+          PY
+      - uses: actions/upload-pages-artifact@v3
+        if: github.event_name != 'pull_request'
+        with:
+          path: _site
+  deploy:
+    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
+    needs: release-validation
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy approved release
+        id: deployment
+        uses: actions/deploy-pages@v4

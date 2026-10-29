@@ -1,0 +1,125 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate" />
+  <meta http-equiv="Pragma" content="no-cache" />
+  <title>みつことば Web リセット</title>
+  <style>
+    body{font-family:system-ui,-apple-system,sans-serif;margin:0;min-height:100vh;display:grid;place-items:center;background:#fbf8ff;color:#332b3d}
+    main{max-width:640px;padding:32px;text-align:center}
+    h1{font-size:1.6rem}
+    p{line-height:1.7}
+  </style>
+</head>
+<body>
+  <main>
+    <h1 id="title">みつことば Webを最新版に更新しています</h1>
+    <p id="status">古いアプリキャッシュを整理しています…</p>
+  </main>
+  <script>
+    (async()=>{
+      const status=document.getElementById('status');
+      const title=document.getElementById('title');
+      const fullReset=new URLSearchParams(location.search).get('full')==='1';
+      const targetPath=new URL('./',location.href).pathname;
+
+      if(fullReset){
+        title.textContent='みつことば Webを初期状態に戻しています';
+        status.textContent='設定とモデルキャッシュを整理しています…';
+      }
+
+      const deleteDatabase=(name)=>new Promise(resolve=>{
+        try{
+          const request=indexedDB.deleteDatabase(name);
+          request.onsuccess=request.onerror=request.onblocked=()=>resolve();
+        }catch{resolve();}
+      });
+
+      try{
+        if('serviceWorker' in navigator){
+          const regs=await navigator.serviceWorker.getRegistrations();
+          await Promise.all(regs
+            .filter(reg=>new URL(reg.scope).pathname.startsWith(targetPath))
+            .map(reg=>reg.unregister()));
+        }
+
+        if('caches' in window){
+          const keys=await caches.keys();
+          const modelPatterns=[
+            targetPath,
+            'KittenML/kitten-tts',
+            'onnx-community/whisper-tiny',
+            'onnx-community/Supertonic-TTS-ONNX',
+            '/small-streaming-ja/',
+            '/voices/F3.bin'
+          ];
+
+          await Promise.all(keys.map(async key=>{
+            const isEmmaCache=
+              key.startsWith('cootrio-web-shell-') ||
+              (fullReset && (key.startsWith('mitsukotoba-qwen3-voice-') || key==='kitten-tts' || key==='moonshine-models-v1' || key==='mitsukotoba-multilingual-v1' || key==='mitsukotoba-background-model-meta-v1'));
+
+            if(isEmmaCache){
+              await caches.delete(key);
+              return;
+            }
+
+            if(fullReset){
+              try{
+                const cache=await caches.open(key);
+                const requests=await cache.keys();
+                await Promise.all(requests
+                  .filter(request=>modelPatterns.some(pattern=>request.url.includes(pattern)))
+                  .map(request=>cache.delete(request)));
+              }catch{}
+            }
+          }));
+        }
+
+        if(fullReset){
+          for(let i=localStorage.length-1;i>=0;i--){
+            const key=localStorage.key(i);
+            if(key && (key.startsWith('emma_') || key.startsWith('emmaBaby'))){
+              localStorage.removeItem(key);
+            }
+          }
+          for(let i=sessionStorage.length-1;i>=0;i--){
+            const key=sessionStorage.key(i);
+            if(key && key.startsWith('emma_')) sessionStorage.removeItem(key);
+          }
+
+          // The new split-file ONNX store must also be cleared on browsers
+          // that do not implement indexedDB.databases().
+          await deleteDatabase('mitsukotoba-multilingual-chunks-v1');
+          if(typeof indexedDB!=='undefined' && typeof indexedDB.databases==='function'){
+            const databases=await indexedDB.databases().catch(()=>[]);
+            await Promise.all(
+              databases
+                .map(db=>db?.name)
+                .filter(name=>name && /emma|moonshine|kitten|mitsukotoba/i.test(name))
+                .map(deleteDatabase)
+            );
+          }
+
+          status.textContent='初期化できました。初回画面を開きます…';
+        }else{
+          sessionStorage.removeItem('emma_coi_reload_count');
+          status.textContent='更新できました。最新版を開きます…';
+        }
+      }catch(error){
+        console.warn('Mitsukotoba reset:',error);
+        status.textContent=fullReset
+          ? '初期化処理を続けます…'
+          : '更新処理を続けます…';
+      }
+
+      const suffix=fullReset
+        ? `?reset=${Date.now()}`
+        : `?refresh=${Date.now()}`;
+      location.replace('./'+suffix);
+    })();
+  </script>
+</body>
+</html>

@@ -1,0 +1,285 @@
+{
+  "schemaVersion": 2,
+  "reviewedAt": "2026-10-28",
+  "product": "Mitsukotoba / CooTrio",
+  "basis": {
+    "webMain": "d3a4b3de0cb023ffc5805571868445640076609b",
+    "androidMain": "2fbae0704840f1fe5f1832edd016584c8c23a020",
+    "method": "Current production ASR route declarations, model pins, deployed runtime manifests, and publisher model-license references",
+    "publishedModelCards": "Pinned source revisions are deliberately immutable; a two-week-old model-card commit date does not mean this audit was conducted two weeks ago",
+    "modelChange": "No model replacement or license-text modification. Keep existing SHA-256 model-asset verification.",
+    "md5": "MD5 fingerprints are non-security reference values for accompanying documents only, never model/download validation."
+  },
+  "warnings": [
+    {
+      "modelId": "sensevoice-small-ko-int8",
+      "status": "license-owner clarification pending",
+      "detail": "A distinct FunASR model-weights agreement applies, not the Sherpa Apache license. The rights for specific ONNX conversion, weight redistribution, use and automatically revised terms are not conclusively settled by repository metadata; avoid asserting unconditional commercial permission.",
+      "source": "https://github.com/modelscope/FunASR/issues/3715"
+    },
+    {
+      "modelId": "pengchengstarling-th",
+      "status": "source-model grant with downstream metadata caveat",
+      "detail": "The original model card declares Apache-2.0. The quantized conversion has identifiable provenance but the converted repository has no separate license metadata. This notice does not certify training-data rights.",
+      "source": "https://huggingface.co/stdo/PengChengStarling"
+    }
+  ],
+  "asr": [
+    {
+      "locale": "ja",
+      "engine": "Moonshine Voice",
+      "model": "Small Streaming (ja)",
+      "modelId": "moonshine-small-streaming-ja",
+      "license": "MIT",
+      "publisher": "Moonshine AI",
+      "source": "https://github.com/moonshine-ai/moonshine/blob/main/docs/license.md",
+      "pin": "Moonshine Voice 0.1.5; streaming architecture",
+      "delivery": "download on first use",
+      "review": "published streaming-model license; no legacy Community model"
+    },
+    {
+      "locale": "de",
+      "engine": "Moonshine Voice",
+      "model": "Small Streaming (de)",
+      "modelId": "moonshine-small-streaming-de",
+      "license": "MIT",
+      "publisher": "Moonshine AI",
+      "source": "https://github.com/moonshine-ai/moonshine/blob/main/docs/license.md",
+      "pin": "Moonshine Voice 0.1.5; streaming architecture",
+      "delivery": "download on first use",
+      "review": "published streaming-model license; no legacy Community model"
+    },
+    {
+      "locale": "fr",
+      "engine": "Vosk",
+      "model": "Vosk Small FR 0.22",
+      "modelId": "vosk-model-small-fr-0.22",
+      "license": "Apache-2.0",
+      "publisher": "Alpha Cephei",
+      "source": "https://alphacephei.com/vosk/models",
+      "pin": "model 0.22; pinned official ZIP SHA-256",
+      "sha256": "cabf6180e177eb9b3a9a9d43a437bd5e549f3a7d09525e5d69a3fed787be12ad",
+      "delivery": "download on first use",
+      "review": "publisher's named Apache-2.0 model listing"
+    },
+    {
+      "locale": "es",
+      "engine": "Moonshine Voice",
+      "model": "Small Streaming (es)",
+      "modelId": "moonshine-small-streaming-es",
+      "license": "MIT",
+      "publisher": "Moonshine AI",
+      "source": "https://github.com/moonshine-ai/moonshine/blob/main/docs/license.md",
+      "pin": "Moonshine Voice 0.1.5; streaming architecture",
+      "delivery": "download on first use",
+      "review": "published streaming-model license; no legacy Community model"
+    },
+    {
+      "locale": "zh",
+      "engine": "Moonshine Voice",
+      "model": "Tiny Streaming (zh)",
+      "modelId": "moonshine-tiny-streaming-zh",
+      "license": "MIT",
+      "publisher": "Moonshine AI",
+      "source": "https://github.com/moonshine-ai/moonshine/blob/main/docs/license.md",
+      "pin": "Moonshine Voice 0.1.5; streaming architecture",
+      "delivery": "download on first use",
+      "review": "published streaming-model license; no legacy Community model"
+    },
+    {
+      "locale": "ko",
+      "engine": "SenseVoice",
+      "model": "SenseVoice Small INT8",
+      "modelId": "sensevoice-small-ko-int8",
+      "license": "FunASR Model Open Source License Agreement v1.1 (model weights; not Sherpa Apache-2.0)",
+      "publisher": "FunAudioLLM / Alibaba; ONNX conversion by Fangjun Kuang",
+      "source": "https://huggingface.co/FunAudioLLM/SenseVoiceSmall/tree/3847d57b6bdf2dd8875cb1508d2af43d80a16bf7",
+      "convertedSource": "https://huggingface.co/csukuangfj/sherpa-onnx-sense-voice-zh-en-ja-ko-yue-2024-07-17/tree/2365baeacb507f821a0c8120fcee3d484dba7a07",
+      "pin": "ONNX conversion 2365baeacb507f821a0c8120fcee3d484dba7a07",
+      "sha256": "c71f0ce00bec95b07744e116345e33d8cbbe08cef896382cf907bf4b51a2cd51",
+      "delivery": "download on first use",
+      "review": "license-owner clarification pending for precise converted-weight scope/commercial redistribution; retain full pinned model agreement",
+      "notice": "licenses/multilingual/SENSEVOICE-MODEL-LICENSE.txt"
+    },
+    {
+      "locale": "th",
+      "engine": "PengChengStarling / Sherpa-ONNX",
+      "model": "PengChengStarling streaming Thai INT8",
+      "modelId": "pengchengstarling-th",
+      "license": "Apache-2.0 (original model card; downstream conversion independently attributed)",
+      "publisher": "PCL-Voice / Yang Bo (stdo); converted by Fangjun Kuang",
+      "source": "https://huggingface.co/stdo/PengChengStarling/tree/3afca1d0cdbda6b0cde440e31539be81df5d1301",
+      "convertedSource": "https://huggingface.co/csukuangfj/sherpa-onnx-streaming-zipformer-ar_en_id_ja_ru_th_vi_zh-2025-02-10/tree/c6726c1147387ad2a11148b33973135d92a55e6c",
+      "pin": "INT8 conversion c6726c1147387ad2a11148b33973135d92a55e6c",
+      "sha256": "f9001ed7a9e46d0294438c1a30cd7c72d1cc4bdd4e7880edbcda36f67081e32e",
+      "delivery": "download on first use",
+      "review": "upstream model card Apache-2.0; downstream metadata absent; provenance and limitations retained",
+      "notice": "licenses/multilingual/PENGCHENG-MODEL-CARD.md"
+    },
+    {
+      "locale": "hi",
+      "engine": "Vosk",
+      "model": "Vosk Small HI 0.22",
+      "modelId": "vosk-model-small-hi-0.22",
+      "license": "Apache-2.0",
+      "publisher": "Alpha Cephei",
+      "source": "https://alphacephei.com/vosk/models",
+      "pin": "model 0.22; pinned official ZIP SHA-256",
+      "sha256": "7c50a10866889f0ac21d912c20537a055a597ed09fc1d3e5bcd798f9f0017e48",
+      "delivery": "download on first use",
+      "review": "publisher's named Apache-2.0 model listing"
+    },
+    {
+      "locale": "ar",
+      "engine": "Moonshine Voice",
+      "model": "Tiny Streaming (ar)",
+      "modelId": "moonshine-tiny-streaming-ar",
+      "license": "MIT",
+      "publisher": "Moonshine AI",
+      "source": "https://github.com/moonshine-ai/moonshine/blob/main/docs/license.md",
+      "pin": "Moonshine Voice 0.1.5; streaming architecture",
+      "delivery": "download on first use",
+      "review": "published streaming-model license; no legacy Community model"
+    },
+    {
+      "locale": "vi",
+      "engine": "Moonshine Voice",
+      "model": "Tiny Streaming (vi)",
+      "modelId": "moonshine-tiny-streaming-vi",
+      "license": "MIT",
+      "publisher": "Moonshine AI",
+      "source": "https://github.com/moonshine-ai/moonshine/blob/main/docs/license.md",
+      "pin": "Moonshine Voice 0.1.5; streaming architecture",
+      "delivery": "download on first use",
+      "review": "published streaming-model license; no legacy Community model"
+    },
+    {
+      "locale": "tl",
+      "engine": "Moonshine Voice",
+      "model": "Tiny Streaming (tl)",
+      "modelId": "moonshine-tiny-streaming-tl",
+      "license": "MIT",
+      "publisher": "Moonshine AI",
+      "source": "https://github.com/moonshine-ai/moonshine/blob/main/docs/license.md",
+      "pin": "Moonshine Voice 0.1.5; streaming architecture",
+      "delivery": "download on first use",
+      "review": "published streaming-model license; no legacy Community model"
+    },
+    {
+      "locale": "en",
+      "engine": "Whisper Small",
+      "model": "Whisper Small q8 / multilingual auto detection",
+      "modelId": "Xenova/whisper-small",
+      "license": "MIT original Whisper; Apache-2.0 converted Xenova model card",
+      "publisher": "OpenAI / Xenova",
+      "source": "https://huggingface.co/Xenova/whisper-small/tree/2d67713f236afa48a18992566e7647f6ca848e13",
+      "pin": "2d67713f236afa48a18992566e7647f6ca848e13",
+      "delivery": "download on first use; only multilingual mode",
+      "review": "conversion and original licenses differ",
+      "notice": "licenses/multilingual/WHISPER-MIT.txt"
+    }
+  ],
+  "otherModels": [
+    {
+      "id": "ruri",
+      "role": "Semantic topic/interaction (Japanese)",
+      "model": "Ruri v3 70M INT8",
+      "license": "Apache-2.0",
+      "publisher": "CL Nagoya / Ruri; ModernBERT-Ja base",
+      "source": "https://huggingface.co/cl-nagoya/ruri-v3-70m/tree/07a8b0aba47d29d2ca21f89b915c1efe2c23d1cc",
+      "pin": "07a8b0aba47d29d2ca21f89b915c1efe2c23d1cc",
+      "sha256": "bd500193003fdeaba8c5422a47b974b40b49a5e0c91285c76f6bd949d2205264",
+      "delivery": "download on first use",
+      "notice": "licenses/semantic/MODEL-CARD.md"
+    },
+    {
+      "id": "e5",
+      "role": "Semantic topic/interaction (non-Japanese)",
+      "model": "Multilingual E5 Small q8",
+      "license": "MIT",
+      "publisher": "Microsoft; Xenova conversion",
+      "source": "https://huggingface.co/Xenova/multilingual-e5-small/tree/761b726dd34fb83930e26aab4e9ac3899aa1fa78",
+      "pin": "761b726dd34fb83930e26aab4e9ac3899aa1fa78",
+      "delivery": "download on first use",
+      "notice": "licenses/multilingual/E5-MIT.txt"
+    },
+    {
+      "id": "silero",
+      "role": "Speech endpoint/VAD",
+      "model": "Silero VAD ONNX",
+      "license": "MIT",
+      "publisher": "Silero Team",
+      "source": "https://github.com/snakers4/silero-vad",
+      "pin": "production on-device VAD; distribution source-specific",
+      "delivery": "on-device VAD"
+    },
+    {
+      "id": "recorded",
+      "role": "Provenance of adopted prerecorded English AAC only",
+      "model": "Qwen3-TTS-12Hz-1.7B-Base-8bit",
+      "license": "Apache-2.0",
+      "publisher": "Qwen / Alibaba; mlx-community conversion",
+      "source": "https://huggingface.co/mlx-community/Qwen3-TTS-12Hz-1.7B-Base-8bit/tree/e7dd0585652209fa0d7783659aad4e8a324de11c",
+      "pin": "e7dd0585652209fa0d7783659aad4e8a324de11c / seed1202",
+      "delivery": "model weights NOT shipped or run in production; generated audio only"
+    },
+    {
+      "id": "kitten",
+      "role": "Optional uncatalogued English free-text TTS",
+      "model": "Kitten TTS Nano 0.8 FP32",
+      "license": "Apache-2.0",
+      "publisher": "KittenML",
+      "source": "https://huggingface.co/KittenML/kitten-tts-nano-0.8-fp32",
+      "pin": "0.8 FP32; model SHA-256 320564d2615f235de972ca27a7f39551c94185cfa24ca85b07a29084135f1e5e",
+      "delivery": "optional model download, not the adopted prerecorded bank"
+    },
+    {
+      "id": "cmudict",
+      "role": "Optional TTS phonemizer dictionary",
+      "model": "CMU Pronouncing Dictionary",
+      "license": "BSD-style",
+      "publisher": "Carnegie Mellon University",
+      "source": "https://github.com/cmusphinx/cmudict/tree/74790861f652b15e4ac49015a90074ad62a27690",
+      "pin": "74790861f652b15e4ac49015a90074ad62a27690",
+      "delivery": "component cached/downloaded only when needed"
+    }
+  ],
+  "runtimes": [
+    {
+      "name": "Moonshine Voice",
+      "version": "0.1.5",
+      "license": "MIT runtime; Eigen dependency MPL-2.0; other third-party notices",
+      "source": "https://github.com/moonshine-ai/moonshine/blob/main/docs/license.md"
+    },
+    {
+      "name": "Vosk runtime",
+      "version": "Web vosk-browser 0.0.8 / Android vosk-android 0.3.75",
+      "license": "Apache-2.0",
+      "source": "https://github.com/alphacep/vosk-api"
+    },
+    {
+      "name": "Sherpa-ONNX ASR-only",
+      "version": "1.12.32; Korean/Thai WASM",
+      "license": "Apache-2.0 (runtime only; does not override model terms)",
+      "source": "https://github.com/k2-fsa/sherpa-onnx/releases/tag/v1.12.32"
+    },
+    {
+      "name": "ONNX Runtime",
+      "version": "Web semantic/multilingual 1.30.0; Kitten browser 1.20.0; Android native 1.23.2",
+      "license": "MIT + third-party dependency notices",
+      "source": "https://github.com/microsoft/onnxruntime"
+    },
+    {
+      "name": "Transformers.js",
+      "version": "3.8.1",
+      "license": "Apache-2.0",
+      "source": "https://github.com/huggingface/transformers.js"
+    },
+    {
+      "name": "JNA (Android Vosk)",
+      "version": "5.18.1",
+      "license": "Apache-2.0 / LGPL-2.1 dual",
+      "source": "https://github.com/java-native-access/jna"
+    }
+  ]
+}

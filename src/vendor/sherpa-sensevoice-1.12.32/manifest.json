@@ -1,0 +1,27 @@
+{
+  "runtime": "sherpa-onnx ASR-only 1.12.32",
+  "sourceCommit": "5f3dcc1dce87e8a6d16887d516bb35aaca4c23eb",
+  "release": "https://github.com/k2-fsa/sherpa-onnx/releases/tag/v1.12.32",
+  "archiveSha256": "931d51f7a6b322243adf92caf5e6cd0022263ce00380523be14e9addab87dc18",
+  "license": "Apache-2.0",
+  "modelWeightsIncluded": false,
+  "files": {
+    "sherpa-onnx-asr.js": {
+      "bytes": 49519,
+      "sha256": "c71a9817c2dd3ab69fd1967a81260428650890980d11d97cfa8e00d551e34f2b"
+    },
+    "sherpa-onnx-wasm-main-vad-asr.js": {
+      "bytes": 95318,
+      "sha256": "79c7464ceb7bab36c75bc5ce1a5836fa0eeaa42d5110548ef8b1e8a0290cb93d"
+    },
+    "sherpa-onnx-wasm-main-vad-asr.wasm": {
+      "bytes": 11719405,
+      "sha256": "80099b875b0b35a7b219407e192049668d64fb771dfd0f36480d39df7d36d36c"
+    },
+    "sherpa-onnx-asr-runtime.js": {
+      "bytes": 90403,
+      "sha256": "281fbf4ce86eebcba519d509382180b11ecbee7de04543a2f6abc51cd9ef0ac1"
+    }
+  },
+  "change": "Only the demo .data preloader is omitted from generated JS; original WASM/binding and model weights are unchanged. Models are loaded with FS_createDataFile."
+}

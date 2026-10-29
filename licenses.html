@@ -1,0 +1,206 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#faf7fd">
+  <title>ライセンス・第三者提供ソフトウェア | みつことば</title>
+  <style>
+    :root{color-scheme:light;--ink:#2d2633;--muted:#62596b;--line:#e7dfea;--primary:#68458d}
+    *{box-sizing:border-box}
+    body{margin:0;background:#faf7fd;color:var(--ink);font:16px/1.65 system-ui,-apple-system,sans-serif}
+    main{width:min(800px,100%);padding:18px 16px 56px;margin:0 auto}
+    h1{font-size:1.5rem;line-height:1.25;margin:16px 0}
+    h2{font-size:1.1rem;margin:28px 0 10px}
+    p{margin:8px 0 18px;color:var(--muted)}
+    a{color:var(--primary);overflow-wrap:anywhere}
+    .back{display:inline-block;padding:9px 0;text-decoration:underline}
+    details{margin:10px 0;background:white;border:1px solid var(--line);border-radius:16px;overflow:hidden}
+    summary{cursor:pointer;padding:15px 16px;font-weight:650;line-height:1.5}
+    summary:focus-visible,a:focus-visible{outline:3px solid var(--primary);outline-offset:2px}
+    .document{padding:0 16px 16px}
+    pre{white-space:pre-wrap;overflow-wrap:anywhere;direction:ltr;text-align:start;background:#f7f5f9;color:#2d2633;border-radius:9px;padding:12px;font:13px/1.55 ui-monospace,Menlo,Consolas,monospace;max-height:55vh;overflow:auto}
+    .source{display:block;margin:4px 0;font-size:.9rem}
+    .notice{font-size:.9rem}
+    .inventory-list{display:grid;gap:9px}
+    .inventory-entry{background:white;border:1px solid var(--line);border-radius:14px;padding:10px 14px}
+    .inventory-entry strong{display:block;font-size:.95rem;line-height:1.55}
+    .inventory-entry p{margin:3px 0 6px;font-size:.85rem}
+    .inventory-entry .pin{font:12px/1.5 ui-monospace,Menlo,Consolas,monospace;overflow-wrap:anywhere;direction:ltr}
+    .inventory-entry a{display:inline-block;margin:0 0 2px;font-size:.85rem}
+    .inventory-error{color:#8c3333}
+    #reviewWarningList{padding:4px 0}
+    [dir="rtl"] summary,[dir="rtl"] .back{direction:rtl;text-align:right}
+  </style>
+</head>
+<body>
+<main>
+  <a class="back" id="back" href="./index.html#settingsScreen">← 設定へ戻る</a>
+  <h1 id="title">ライセンス・第三者提供ソフトウェア</h1>
+  <p id="intro">みつことば／CooTrioで利用するモデルや外部ライブラリの利用条件、開発元、改変記録を確認できます。許諾本文は原文のまま表示します。</p>
+  <p class="notice" id="offline">これらの文書はオフラインでも読めるように保存します。モデル本体はこのページに同梱していません。</p>
+  <section id="currentModelOverview" aria-labelledby="currentModelTitle">
+    <h2 id="currentModelTitle">現行モデルの一覧（12言語）</h2>
+    <p id="currentModelAudit">ライセンス再確認日：2026-10-28。モデルカードの固定リビジョンの作成日とは別の日付です。</p>
+    <p id="currentModelNote" class="notice">実装中のモデルと、音声生成にだけ使用したモデルを区別します。公式モデルカードは固定版のまま保存し、日付だけを変更しません。</p>
+    <div id="currentModelList" aria-live="polite"><p>モデル一覧を読み込んでいます…</p></div>
+    <h2 id="otherModelTitle">その他の利用モデル・辞書</h2>
+    <div id="otherModelList"></div>
+    <h2 id="runtimeModelTitle">推論ライブラリと実行環境</h2>
+    <div id="runtimeModelList"></div>
+    <h2 id="reviewWarningTitle">許諾確認上の注意</h2>
+    <div id="reviewWarningList"></div>
+    <details data-source="./licenses/CURRENT-MODEL-INVENTORY.json"><summary>Current production model inventory — exact source pins and review date</summary><div class="document"><a class="source" href="./licenses/CURRENT-MODEL-INVENTORY.json">CURRENT-MODEL-INVENTORY.json</a><pre></pre></div></details>
+    <details data-source="./licenses/CURRENT-LICENSE-DIGESTS.json"><summary>MD5 document fingerprints — reference only (SHA-256 remains security verification)</summary><div class="document"><a class="source" href="./licenses/CURRENT-LICENSE-DIGESTS.json">CURRENT-LICENSE-DIGESTS.json</a><pre></pre></div></details>
+  </section>
+
+  <h2 id="overview">全体の表示・モデル一覧</h2>
+  <details data-source="./THIRD_PARTY_NOTICES.md"><summary>Third-party components / THIRD_PARTY_NOTICES.md</summary><div class="document"><a class="source" href="./THIRD_PARTY_NOTICES.md">THIRD_PARTY_NOTICES.md</a><pre></pre></div></details>
+  <details data-source="./licenses/multilingual/NOTICE.md"><summary>Multilingual ASR — attribution and license summary</summary><div class="document"><a class="source" href="./licenses/multilingual/NOTICE.md">NOTICE.md</a><pre></pre></div></details>
+
+  <h2 id="specialist">韓国語・タイ語の音声認識モデル</h2>
+  <details data-source="./licenses/multilingual/SENSEVOICE-MODEL-LICENSE.txt"><summary>SenseVoice Small INT8 — FunASR Model Open Source License Agreement v1.1</summary><div class="document"><a class="source" href="./licenses/multilingual/SENSEVOICE-MODEL-LICENSE.txt">SENSEVOICE-MODEL-LICENSE.txt</a><pre></pre></div></details>
+  <details data-source="./licenses/multilingual/PENGCHENG-APACHE-2.0.txt"><summary>PengChengStarling — Apache License 2.0 (full text)</summary><div class="document"><a class="source" href="./licenses/multilingual/PENGCHENG-APACHE-2.0.txt">PENGCHENG-APACHE-2.0.txt</a><pre></pre></div></details>
+  <details data-source="./licenses/multilingual/PENGCHENG-MODEL-CARD.md"><summary>PengChengStarling — original model card and author</summary><div class="document"><a class="source" href="./licenses/multilingual/PENGCHENG-MODEL-CARD.md">PENGCHENG-MODEL-CARD.md</a><pre></pre></div></details>
+  <details data-source="./licenses/multilingual/PENGCHENG-PROVENANCE.json"><summary>PengChengStarling — source revisions, INT8 conversion and modifications</summary><div class="document"><a class="source" href="./licenses/multilingual/PENGCHENG-PROVENANCE.json">PENGCHENG-PROVENANCE.json</a><pre></pre></div></details>
+  <a class="source" href="./licenses/multilingual/PENGCHENG-NOTICE.html">PengChengStarling: original HTML notice and source attribution</a>
+
+  <h2 id="others">そのほかのモデル・実行環境</h2>
+  <details data-source="./licenses/multilingual/WHISPER-MIT.txt"><summary>Whisper — MIT license</summary><div class="document"><a class="source" href="./licenses/multilingual/WHISPER-MIT.txt">WHISPER-MIT.txt</a><pre></pre></div></details>
+  <details data-source="./licenses/multilingual/E5-MIT.txt"><summary>Multilingual E5 — MIT license</summary><div class="document"><a class="source" href="./licenses/multilingual/E5-MIT.txt">E5-MIT.txt</a><pre></pre></div></details>
+  <details data-source="./licenses/multilingual/ONNXRUNTIME.txt"><summary>ONNX Runtime — MIT license</summary><div class="document"><a class="source" href="./licenses/multilingual/ONNXRUNTIME.txt">ONNXRUNTIME.txt</a><pre></pre></div></details>
+  <details data-source="./licenses/semantic/MODEL-CARD.md"><summary>Ruri — model card and attribution</summary><div class="document"><a class="source" href="./licenses/semantic/MODEL-CARD.md">MODEL-CARD.md</a><pre></pre></div></details>
+  <details data-source="./multilingual-assets/runtime/LICENSE-transformers.txt"><summary>Transformers.js — Apache License 2.0</summary><div class="document"><a class="source" href="./multilingual-assets/runtime/LICENSE-transformers.txt">LICENSE-transformers.txt</a><pre></pre></div></details>
+  <p id="footer">許諾条件はモデルと実行環境ごとに異なります。音声認識の推論は端末内で行われます。</p>
+</main>
+<script>
+(() => {
+  'use strict';
+  const copy={
+    ja:['ライセンス・第三者提供ソフトウェア','← 設定へ戻る','みつことば／CooTrioで利用するモデルや外部ライブラリの利用条件、開発元、改変記録を確認できます。許諾本文は原文のまま表示します。','これらの文書はオフラインでも読めるように保存します。モデル本体はこのページに同梱していません。','全体の表示・モデル一覧','韓国語・タイ語の音声認識モデル','そのほかのモデル・実行環境','許諾条件はモデルと実行環境ごとに異なります。音声認識の推論は端末内で行われます。'],
+    en:['Licenses & third-party software','← Back to settings','Review the licenses, authors and modifications of models and third-party libraries used by CooTrio. Legal texts are shown verbatim.','These documents are stored for offline reading; model weights are not bundled with this page.','Overview & model attribution','Korean and Thai speech recognition models','Other models and runtimes','Each model and runtime has its own license. Speech recognition runs on your device.'],
+    de:['Lizenzen & Software von Drittanbietern','← Zurück zu den Einstellungen','Lizenzen, Urheber und Änderungen von Modellen und Bibliotheken in CooTrio. Rechtstexte bleiben unverändert.','Diese Dokumente sind offline verfügbar. Modellgewichte sind hier nicht enthalten.','Übersicht und Herkunft','Koreanische und thailändische Spracherkennung','Weitere Modelle und Laufzeitumgebungen','Für jedes Modell gelten eigene Bedingungen. Spracherkennung erfolgt auf dem Gerät.'],
+    fr:['Licences et logiciels tiers','← Retour aux paramètres','Consultez les licences, auteurs et modifications des modèles et bibliothèques utilisés par CooTrio. Les textes juridiques sont reproduits tels quels.','Ces documents restent accessibles hors ligne. Les poids des modèles ne sont pas inclus.','Vue générale et attribution','Reconnaissance vocale en coréen et thaï','Autres modèles et environnements','Les conditions varient selon le composant. La reconnaissance vocale reste sur l’appareil.'],
+    ko:['라이선스 및 타사 소프트웨어','← 설정으로 돌아가기','CooTrio에 사용된 모델과 외부 라이브러리의 라이선스, 저작자, 변경 내역입니다. 약관 원문은 그대로 표시됩니다.','문서는 오프라인에서도 읽을 수 있습니다. 모델 가중치는 포함하지 않습니다.','전체 목록 및 출처','한국어·태국어 음성 인식 모델','기타 모델과 실행 환경','구성 요소마다 적용되는 조건이 다릅니다. 음성 인식은 기기에서 처리합니다.'],
+    th:['ใบอนุญาตและซอฟต์แวร์จากบุคคลที่สาม','← กลับไปที่การตั้งค่า','ตรวจสอบใบอนุญาต ผู้พัฒนา และการแก้ไขโมเดลหรือไลบรารีที่ CooTrio ใช้ โดยแสดงข้อความกฎหมายต้นฉบับ','เอกสารเหล่านี้อ่านได้แบบออฟไลน์ และไม่มีไฟล์น้ำหนักโมเดลรวมอยู่ด้วย','ภาพรวมและแหล่งที่มา','โมเดลรู้จำเสียงภาษาเกาหลีและไทย','โมเดลและระบบทำงานอื่น ๆ','แต่ละส่วนมีเงื่อนไขต่างกัน การรู้จำเสียงทำบนอุปกรณ์'],
+    es:['Licencias y software de terceros','← Volver a ajustes','Consulta las licencias, autores y modificaciones de modelos y bibliotecas de CooTrio. Los textos legales se muestran íntegros.','Los documentos están disponibles sin conexión. No incluyen los pesos de los modelos.','Avisos y atribución','Reconocimiento de voz coreano y tailandés','Otros modelos y bibliotecas','Las condiciones varían por componente. El reconocimiento se realiza en el dispositivo.'],
+    zh:['许可与第三方软件','← 返回设置','查看 CooTrio 使用的模型与第三方库的许可、作者及修改记录。法律原文保持不变。','文档可离线阅读，此页面不包含模型权重。','总体声明与来源','韩语和泰语语音识别模型','其他模型与运行环境','各组件的许可条款不同。语音识别在设备本地进行。'],
+    hi:['लाइसेंस और तृतीय-पक्ष सॉफ़्टवेयर','← सेटिंग में वापस','CooTrio के मॉडल और तृतीय-पक्ष लाइब्रेरी के लाइसेंस, लेखक और बदलाव देखें। कानूनी मूल पाठ जस का तस है।','ये दस्तावेज़ ऑफ़लाइन उपलब्ध हैं; मॉडल वज़न शामिल नहीं हैं।','सूचनाएँ और स्रोत','कोरियाई और थाई आवाज़ पहचान मॉडल','अन्य मॉडल और रनटाइम','हर घटक की शर्तें अलग हैं। आवाज़ पहचान डिवाइस पर होती है।'],
+    ar:['التراخيص وبرامج الجهات الخارجية','← العودة إلى الإعدادات','اطّلع على تراخيص النماذج والمكتبات المستخدمة في CooTrio ومؤلفيها والتعديلات عليها. النصوص القانونية معروضة كما هي.','يمكن قراءة هذه المستندات دون اتصال. لا تتضمن أوزان النماذج.','الإشعارات ومعلومات النسبة','نماذج التعرف على الكورية والتايلاندية','نماذج وبيئات تشغيل أخرى','تختلف شروط كل مكوّن. تتم معالجة التعرف على الكلام على الجهاز.'],
+    vi:['Giấy phép và phần mềm bên thứ ba','← Quay lại cài đặt','Xem giấy phép, tác giả và các thay đổi của mô hình cùng thư viện trong CooTrio. Văn bản pháp lý được giữ nguyên.','Tài liệu có thể đọc ngoại tuyến. Trang này không chứa trọng số mô hình.','Tổng quan và ghi công','Mô hình nhận dạng tiếng Hàn và tiếng Thái','Các mô hình và bộ chạy khác','Mỗi thành phần có điều khoản riêng. Nhận dạng giọng nói chạy trên thiết bị.'],
+    tl:['Mga lisensya at software ng third party','← Bumalik sa settings','Tingnan ang lisensya, may-akda at pagbabago sa mga modelo at library ng CooTrio. Hindi binabago ang legal na teksto.','Mababasa offline ang mga dokumento. Walang model weights na kasama rito.','Pangkalahatang abiso at pinagmulan','Korean at Thai na speech recognition','Iba pang modelo at runtime','May sariling tuntunin ang bawat bahagi. Sa device ginagawa ang pagkilala sa boses.'],
+  };
+  let query=new URLSearchParams(location.search).get('lang');
+  let saved=null;
+  try{saved=localStorage.getItem('mitsukotoba_language_v1');}catch{}
+  const language=Object.hasOwn(copy,query)?query:Object.hasOwn(copy,saved)?saved:'ja';
+  document.documentElement.lang=language;
+  document.documentElement.dir=language==='ar'?'rtl':'ltr';
+  const keys=['title','back','intro','offline','overview','specialist','others','footer'];
+  keys.forEach((id,i)=>{document.getElementById(id).textContent=copy[language][i];});
+  document.title=copy[language][0]+' | CooTrio';
+  document.getElementById('back').href='./index.html';
+
+  // A review date describes this inventory, not the publication date of a
+  // pinned immutable model card. This never rewrites third-party legal text.
+  const currentLabels={
+    ja:['現行モデルの一覧（12言語）','ライセンス再確認日：','モデルカードの固定リビジョンの日付とは異なります。','現行モデルと音声生成専用のモデルを区別しています。','その他の利用モデル・辞書','推論ライブラリと実行環境','許諾確認上の注意','モデル一覧を読み込めませんでした。','固定版：'],
+    en:['Current models (12 language modes)','License review: ','This is not the pinned model-card revision date.','Runtime models and voice-generation-only models are listed separately.','Other models and dictionaries','Runtime and inference libraries','License scope caveats','Could not load the model inventory.','Pinned: '],
+    de:['Aktuelle Modelle (12 Sprachmodi)','Lizenzprüfung: ','Dies ist nicht das Datum der fixierten Modellkarte.','Aktive Modelle und nur zur Stimmerzeugung genutzte Modelle sind getrennt.','Weitere Modelle und Wörterbücher','Laufzeitumgebungen und Bibliotheken','Lizenzhinweise','Modellliste konnte nicht geladen werden.','Fixierte Version: '],
+    fr:['Modèles actuels (12 modes)','Vérification des licences : ','Différent de la date de révision de la fiche modèle figée.','Les modèles actifs et ceux servant uniquement à générer les voix sont distincts.','Autres modèles et dictionnaires','Bibliothèques et environnements','Réserves sur les licences','Impossible de charger la liste des modèles.','Version figée : '],
+    ko:['현재 사용 모델 (12개 언어 모드)','라이선스 확인일: ','고정된 모델 카드 수정일과 다릅니다.','실행 모델과 녹음 음성 제작에만 쓴 모델을 구분합니다.','기타 모델과 사전','추론 라이브러리 및 실행 환경','라이선스 확인 사항','모델 목록을 불러오지 못했습니다.','고정 버전: '],
+    th:['โมเดลที่ใช้ปัจจุบัน (12 โหมดภาษา)','ตรวจสอบใบอนุญาต: ','ไม่ใช่วันที่ของรุ่นโมเดลการ์ดที่ตรึงไว้','แยกโมเดลที่ใช้จริงกับโมเดลที่ใช้สร้างเสียงเท่านั้น','โมเดลและพจนานุกรมอื่น ๆ','ไลบรารีและระบบอนุมาน','ข้อควรระวังเรื่องใบอนุญาต','โหลดรายการโมเดลไม่ได้','รุ่นที่ตรึง: '],
+    es:['Modelos actuales (12 idiomas)','Revisión de licencias: ','No es la fecha de la ficha fijada.','Se separan modelos activos y los usados solo para crear audio.','Otros modelos y diccionarios','Bibliotecas y runtimes','Advertencias de licencias','No se pudo cargar el inventario.','Versión fijada: '],
+    zh:['当前使用模型（12种语言模式）','许可核查日期：','不同于固定模型卡的修订日期。','区分实际运行的模型和仅用于生成录音的模型。','其他模型与词典','推理库与运行环境','许可范围注意事项','无法加载模型清单。','固定版本：'],
+    hi:['वर्तमान मॉडल (12 भाषा मोड)','लाइसेंस जाँच: ','यह स्थिर मॉडल कार्ड की तारीख नहीं है।','सक्रिय मॉडल और केवल रिकॉर्डेड आवाज बनाने वाले मॉडल अलग हैं।','अन्य मॉडल और शब्दकोश','रनटाइम और लाइब्रेरी','लाइसेंस संबंधी सावधानियाँ','मॉडल सूची लोड नहीं हुई।','स्थिर संस्करण: '],
+    ar:['النماذج المستخدمة (12 وضعًا لغويًا)','مراجعة التراخيص: ','هذا ليس تاريخ بطاقة النموذج المثبتة.','نميّز نماذج التشغيل عن نماذج توليد التسجيلات فقط.','نماذج وقواميس أخرى','مكتبات وبيئات التشغيل','تنبيهات بشأن التراخيص','تعذّر تحميل قائمة النماذج.','الإصدار المثبّت: '],
+    vi:['Các mô hình hiện dùng (12 chế độ)','Rà soát giấy phép: ','Không phải ngày sửa thẻ mô hình đã ghim.','Phân biệt mô hình đang chạy và mô hình chỉ dùng tạo bản thu âm.','Mô hình và từ điển khác','Thư viện và môi trường chạy','Lưu ý về giấy phép','Không tải được danh sách mô hình.','Phiên bản ghim: '],
+    tl:['Kasalukuyang modelo (12 wika)','Pagsuri ng lisensya: ','Hindi ito petsa ng naka-pin na model card.','Hiwalay ang aktibong modelo at ang ginamit lang sa paggawa ng audio.','Iba pang modelo at diksyunaryo','Mga library at runtime','Mga paalala sa lisensya','Hindi ma-load ang listahan ng modelo.','Naka-pin: ']
+  };
+  const uiLabels=currentLabels[language];
+  for(const [id,index] of [['currentModelTitle',0],['otherModelTitle',4],['runtimeModelTitle',5],['reviewWarningTitle',6]]){
+    document.getElementById(id).textContent=uiLabels[index];
+  }
+  document.getElementById('currentModelNote').textContent=uiLabels[3];
+  function element(type,text,parent,cls) {
+    const node=document.createElement(type);
+    if(cls)node.className=cls;
+    node.textContent=text;
+    parent.append(node);
+    return node;
+  }
+  function link(url,title,parent){
+    if(typeof url!=='string'||!url.startsWith('https://'))return;
+    const anchor=document.createElement('a');
+    anchor.href=url;anchor.target='_blank';anchor.rel='noopener noreferrer';anchor.textContent=title;
+    parent.append(anchor);
+  }
+  function renderItems(target,items,layout){
+    target.replaceChildren();
+    const root=document.createElement('div');root.className='inventory-list';
+    items.forEach(item=>{
+      const card=document.createElement('div');card.className='inventory-entry';
+      const prefix=layout==='asr'?item.locale.toUpperCase()+' · ':'';
+      element('strong',prefix+(item.model||item.name),card);
+      element('p',(item.engine?item.engine+' · ':'')+(item.license||''),card);
+      if(item.role)element('p',item.role,card);
+      if(item.publisher)element('p',item.publisher,card);
+      if(item.pin)element('p',uiLabels[8]+item.pin,card,'pin');
+      if(item.review&&/pending|caveat|absent/.test(item.review))
+        element('p',item.review,card,'inventory-error');
+      link(item.source,'Source / model card',card);
+      if(item.notice) {
+        const local=document.createElement('a');
+        local.href='./'+item.notice;local.textContent='Local license text';
+        card.append(document.createTextNode(' · '),local);
+      }
+      root.append(card);
+    });
+    target.append(root);
+  }
+  async function refreshInventory(){
+    try{
+      const response=await fetch('./licenses/CURRENT-MODEL-INVENTORY.json');
+      if(!response.ok)throw Error('HTTP '+response.status);
+      const catalog=await response.json();
+      if(catalog.schemaVersion!==2||catalog.asr?.length!==12||
+          !Array.isArray(catalog.otherModels)||!Array.isArray(catalog.runtimes))
+        throw Error('Invalid model inventory');
+      document.getElementById('currentModelAudit').textContent=
+        uiLabels[1]+catalog.reviewedAt+'. '+uiLabels[2];
+      renderItems(document.getElementById('currentModelList'),catalog.asr,'asr');
+      renderItems(document.getElementById('otherModelList'),catalog.otherModels,'other');
+      renderItems(document.getElementById('runtimeModelList'),catalog.runtimes,'runtime');
+      const warnings=document.getElementById('reviewWarningList');
+      warnings.replaceChildren();
+      catalog.warnings.forEach(warning=>{
+        const item=element('p',warning.modelId+': '+warning.detail,warnings,'notice');
+        if(warning.source){item.append(' ');link(warning.source,'Publisher discussion',item);}
+      });
+    }catch(error){
+      const root=document.getElementById('currentModelList');
+      root.replaceChildren();
+      element('p',uiLabels[7],root,'inventory-error');
+    }
+  }
+  refreshInventory();
+  // Only static, explicitly listed local documents may be opened. Never render
+  // untrusted legal text as HTML; preserve it exactly inside a plain <pre>.
+  for(const item of document.querySelectorAll('details[data-source]')){
+    item.addEventListener('toggle',async()=>{
+      if(!item.open||item.dataset.loaded==='true')return;
+      const pre=item.querySelector('pre');
+      try{
+        const url=new URL(item.dataset.source,location.href);
+        if(url.origin!==location.origin)throw Error('Unexpected external source');
+        const response=await fetch(url);
+        if(!response.ok)throw Error('HTTP '+response.status);
+        pre.textContent=await response.text();
+        item.dataset.loaded='true';
+      }catch(error){pre.textContent='Document not available: '+error.message;}
+    });
+  }
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,48 @@
+{
+  "schemaVersion": 1,
+  "reviewedAt": "2026-10-28",
+  "purpose": "Reference-only MD5 fingerprints of the pinned, unchanged source-license document bytes. MD5 is NOT a secure content-integrity or model-download checksum. Deployed model weights remain SHA-256 verified.",
+  "webSourceCommit": "d3a4b3de0cb023ffc5805571868445640076609b",
+  "documents": [
+    {
+      "name": "SENSEVOICE-MODEL-LICENSE.txt",
+      "bytes": 5306,
+      "md5": "6afdf48ba6d13f458eeb87857cbe8ce6"
+    },
+    {
+      "name": "PENGCHENG-APACHE-2.0.txt",
+      "bytes": 11358,
+      "md5": "3b83ef96387f14655fc854ddc3c6bd57"
+    },
+    {
+      "name": "PENGCHENG-MODEL-CARD.md",
+      "bytes": 1860,
+      "md5": "ee80a4b5dca0bbb1e3532efd241deb39"
+    },
+    {
+      "name": "PENGCHENG-PROVENANCE.json",
+      "bytes": 7072,
+      "md5": "6ed823f77f65b2508544e200d81ae36e"
+    },
+    {
+      "name": "PENGCHENG-NOTICE.html",
+      "bytes": 3191,
+      "md5": "aa9f8dcc7f66859d0790abf76067f1eb"
+    },
+    {
+      "name": "E5-MIT.txt",
+      "bytes": 1083,
+      "md5": "d13938853adfb8d9d86d7270e8ec96a2"
+    },
+    {
+      "name": "WHISPER-MIT.txt",
+      "bytes": 1063,
+      "md5": "b1b8ea5cbbe899304ac6566613a3b74e"
+    },
+    {
+      "name": "ONNXRUNTIME.txt",
+      "bytes": 1073,
+      "md5": "0f7e3b1308cb5c00b372a6e78835732d"
+    }
+  ]
+}
