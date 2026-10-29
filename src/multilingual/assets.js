@@ -129,7 +129,9 @@ export async function prepareAssets(manifest,{
     if(!response&&store)response=await store.read(meta).catch(()=>null);
     if(!response) {
       if(cache)await cache.delete(meta.url).catch(()=>{});
-      const network=await fetcher(meta.url,{credentials:'omit',referrerPolicy:'no-referrer'});
+      // Local runtime/heads need the existing Access session. External model
+      // hosts still receive no credentials with the same-origin policy.
+      const network=await fetcher(meta.url,{credentials:'same-origin',referrerPolicy:'no-referrer'});
       if(!network.ok)throw Error('Model download failed ('+network.status+'): '+meta.model);
       let downloaded;
       if(network.body?.getReader) {
