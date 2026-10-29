@@ -1,6 +1,6 @@
 {
   "version": "v1.0.1",
-  "source_commit": "6d2fa548cc1b578f7fc3c6a13484dffc9278f912",
+  "source_commit": "c6c87f3ed8547939e36ffe9a933142189224c803",
   "baseline_commit": "151f6c9396948221660e1e926f145cb4af73afb6",
   "models": {
     "ruri": {
@@ -22,8 +22,8 @@
     },
     {
       "path": "README.md",
-      "bytes": 2136,
-      "sha256": "f740973866dc8cebcc651a1279c52f305bb9a04c37b2b002ef4c95982f24a99c"
+      "bytes": 4283,
+      "sha256": "d5cadb32d5b5ba63a11160d15364e407b57ca06dbeba7578e0e97370ad5afd9b"
     },
     {
       "path": "SILERO_VAD.md",
