@@ -10,6 +10,8 @@ for name,path in files.items():
     if path.stat().st_size>25*1024*1024:errors.append('oversized:'+name)
     if any(part in {'research','docs','work','tests','node_modules','experimental'} for part in Path(name).parts):errors.append('private/development:'+name)
     if Path(name).name in {'.env','.DS_Store','AGENTS.md'}:errors.append('private:'+name)
+    if '/' not in name and re.match(r'(?i)^(?:licen[cs]e|copying)(?:$|[._-])',name):
+        errors.append('unreviewed repository-license filename:'+name)
     if name=='.github/scripts/verify-release.py':continue
     if path.suffix in {'.js','.mjs','.html','.css','.json','.md','.yml','.webmanifest'}:
         s=path.read_text(errors='replace')

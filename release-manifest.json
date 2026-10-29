@@ -1,6 +1,6 @@
 {
   "version": "v1.0.1",
-  "source_commit": "c6c87f3ed8547939e36ffe9a933142189224c803",
+  "source_commit": "ea955d5a846303cb5c2b147d63359877bcbf1285",
   "baseline_commit": "151f6c9396948221660e1e926f145cb4af73afb6",
   "models": {
     "ruri": {
@@ -16,7 +16,7 @@
       "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
     },
     {
-      "path": "LICENSE_AUDIT.md",
+      "path": "DEPENDENCY_AUDIT.md",
       "bytes": 3503,
       "sha256": "a709d6b703f99622db472506691105803b38558885c223481f7dae5af462407e"
     },
@@ -32,8 +32,8 @@
     },
     {
       "path": "THIRD_PARTY_NOTICES.md",
-      "bytes": 12621,
-      "sha256": "a5418efd1622499c1d5efeadb623cfbb33ad3623b3569beadf4ad7eb83a89dc2"
+      "bytes": 12624,
+      "sha256": "3e26a9ee247aa82c396172c148720f90ec485167696ccb50e254a5b9557c946e"
     },
     {
       "path": "assets/emma-background-cues/calm-poster.svg",
@@ -6066,6 +6066,11 @@
       "sha256": "60a2295a97d7d62db288b927a76ecb64158c3165660a359ce0ea8eaa39143c6d"
     },
     {
+      "path": "licenses.html",
+      "bytes": 24972,
+      "sha256": "f7231810256d8512eccdeb122eb5d2b9040168825f29aaa77aded575de2e5a5e"
+    },
+    {
       "path": "licenses/CURRENT-LICENSE-DIGESTS.json",
       "bytes": 1321,
       "sha256": "0ccb25eef9c133e48eeaf67ae28b356a93960a288f7ae306216fc5ef0e2cf0a7"
@@ -6159,11 +6164,6 @@
       "path": "licenses/semantic/ONNXRUNTIME-ThirdPartyNotices.txt",
       "bytes": 338088,
       "sha256": "143764b952fdb1a7c69ce653bfba74a7744d6a8a573bfb73e235fba356c83de3"
-    },
-    {
-      "path": "licenses.html",
-      "bytes": 24972,
-      "sha256": "f7231810256d8512eccdeb122eb5d2b9040168825f29aaa77aded575de2e5a5e"
     },
     {
       "path": "manifest.intl.webmanifest",
@@ -6626,6 +6626,11 @@
       "sha256": "2b61de8b6030186e4bfea90e5b38a7fcacc0c563b1c9417349b392d80db475a1"
     },
     {
+      "path": "src/semantic-assets-manifest.json",
+      "bytes": 5173,
+      "sha256": "c124d373bdf2ca800ae1e743a1ea0ecbb3a471a9e4565cd83a5537feb2102ec5"
+    },
+    {
       "path": "src/semantic/client.js",
       "bytes": 2658,
       "sha256": "33450ee4dbc37ecd299d89860f0378d3f99908a61aa385e541c1a8775534ce14"
@@ -6659,11 +6664,6 @@
       "path": "src/semantic/worker.js",
       "bytes": 5917,
       "sha256": "6b7ed8a1995e1822efac94d3150239ed932399a96c5158b856c20c45dcfa3b05"
-    },
-    {
-      "path": "src/semantic-assets-manifest.json",
-      "bytes": 5173,
-      "sha256": "c124d373bdf2ca800ae1e743a1ea0ecbb3a471a9e4565cd83a5537feb2102ec5"
     },
     {
       "path": "src/settings-choice-buttons.js",
