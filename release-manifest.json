@@ -1,6 +1,6 @@
 {
   "version": "v1.0.1",
-  "source_commit": "4b2ef8ef195245c0c2a4968a8fc4f63045485051",
+  "source_commit": "6d2fa548cc1b578f7fc3c6a13484dffc9278f912",
   "baseline_commit": "151f6c9396948221660e1e926f145cb4af73afb6",
   "models": {
     "ruri": {
