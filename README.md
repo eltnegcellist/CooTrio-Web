@@ -24,7 +24,7 @@ The app path differs from the old site. You may need to download models again, g
 
 ### Releases
 
-This repository is reserved for official releases. Day-to-day development changes are not automatically published here. The source commit, model identifiers, and application file hashes for each release are recorded in `release-manifest.json`.
+This repository contains official CooTrio Web releases. Release versions, model identifiers, and application file hashes are recorded in `release-manifest.json`.
 
 ### Third-party notices
 
@@ -52,7 +52,7 @@ Ruriモデルは[既存のruri_int8](https://github.com/eltnegcellist/ruri_int8)
 
 ### リリース
 
-このリポジトリは正式リリース専用です。日常的な開発変更は自動反映しません。リリースの元コミット、モデル識別情報、アプリファイルのハッシュは `release-manifest.json` に記録します。
+このリポジトリではCooTrio Webの正式リリースを公開しています。リリースのバージョン、モデル識別情報、アプリファイルのハッシュは `release-manifest.json` に記録しています。
 
 ### 第三者通知
 
