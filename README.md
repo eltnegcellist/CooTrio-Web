@@ -18,7 +18,7 @@ Ruri is downloaded from the existing [ruri_int8 repository](https://github.com/e
 
 ### Browser requirements
 
-Use an up-to-date browser with microphone, WebAssembly, Service Worker, and browser storage support. Offline use after downloading models depends on what remains saved on your device. Operation while the screen is locked depends on the OS and browser. The developer experiment that keeps the microphone active during playback is off by default.
+Use an up-to-date browser with microphone, WebAssembly, Service Worker, and browser storage support. Offline use after downloading models depends on what remains saved on your device. Operation while the screen is locked depends on the OS and browser.
 
 The app path differs from the old site. You may need to download models again, grant microphone permission again, and reinstall the PWA. Migration of the old site's saved data is not guaranteed.
 
@@ -46,7 +46,7 @@ Ruriモデルは[既存のruri_int8](https://github.com/eltnegcellist/ruri_int8)
 
 ### 利用環境
 
-マイク、WebAssembly、Service Worker、保存領域を利用できる最新のブラウザで開いてください。モデル取得後のオフライン利用は保存状態に依存します。画面ロック中の動作はOS・ブラウザに依存し、開発者向けのマイク保持実験は初期値オフです。
+マイク、WebAssembly、Service Worker、保存領域を利用できる最新のブラウザで開いてください。モデル取得後のオフライン利用は保存状態に依存します。画面ロック中の動作はOS・ブラウザに依存します。
 
 旧サイトとはアプリのパスが異なります。モデルの再取得、マイクの再許可、PWAの再インストールが必要になる場合があります。旧サイトの保存状態の引き継ぎは保証しません。
 

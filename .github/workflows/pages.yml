@@ -15,8 +15,26 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Validate exact release snapshot
-        run: python3 .github/scripts/verify-release.py .
+      - name: Reject changes to the approved legal lock and gate code
+        if: github.event_name == 'pull_request'
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+        run: |
+          set -euo pipefail
+          git fetch --no-tags --depth=1 origin "$BASE_SHA"
+          for path in .github/policy/legal-lock.json .github/scripts/public-boundary.py .github/scripts/verify-release.py; do
+            if git cat-file -e "$BASE_SHA:$path" 2>/dev/null; then
+              if ! git diff --quiet "$BASE_SHA" HEAD -- "$path"; then
+                echo "::error file=$path::Release policy changed. Stop and request a separate explicitly approved policy update."
+                exit 1
+              fi
+            fi
+          done
+      - name: Validate exact release snapshot and public/privacy/legal boundary
+        run: |
+          python3 .github/scripts/verify-release.py .
+          python3 .github/scripts/public-boundary.py .
+          python3 .github/scripts/test-public-boundary.py
       - name: Assemble deployment from the verified manifest only
         run: |
           python3 - <<'PY'
