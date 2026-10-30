@@ -15,8 +15,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Validate exact release snapshot
-        run: python3 .github/scripts/verify-release.py .
+      - name: Validate exact release snapshot and public/privacy/legal boundary
+        run: |
+          python3 .github/scripts/verify-release.py .
+          python3 .github/scripts/public-boundary.py .
+          python3 .github/scripts/test-public-boundary.py
       - name: Assemble deployment from the verified manifest only
         run: |
           python3 - <<'PY'
