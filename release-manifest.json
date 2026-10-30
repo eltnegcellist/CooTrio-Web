@@ -1,7 +1,5 @@
 {
   "version": "v1.0.1",
-  "source_commit": "ea955d5a846303cb5c2b147d63359877bcbf1285",
-  "baseline_commit": "151f6c9396948221660e1e926f145cb4af73afb6",
   "models": {
     "ruri": {
       "url": "https://raw.githubusercontent.com/eltnegcellist/ruri_int8/181a9f2a8b3706d430116ed8ae992866cb603b26/model.onnx",
@@ -22,8 +20,8 @@
     },
     {
       "path": "README.md",
-      "bytes": 4182,
-      "sha256": "520f71f340cb1f64e62f34167cf3314d32fa4c8937c17aafeae310ce16e30268"
+      "bytes": 4023,
+      "sha256": "6984ac914a227858838d8339b0c49a0d70dc303dbcbc945cb5eb2ccbd80dac96"
     },
     {
       "path": "SILERO_VAD.md",
