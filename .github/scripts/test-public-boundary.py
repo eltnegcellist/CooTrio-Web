@@ -50,6 +50,8 @@ with TemporaryDirectory() as d:
     (root / "research-notes.txt").unlink()
     readme.write_text("https://github.com/eltnegcellist/CooTrio-Web-Dev\n")
     bad("PRIVATE REFERENCE")
+    readme.write_text("CooTrio-Web-Dev is the source\\n")
+    bad("PRIVATE REFERENCE")
     readme.write_text("# CooTrio released\n")
     good()
     m["source_commit"] = "private-dev-sha"
