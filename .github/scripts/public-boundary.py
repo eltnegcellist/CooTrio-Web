@@ -78,10 +78,10 @@ else:
 # model cards and third-party notices may describe historical research and
 # are intentionally preserved rather than blanket-matching 'development'.
 private_patterns = [
-    r"(?i)https?://github\\.com/[^/\\s]+/[^/\\s]*(?:-dev|-legacy)(?:[/?#\\s]|$)",
-    r"(?i)https?://[^/\\s]+\\.pages\\.dev(?:[/?#\\s]|$)",
-    r"(?i)https?://github\\.com/[^/\\s]+/Web_EmmaLocal_English_for_babies",
-    r"/Users/[^/\\s]+/",
+    r"(?i)https?://github\.com/[^/\s]+/[^/\s]*(?:-dev|-legacy)(?:[/?#\s]|$)",
+    r"(?i)https?://[^/\s]+\.pages\.dev(?:[/?#\s]|$)",
+    r"(?i)https?://github\.com/[^/\s]+/Web_EmmaLocal_English_for_babies",
+    r"/Users/[^/\s]+/",
     r"-----BEGIN (?:RSA |EC |OPENSSH )?PRIVATE KEY-----",
     r"github_pat_[A-Za-z0-9_]{30,}",
     r"gh[pousr]_[A-Za-z0-9]{30,}",
