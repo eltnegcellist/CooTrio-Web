@@ -30,31 +30,8 @@ jobs:
               fi
             fi
           done
-      - name: Validate exact release snapshot and public/privacy/legal boundary
-        run: |
-          python3 .github/scripts/verify-release.py .
-          python3 .github/scripts/public-boundary.py .
-          python3 .github/scripts/test-public-boundary.py
-      - name: Assemble deployment from the verified manifest only
-        run: |
-          python3 - <<'PY'
-          import hashlib,json,shutil
-          from pathlib import Path
-          root=Path('.')
-          manifest=json.loads(Path('release-manifest.json').read_text())
-          dest=Path('_site');dest.mkdir()
-          for entry in manifest['files']:
-              src=Path(entry['path'])
-              assert not src.is_absolute() and '..' not in src.parts
-              assert src.is_file() and not src.is_symlink()
-              assert src.stat().st_size==entry['bytes']<=25*1024*1024
-              assert hashlib.sha256(src.read_bytes()).hexdigest()==entry['sha256'],str(src)
-              target=dest/src;target.parent.mkdir(parents=True,exist_ok=True);shutil.copyfile(src,target)
-          shutil.copyfile('release-manifest.json',dest/'release-manifest.json')
-          assert len(list(dest.rglob('*'))) < 20000
-          assert all(p.stat().st_size<=25*1024*1024 for p in dest.rglob('*') if p.is_file())
-          print('Validated Pages artifact files and hashes')
-          PY
+      - name: Build verified release artifact for GitHub and Cloudflare Pages
+        run: python3 .github/scripts/build-cloudflare-pages.py
       - uses: actions/upload-pages-artifact@v3
         if: github.event_name != 'pull_request'
         with:
