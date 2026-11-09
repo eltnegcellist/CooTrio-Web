@@ -15,7 +15,7 @@ import { inspectMoonshineCacheInventory, inspectMoonshineManifestCache } from '.
 import { MultilingualClient } from './multilingual/client.js';
 import {MOONSHINE_SPECIALIST_LANGUAGES,FIXED_ASR_LANGUAGES,FIXED_ASR_MODELS,createFixedLocaleAsr} from './multilingual/specialist-asr.js';
 import { LanguageSemanticClient } from './multilingual/semantic-client.js';
-import { installLanguageUI } from './multilingual/ui.js?v=20261028-offline-model-licenses-r1';
+import { installLanguageUI } from './multilingual/ui.js?v=20261104-why-page-r1';
 import { describeError } from './multilingual/translations.js?v=20261022-speech-language-redetect-r1';
 import { createConfirmation } from './multilingual/confirmation.js';
 import { meaningfulSpeech, LANGUAGE_KEY } from './multilingual/core.js';
@@ -28,7 +28,7 @@ import {chooseEnglishResumeGreeting} from './resume-greeting.js';
 const $ = (id) => document.getElementById(id);
 const VISUAL_CUE_TRIAL = document.documentElement.dataset.visualCueTrial === 'true';
 const ui = {
-  onboardingScreen:$('onboardingScreen'), homeScreen:$('homeScreen'), settingsScreen:$('settingsScreen'), aboutScreen:$('aboutScreen'),
+  onboardingScreen:$('onboardingScreen'), homeScreen:$('homeScreen'), settingsScreen:$('settingsScreen'), whyScreen:$('whyScreen'), aboutScreen:$('aboutScreen'),
   prepareEmmaButton:$('prepareEmmaButton'),
   onboardingProgress:$('onboardingProgress'), onboardingProgressBar:$('onboardingProgressBar'), onboardingProgressText:$('onboardingProgressText'),
   avatar:$('avatar'), statusTitle:$('statusTitle'), statusDetail:$('statusDetail'), busySpinner:$('busySpinner'), tutorialStatusTarget:$('tutorialStatusTarget'),
@@ -37,7 +37,7 @@ const ui = {
   replyTopic:$('replyTopic'), replyJapanese:$('replyJapanese'),
   mainButton:$('mainButton'), stopButton:$('stopButton'), manualReplyButton:$('manualReplyButton'), enableAudioButton:$('enableAudioButton'),
   autoRespond:$('autoRespond'), endpointMode:$('endpointMode'), aboutButton:$('aboutButton'), settingsButton:$('settingsButton'),
-  settingsBackButton:$('settingsBackButton'), settingsAboutButton:$('settingsAboutButton'),
+  settingsBackButton:$('settingsBackButton'), whyMitsukotobaButton:$('whyMitsukotobaButton'), whyBackButton:$('whyBackButton'), whyResearchButton:$('whyResearchButton'),
   aboutBackButton:$('aboutBackButton'), onboardingAboutButton:$('onboardingAboutButton'),
   aiBubbleLabel:$('aiBubbleLabel'), aiNameBadge:$('aiNameBadge'),
   aiAvatarFace:$('aiAvatarFace'), onboardingAiIntro:$('onboardingAiIntro'),
@@ -57,7 +57,7 @@ const ui = {
 };
 
 const CURRENT_SETUP_REVISION = 'moonshine-streaming-qwen3-prerecorded-1202-v11';
-const WEB_BUILD = '20261029-hidden-zero-recovery-r5';
+const WEB_BUILD = '20261109-public-v1.1.0';
 
 const STORAGE = {
   setupRevision:'emma_web_setup_revision',
@@ -514,10 +514,17 @@ function bindEvents() {
   document.addEventListener('pointerdown',()=>{ if(!audioUnlocked) unlockPlaybackAudioFromGesture(); },{capture:true,passive:true});
   ui.prepareEmmaButton.addEventListener('click',()=>{ unlockPlaybackAudioFromGesture(); prepareFirstRun(); });
 
-  // About remains available in Settings; the top-right shortcut now opens "押して聞く".
-  ui.settingsAboutButton.addEventListener('click',()=>openAbout('settings'));
+  ui.whyMitsukotobaButton.addEventListener('click',()=>{previousScreen='settings';openSubpage('why');});
+  ui.whyResearchButton.addEventListener('click',()=>openAbout('why'));
+  // The approved-only Visual Cue viewer is packaged on Cloudflare Dev.
+  // It is intentionally not an HTML href in the exportable Public shell.
+  document.getElementById('whyVisualCueLink')?.addEventListener('click',()=>{
+    const url='./visual-cue-guide/?lang='+encodeURIComponent(languageUI.language);
+    window.open(url,'_blank','noopener,noreferrer');
+  });
   ui.onboardingAboutButton.addEventListener('click',()=>openAbout('onboarding'));
   ui.aboutBackButton.addEventListener('click',backFromSubpage);
+  ui.whyBackButton.addEventListener('click',backFromSubpage);
   ui.settingsBackButton.addEventListener('click',backFromSubpage);
   ui.settingsButton.addEventListener('click',async()=>{
     if (running || preparingConversation || speaking || processing) await stopEmma();
@@ -716,7 +723,7 @@ function bindEvents() {
 
 function showScreen(name,{autoStart=true}={}) {
   currentScreen=name;
-  for (const key of ['onboarding','home','settings','about']) {
+  for (const key of ['onboarding','home','settings','why','about']) {
     ui[key+'Screen'].classList.toggle('hidden',key!==name);
   }
   window.scrollTo({top:0,behavior:'auto'});
@@ -759,7 +766,7 @@ function backFromSubpage() {
     window.history.back();
     return;
   }
-  showScreen(currentScreen==='about'?previousScreen:'home',{autoStart:false});
+  showScreen(currentScreen==='about'?previousScreen:currentScreen==='why'?'settings':'home',{autoStart:false});
 }
 
 function openAbout(from) {
@@ -2711,7 +2718,7 @@ async function ensureMoonshineIsolation({isCurrent=()=>true,manualStartAfterRelo
     throw new Error('このブラウザではMoonshineに必要なService Workerを利用できません。');
   }
 
-  const registration=await navigator.serviceWorker.register('./service-worker.js?v=20261025-offline-bootstrap-v1',{updateViaCache:'none'});
+  const registration=await navigator.serviceWorker.register('./service-worker.js?v=20261104-settings-why-r1',{updateViaCache:'none'});
   await registration.update().catch(()=>{});
 
   const candidate=registration.installing || registration.waiting;
@@ -2750,6 +2757,6 @@ window.addEventListener('load',()=>{
   if(!VISUAL_CUE_TRIAL && 'serviceWorker' in navigator) {
     // Register for offline assets now. Reload for isolation only when ASR starts,
     // so background setup cannot discard settings or Japanese text being edited.
-    navigator.serviceWorker.register('./service-worker.js?v=20261025-offline-bootstrap-v1',{updateViaCache:'none'}).catch(error=>console.warn('Service Worker setup:',error));
+    navigator.serviceWorker.register('./service-worker.js?v=20261104-settings-why-r1',{updateViaCache:'none'}).catch(error=>console.warn('Service Worker setup:',error));
   }
 });

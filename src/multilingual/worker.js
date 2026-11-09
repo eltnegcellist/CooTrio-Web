@@ -1,3 +1,5 @@
+import {loadFrequencyClassifier,applyFrequencyClassifier} from '../frequency/classifier.js';
+let frequencyModel;
 import {prepareAssets,digest} from './assets.js';
 import {classifyE5,decodeE5Heads,speechLanguage} from './core.js';
 import {resolveWhisperThreads} from './performance.js';
@@ -46,6 +48,7 @@ async function initialize({threadPreference='auto',asrBackend='legacy'}={}) {
     const bytes=await r.arrayBuffer();if(await digest(bytes)!==meta.sha256)throw Error('E5 head integrity check failed');buffers[name]=bytes;
   }
   heads=decodeE5Heads(buffers,config);
+  frequencyModel=await loadFrequencyClassifier('e5');
 }
 function disposeTensors(value,seen=new Set()) {
   if(!value||typeof value!=='object'||seen.has(value))return;seen.add(value);
@@ -107,7 +110,7 @@ async function handle(data) {
   if(data.type==='predict'){
     const start=performance.now();
     const features=await extractor('query: '+String(data.text),{pooling:'mean',normalize:true,truncation:true,max_length:512});
-    try{return {...classifyE5(Array.from(features.data),heads),elapsedMs:performance.now()-start,
+    try{return {...applyFrequencyClassifier(Array.from(features.data),classifyE5(Array.from(features.data),heads),frequencyModel,data.language||'en'),elapsedMs:performance.now()-start,
       ...(data.diagnostics?{embedding:Array.from(features.data),tokenIds:Array.from(extractor.tokenizer('query: '+String(data.text),{truncation:true,max_length:512}).input_ids.data,Number)}:{})};}finally{features.dispose();}
   }
   throw Error('Unsupported multilingual request');

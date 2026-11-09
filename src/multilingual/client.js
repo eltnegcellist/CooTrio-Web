@@ -8,7 +8,7 @@ export class MultilingualClient {
     this.semanticOnly=semanticOnly===true;
     this.threadPreference=normalizeThreads(threads);
     this.languageDetection=normalizeLanguageDetection(languageDetection);
-    this.cachedSpokenLanguage=null;this.languageCacheEpoch=0;this.runtimeInfo=null;
+    this.cachedSpokenLanguage=null;this.lastDetectedSemanticLanguage=null;this.languageCacheEpoch=0;this.runtimeInfo=null;
     this.acft=null;this.asrBackend='legacy';
   }
   request(type,payload={},timeout=900000,transfer=[]) {
@@ -41,7 +41,7 @@ export class MultilingualClient {
     })().catch(e=>{if(token===this.generation)this.cancel(e.message);throw e;}).finally(()=>{if(this.preparing===op)this.preparing=null;});
     this.preparing=op;return op;
   }
-  async predict(text,options={}){await this.prepare();return this.request('predict',{text,...options},60000);}
+  async predict(text,options={}){await this.prepare();return this.request('predict',{text,language:this.lastDetectedSemanticLanguage||this.cachedSpokenLanguage||'en',...options},60000);}
   async transcribe(audio,language){
     if(this.semanticOnly)throw Error('E5-only worker cannot transcribe audio');
     await this.prepare();
@@ -64,9 +64,10 @@ export class MultilingualClient {
       this.cachedSpokenLanguage=result.detectedLanguage;
       this.onStatus({stage:'speech-language-cached',detectedLanguage:this.cachedSpokenLanguage});
     }
+    if(languageCacheEpoch===this.languageCacheEpoch && result?.text?.trim() && /^[a-z]{2,3}(?:-[a-z]+)?$/i.test(result.detectedLanguage||''))this.lastDetectedSemanticLanguage=result.detectedLanguage;
     return result;
   }
-  resetSpeechLanguage(){this.cachedSpokenLanguage=null;this.languageCacheEpoch++;}
+  resetSpeechLanguage(){this.cachedSpokenLanguage=null;this.lastDetectedSemanticLanguage=null;this.languageCacheEpoch++;}
   setPerformance({threads=this.threadPreference,languageDetection=this.languageDetection}={}){
     const nextThreads=normalizeThreads(threads),nextDetection=normalizeLanguageDetection(languageDetection);
     if(nextThreads!==this.threadPreference){

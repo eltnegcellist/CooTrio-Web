@@ -12,7 +12,7 @@ export class LanguageSemanticClient {
   }
   get ready(){return this.active.ready;}
   prepare(){return this.active.prepare();}
-  predict(text,options){return this.active.predict(text,options);}
+  predict(text,options={}){const locale=this.language();return this.active.predict(text,{...options,language:locale==='en'?(this.multilingual.lastDetectedSemanticLanguage||this.multilingual.cachedSpokenLanguage||'en'):locale});}
   cancel(){this.active.cancel();}
   cancelPending(){this.active.cancelPending();}
 }
