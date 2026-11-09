@@ -1,10 +1,10 @@
-import { VISUAL_CUE_CATALOG } from './visual-cue-catalog.js?v=20261020-english-illustrations-v2';
+import {VISUAL_CUE_RUNTIME_CATALOG} from './visual-cue-runtime-catalog.js';
 import { createEmmaBackground } from './emma-background-cues.js?v=20261020-english-illustrations-v2';
 export const normalizeCueText=text=>String(text||'').replaceAll('’',"'").trim().replace(/\s+/g,' ').toLowerCase();
-export function resolveVisualCue(text,catalog=VISUAL_CUE_CATALOG){return catalog.bindings[normalizeCueText(text)]||null;}
+export function resolveVisualCue(text,catalog=VISUAL_CUE_RUNTIME_CATALOG){return catalog.bindings[normalizeCueText(text)]||null;}
 
 /** Optional turn-owned visual. Audio may end before the next parent utterance finishes. */
-export function createVisualCueController({document=globalThis.document,baseUrl=new URL('../',import.meta.url),catalog=VISUAL_CUE_CATALOG,loadImage,media=globalThis.matchMedia?.('(prefers-reduced-motion: reduce)'),onChange=()=>{}}={}){
+export function createVisualCueController({document=globalThis.document,baseUrl=new URL('../',import.meta.url),catalog=VISUAL_CUE_RUNTIME_CATALOG,loadImage,media=globalThis.matchMedia?.('(prefers-reduced-motion: reduce)'),onChange=()=>{}}={}){
  let mode='emma',motion=true,serial=0,generation=0,current=null,disposed=false;
  const hosts=()=>[...document.querySelectorAll('[data-visual-cue-host]')];
  const clear=()=>{for(const host of hosts()){host.replaceChildren();host.hidden=true;const avatar=host.closest('.avatar');avatar?.classList.remove('has-visual-cue','has-emma-background');delete host.dataset.layer;}onChange(null);};

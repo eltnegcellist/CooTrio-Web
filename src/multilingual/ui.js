@@ -2,6 +2,8 @@ import {LANGUAGES,LANGUAGE_NAMES,LANGUAGE_KEY,LANGUAGE_MODE_KEY,resolveLanguage,
 import { enhanceChoiceSelect, syncChoiceButtons } from '../settings-choice-buttons.js';
 import {translate} from './translations.js?v=20261027-twelve-locale-r1';
 import {renderLocalizedAbout} from './about-page.js';
+import {installSettingsSharing} from '../settings-sharing.js';
+import {installWhyPage} from './why-page.js';
 // Disclose the fixed specialist provider; Whisper is used only by Multilingual.
 // This is UI disclosure, not a claim that natural-speech QA is complete.
 const ASR_PROVIDER_NOTICE={
@@ -142,6 +144,8 @@ export function installLanguageUI({document=globalThis.document,storage=globalTh
   });
   // Language first; manual Vosk import developer-only.
   settings?.querySelector('header')?.after(settingsCard);
+  const appSharing=installSettingsSharing({document});
+  const whyPage=installWhyPage({document});
   const about=document.querySelector('#aboutScreen .screen-content');
   let localizedAbout=null,localizedAboutLanguage=null;
   function eligible(node){
@@ -171,6 +175,8 @@ export function installLanguageUI({document=globalThis.document,storage=globalTh
   }
   function apply(){
     document.documentElement.lang=language;document.documentElement.dataset.appLanguage=language;
+    appSharing.apply(language);
+    whyPage.apply(language);
     document.documentElement.dir=language==='ar'?'rtl':'ltr';
     const licenseLink=document.querySelector('#licenseSettingsLink');
     if(licenseLink)licenseLink.href='./licenses.html?lang='+encodeURIComponent(language);
@@ -239,12 +245,6 @@ export function installLanguageUI({document=globalThis.document,storage=globalTh
     }
     for(const id of ['storageProtectionStatus','modelCacheStatus','modelCacheHistoryStatus']){
       const el=document.getElementById(id);if(el)el.hidden=language!=='ja';
-    }
-    const semanticHelp=document.getElementById('topicGuideSettings');
-    if(semanticHelp){
-      semanticHelp.hidden=false;
-      const guideLink=semanticHelp.querySelector('a[href*="topic-guide.html"]');
-      if(guideLink)guideLink.href='./topic-guide.html?lang='+encodeURIComponent(language);
     }
     walk(document.body);
     if(status.dataset.message)setStatus(status.dataset.message,{loaded:Number(status.dataset.loaded),total:Number(status.dataset.total),phase});

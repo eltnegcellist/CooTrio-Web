@@ -1465,3 +1465,114 @@ html[lang="ar"]{letter-spacing:normal}
 @media(max-width:360px){
   #homeScreen .avatar-wrap>.reply-topic{max-width:calc(100% - 16px);margin-inline:8px;font-size:.68rem}
 }
+
+/* A quiet illustrated sharing row: distinct from functional settings and ads. */
+#settingsScreen .settings-sharing{
+  margin:12px 9px 18px;
+  border-top:1px solid rgba(116,91,141,.13);
+  padding:15px 0 0;
+}
+#settingsScreen .settings-sharing-action{
+  display:flex;align-items:center;gap:13px;
+  width:100%;min-height:88px;
+  padding:13px 15px 13px 13px;
+  border:1px solid #e8ddef;border-radius:20px;
+  background:linear-gradient(112deg,#f7edfc 0%,#fff8fc 73%,#fff 100%);
+  color:#44334f;text-decoration:none;cursor:pointer;
+  box-shadow:0 2px 8px rgba(88,60,111,.045);
+  transition:border-color .16s ease,background-color .16s ease;
+  box-sizing:border-box;
+}
+#settingsScreen .settings-sharing-action:hover{border-color:#cdb6e4;background:#f7effc;text-decoration:none}
+#settingsScreen .settings-sharing-action:focus-visible{outline:3px solid #7957a6;outline-offset:3px}
+#settingsScreen .settings-sharing-artwork{
+  display:grid;place-items:center;flex:0 0 56px;
+  width:56px;height:56px;border-radius:17px;
+  border:1px solid rgba(128,92,164,.13);
+  background:#fff;overflow:hidden;color:#6d4a9b;
+}
+#settingsScreen .settings-sharing-artwork svg{width:26px;height:26px}
+#settingsScreen .settings-sharing-thumbnail{
+  display:block;width:100%;height:100%;object-fit:contain;
+}
+#settingsScreen .settings-sharing-copy{
+  display:flex;flex:1;min-width:0;flex-direction:column;
+  justify-content:center;gap:5px;text-align:start;line-height:1.35;
+}
+#settingsScreen .settings-sharing-copy strong{
+  display:block;font-size:.97rem;font-weight:700;letter-spacing:.01em;color:#61458b;
+}
+#settingsScreen .settings-sharing-copy span{
+  display:block;font-size:.8rem;color:#6e6278;line-height:1.4;
+}
+#settingsScreen .settings-sharing-chevron{display:block;flex:none;width:18px;height:18px;color:#967eae}
+#settingsScreen .settings-sharing-note{
+  font-size:.77rem;color:var(--on-surface-variant);
+  margin:7px 4px 1px;line-height:1.5;
+}
+#settingsScreen #shareAppFallback{
+  width:100%;max-width:100%;min-height:42px;margin-top:6px;
+  padding:8px;border:1px solid var(--outline);border-radius:8px;font-size:.79rem;
+}
+#settingsScreen #shareAppFallback[hidden]{display:none!important}
+@media (prefers-reduced-motion:reduce){
+  #settingsScreen .settings-sharing-action{transition:none}
+}
+
+
+/* Settings help consolidation — 2026-11-04 */
+#settingsScreen .settings-help-card{
+  display:flex;flex-direction:column;gap:9px;
+}
+#settingsScreen .settings-help-card h2{margin-bottom:3px}
+#settingsScreen .settings-help-link{
+  display:flex;justify-content:space-between;align-items:center;
+  min-height:48px;width:100%;text-align:start;
+  padding:11px 14px;font-size:.94rem;
+}
+#settingsScreen .settings-help-link + .settings-help-link{margin-top:0}
+#settingsScreen .settings-license-footer{
+  margin:1px 10px 17px;text-align:center;padding:4px 6px;
+  background:transparent;border:0;box-shadow:none;
+}
+#settingsScreen .settings-license-footer a{
+  display:inline-flex;align-items:center;justify-content:center;
+  min-height:40px;padding:9px 7px;
+  font-size:.75rem;color:var(--on-surface-variant);
+  font-weight:400;text-decoration:underline;text-underline-offset:3px;
+  opacity:.82;
+}
+#settingsScreen .settings-license-footer a:focus-visible{
+  outline:2px solid var(--primary);outline-offset:2px;border-radius:4px;opacity:1;
+}
+#whyScreen .why-content{
+  max-width:700px;overflow-wrap:anywhere;
+}
+#whyScreen .why-content h1{
+  margin:5px 0 18px;text-align:center;
+  font-size:clamp(1.38rem,5vw,1.8rem);
+}
+#whyScreen .why-summary{
+  font-size:.97rem;line-height:1.87;
+}
+#whyScreen .why-summary p{margin:0 0 13px}
+#whyScreen .why-summary p:last-child{margin-bottom:0}
+#whyScreen .why-summary strong{color:var(--on-surface);font-weight:750}
+#whyScreen .why-summary #whyCaution{font-size:.8rem;line-height:1.65;margin-top:16px}
+#whyScreen .why-more-links{padding:0 14px;overflow:hidden}
+#whyScreen .why-more-link{
+  display:flex;justify-content:space-between;align-items:center;
+  gap:15px;min-height:58px;padding:13px 4px;
+  border:0;border-bottom:1px solid rgba(112,96,128,.16);
+  background:none;color:var(--on-surface);
+  text-decoration:none;font:inherit;font-size:.93rem;font-weight:600;
+  text-align:start;cursor:pointer;width:100%;box-sizing:border-box;
+}
+#whyScreen .why-more-link:last-child{border-bottom:0}
+#whyScreen .why-more-link > span:last-child{
+  font-size:1.35rem;color:var(--on-surface-variant);flex:none;
+}
+#whyScreen .why-more-link:hover{color:var(--primary)}
+#whyScreen .why-more-link:focus-visible{
+  outline:2px solid var(--primary);outline-offset:-2px;border-radius:6px;
+}

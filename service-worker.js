@@ -1,7 +1,7 @@
 // Install a complete new generation before replacing an existing active shell.
 // The fallback below can only read the currently activated, complete cache.
-const CACHE='cootrio-web-shell-v189-access-credentials';
-const SHELL=['./src/multilingual/additional-translations.js','./src/multilingual/additional-about.js','./src/visual-cue-settings.js','./src/visual-cue-controller.js','./src/visual-cue-catalog.js','./src/emma-background-cues.js','./src/multilingual/confirmation.js','./src/multilingual/operational-messages.js','./src/multilingual/core.js','./src/multilingual/performance.js','./src/multilingual/performance-controls.js','./src/multilingual/translations.js','./src/multilingual/ui.js','./src/settings-choice-buttons.js','./src/multilingual/about-page.js','./src/multilingual/client.js','./src/multilingual/worker.js','./src/multilingual/assets.js','./src/multilingual/assets.json','./src/multilingual/semantic-client.js','./src/multilingual/specialist-asr.js','./src/multilingual/vosk-asr.js','./src/multilingual/vosk-models.js','./src/multilingual/vosk-archive.js','./src/multilingual/vosk-archive-worker.js','./src/multilingual/sensevoice-asr.js','./src/multilingual/sensevoice-worker.js','./src/multilingual/pengcheng-asr.js','./src/multilingual/pengcheng-worker.js','./src/prerecorded-voice.js?v=20261021-audio-recovery-v2','./src/prerecorded-voice.js','./assets/voice-1202/manifest.json','./src/semantic/panel.js','./src/semantic/controller.js','./src/semantic/core.js','./src/semantic/client.js','./src/semantic/worker.js','./src/semantic/download.js', './src/semantic/tokenize.js','./src/semantic-assets-manifest.json','./src/conversation-history.js','./src/feature-screens.js','./src/app-navigation.js','./shared/play-topics.json','./','./index.html','./topic-guide.html','./src/multilingual/topic-guide.js','./src/multilingual/topic-guide-examples.js','./reset.html','./styles.css','./manifest.webmanifest','./manifest.intl.webmanifest','./icons/mitsukotoba-baby-abc-v2-192.png','./assets/mitsukotoba-parent.png','./assets/mitsukotoba-baby.png','./assets/mitsukotoba-ai.png','./assets/emma-face/emma-face-idle-open.svg','./assets/emma-face/emma-face-idle-half.svg','./assets/emma-face/emma-face-idle-closed.svg','./assets/emma-face/emma-face-talk-small.svg','./assets/emma-face/emma-face-talk-medium.svg','./assets/emma-face/emma-face-talk-large.svg','./assets/emma-face/emma-face-talk-small-half.svg','./assets/emma-face/emma-face-talk-small-closed.svg','./assets/emma-face/emma-face-talk-medium-half.svg','./assets/emma-face/emma-face-talk-medium-closed.svg','./assets/emma-face/emma-face-talk-large-half.svg','./assets/emma-face/emma-face-talk-large-closed.svg','./src/resume-greeting.js','./src/app.js','./src/microphone-continuity.js','./src/asr-worker.js','./src/moonshine-keyterm-bias.js','./src/asr-client.js','./src/turn-revisions.js','./src/emma-color-palettes.js','./src/resumable-download.js','./src/moonshine-module.js','./src/audio-capture.js','./src/silero-capture.js','./src/silero-endpoint.js','./src/silero-worker.js','./src/lite-response-engine.js','./src/interaction/diagnostics.js','./src/interaction/diversity.js','./src/interaction/frequent-replies.js','./src/interaction/supplemental-replies.js','./src/interaction/ruri-routing.js','./src/interaction/response.js','./src/lite-topic-matcher.js','./src/lite-phonetic-scene-matcher.js','./src/tts-worker.js','./worklets/pcm-capture-worklet.js'];
+const CACHE='cootrio-web-shell-v208-approved-new-theme-cues';
+const SHELL=['./src/settings-sharing.js','./src/multilingual/additional-translations.js','./src/multilingual/additional-about.js','./src/multilingual/why-page.js','./src/visual-cue-settings.js','./src/visual-cue-controller.js','./src/visual-cue-catalog.js','./src/emma-background-cues.js','./src/multilingual/confirmation.js','./src/multilingual/operational-messages.js','./src/multilingual/core.js','./src/multilingual/performance.js','./src/multilingual/performance-controls.js','./src/multilingual/translations.js','./src/multilingual/ui.js','./src/settings-choice-buttons.js','./src/multilingual/about-page.js','./src/multilingual/client.js','./src/multilingual/worker.js','./src/multilingual/assets.js','./src/multilingual/assets.json','./src/multilingual/semantic-client.js','./src/multilingual/specialist-asr.js','./src/multilingual/vosk-asr.js','./src/multilingual/vosk-models.js','./src/multilingual/vosk-archive.js','./src/multilingual/vosk-archive-worker.js','./src/multilingual/sensevoice-asr.js','./src/multilingual/sensevoice-worker.js','./src/multilingual/pengcheng-asr.js','./src/multilingual/pengcheng-worker.js','./src/prerecorded-voice.js?v=20261021-audio-recovery-v2','./src/prerecorded-voice.js','./assets/voice-1202/manifest.json','./src/semantic/panel.js','./src/semantic/controller.js','./src/semantic/core.js','./src/semantic/client.js','./src/semantic/worker.js','./src/semantic/download.js', './src/semantic/tokenize.js','./src/semantic-assets-manifest.json','./src/conversation-history.js','./src/feature-screens.js','./src/app-navigation.js','./shared/play-topics.json','./','./index.html','./topic-guide.html','./src/multilingual/topic-guide.js','./src/multilingual/topic-guide-examples.js','./reset.html','./styles.css','./manifest.webmanifest','./manifest.intl.webmanifest','./icons/mitsukotoba-baby-abc-v2-192.png','./assets/mitsukotoba-parent.png','./assets/mitsukotoba-baby.png','./assets/mitsukotoba-ai.png','./assets/emma-face/emma-face-idle-open.svg','./assets/emma-face/emma-face-idle-half.svg','./assets/emma-face/emma-face-idle-closed.svg','./assets/emma-face/emma-face-talk-small.svg','./assets/emma-face/emma-face-talk-medium.svg','./assets/emma-face/emma-face-talk-large.svg','./assets/emma-face/emma-face-talk-small-half.svg','./assets/emma-face/emma-face-talk-small-closed.svg','./assets/emma-face/emma-face-talk-medium-half.svg','./assets/emma-face/emma-face-talk-medium-closed.svg','./assets/emma-face/emma-face-talk-large-half.svg','./assets/emma-face/emma-face-talk-large-closed.svg','./src/resume-greeting.js','./src/app.js','./src/microphone-continuity.js','./src/asr-worker.js','./src/moonshine-keyterm-bias.js','./src/asr-client.js','./src/turn-revisions.js','./src/emma-color-palettes.js','./src/resumable-download.js','./src/moonshine-module.js','./src/audio-capture.js','./src/silero-capture.js','./src/silero-endpoint.js','./src/silero-worker.js','./src/lite-response-engine.js','./src/interaction/diagnostics.js','./src/interaction/diversity.js','./src/interaction/frequent-replies.js','./src/interaction/supplemental-replies.js','./src/interaction/ruri-routing.js','./src/interaction/response.js','./src/lite-topic-matcher.js','./src/lite-phonetic-scene-matcher.js','./src/tts-worker.js','./worklets/pcm-capture-worklet.js'];
 // Complete the transitive static ES module graph of src/app.js. These imports
 // must survive a first-visit offline restart even before an online reload has
 // let the controlling SW observe and cache dynamic network requests.
@@ -21,6 +21,9 @@ for(const file of ['agent-flow.js','asset-downloader.js','embedding-model.js','e
   const path='./src/vendor/moonshine/'+file;if(!SHELL.includes(path))SHELL.push(path);
 }
 
+
+SHELL.push("./assets/visual-cue/original-style-v2/change-clothes-general.webp","./assets/visual-cue/original-style-v2/tummy-fullbody.webp","./assets/visual-cue/original-style-v2/hug-face-comfort.webp","./assets/visual-cue/original-style-v2/care-general.webp","./assets/visual-cue/original-style-v2/meal-general.webp","./assets/visual-cue/original-style-v2/sleep-general.webp","./assets/visual-cue/original-style-v2/coo-conversation.webp","./assets/visual-cue/original-style-v2/hello-smile.webp","./assets/visual-cue/original-style-v2/wake-open-eyes.webp","./assets/visual-cue/original-style-v2/cry-listen.webp","./assets/visual-cue/original-style-v2/hooray-achievement.webp","./assets/visual-cue/original-style-v2/try-again-reach.webp","./assets/visual-cue/original-style-v2/bath-towel.webp");
+
 // All current conversation illustrations, including animations and reduced-motion
 // posters, must be available before the first utterance after an offline restart.
 // Keep this list equal to the catalog; the offline browser probe decodes every file.
@@ -34,6 +37,12 @@ SHELL.push(
   "./assets/visual-cue/artwork/stills/outdoor.webp",
   "./assets/visual-cue/artwork/stills/sun.webp",
   "./assets/visual-cue/artwork/stills/clothes.webp",
+
+
+
+
+
+
   "./assets/visual-cue/artwork/stills/rain.webp",
   "./assets/visual-cue/artwork/stills/meal.webp",
   "./assets/visual-cue/artwork/stills/music.webp",
@@ -61,16 +70,11 @@ SHELL.push(
   "./assets/visual-cue/artwork/stills/clothes-open-v2.webp",
   "./assets/visual-cue/artwork/animations/change-zipper.webp",
   "./assets/visual-cue/artwork/posters/change-zipper.webp",
-  "./assets/visual-cue/artwork/stills/tummy.webp",
   "./assets/visual-cue/artwork/animations/change-diaper-exchange.webp",
   "./assets/visual-cue/artwork/posters/change-diaper-exchange.webp",
   "./assets/visual-cue/artwork/stills/feet.webp",
   "./assets/visual-cue/artwork/animations/page.webp",
   "./assets/visual-cue/artwork/posters/page.webp",
-  "./assets/visual-cue/artwork/animations/dress-sleeves.webp",
-  "./assets/visual-cue/artwork/posters/dress-sleeves.webp",
-  "./assets/visual-cue/artwork/animations/change-clothes.webp",
-  "./assets/visual-cue/artwork/posters/change-clothes.webp",
   "./assets/visual-cue/artwork/animations/care-burp.webp",
   "./assets/visual-cue/artwork/posters/care-burp.webp",
   "./assets/visual-cue/artwork/stills/cup.webp",
@@ -110,6 +114,26 @@ SHELL.push(
   './licenses/multilingual/ONNXRUNTIME.txt',
   './licenses/semantic/MODEL-CARD.md',
   './multilingual-assets/runtime/LICENSE-transformers.txt'
+);
+
+SHELL.push('./src/frequency/approved-bank.js','./src/frequency/classifier.js','./src/frequency/model-assets.js','./src/frequency/labels.js');
+
+// New-frequency exact cues, installed atomically with this shell.
+SHELL.push(
+  "./src/visual-cue-runtime-catalog.js",
+  "./src/visual-cue-frequency-catalog.js",
+  "./assets/visual-cue/frequency-stills/animals-together.webp",
+  "./assets/visual-cue/frequency-stills/lion-roar.webp",
+  "./assets/visual-cue/frequency-stills/kitten-meow.webp",
+  "./assets/visual-cue/frequency-stills/count-three-objects.webp",
+  "./assets/visual-cue/frequency-stills/count-six-objects.webp",
+  "./assets/visual-cue/frequency-stills/count-three-fingers.webp",
+  "./assets/visual-cue/frequency-stills/revisions-20261108-temperature/temperature-comfort-check.webp",
+  "./assets/visual-cue/frequency-stills/revisions-20261108-temperature/temperature-comfort-check-poster.webp",
+  "./assets/visual-cue/frequency-stills/revisions-20261108-front/parent-surprise.webp",
+  "./assets/visual-cue/frequency-stills/revisions-20261108-front/parent-surprise-poster.webp",
+  "./assets/visual-cue/frequency-stills/revisions-20261108-front/come-closer.webp",
+  "./assets/visual-cue/frequency-stills/revisions-20261108-front/come-closer-poster.webp"
 );
 
 self.addEventListener('install',event=>event.waitUntil(

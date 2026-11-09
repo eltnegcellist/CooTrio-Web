@@ -1,3 +1,4 @@
+import {frequencyLabel,FREQUENCY_NOTE_IDS} from './frequency/labels.js';
 import {GUIDE_LABELS} from './multilingual/topic-guide.js';
 // Compact parent-facing hints for the existing three-sentence response.
 // These are topic/interaction summaries, NOT sentence-by-sentence translations.
@@ -15,6 +16,7 @@ const TOPICS = {
   book:['絵本','絵本を読もうね。'], music:['音楽','歌を楽しもうね。'],
   drink:['飲む','少しずつ飲もうね。'],
 };
+Object.assign(TOPICS,{animals:['どうぶつ','動物のお話だよ。'],counting:['かず','一緒に数えようね。'],temperature:['あつい・つめたい','あついか、つめたいか確かめよう。']});
 const INTERACTIONS = {
   affection:['だいすき','大好きだよ。'], praise:['ほめる','よくできたね。'],
   achievement:['できた','できたね！'], effort:['がんばる','がんばっているね。'],
@@ -25,6 +27,7 @@ const INTERACTIONS = {
   repeat:['もう一度','もう一回やってみる？'],
   pause:['ひと休み','少し休もうね。'],
 };
+Object.assign(INTERACTIONS,{acknowledge:['相づち','うん、お話を聞いているよ。'],reaction_surprise:['びっくり','わあ、びっくりしたね。'],reaction_mishap:['あらら','あらら、大丈夫だよ。'],approach:['おいで','こっちにおいで。'],attention:['注目','こっちを見てみよう。'],vocal_prompt:['声を出そう','一緒に声を出してみよう。'],accept:['どうぞ','どうぞ、使っていいよ。']});
 export function replyDisplayHint(route = '') {
   const parts = String(route || '').split(':');
   const combined = parts[0] === 'combined';
@@ -57,8 +60,8 @@ export function localizedReplyLabels(hint,language='ja',translate=value=>value){
   const words=GUIDE_LABELS[language]||GUIDE_LABELS.en;
   const topics=words.topics.split('|'),interactions=words.interactions.split('|');
   return [
-    hint.topicId ? topics[Object.keys(TOPICS).indexOf(hint.topicId)] : null,
-    hint.interactionId ? interactions[Object.keys(INTERACTIONS).indexOf(hint.interactionId)] : null,
+    hint.topicId ? frequencyLabel(hint.topicId,language)||topics[Object.keys(TOPICS).indexOf(hint.topicId)] : null,
+    hint.interactionId ? frequencyLabel(hint.interactionId,language)||interactions[Object.keys(INTERACTIONS).indexOf(hint.interactionId)] : null,
   ].filter(Boolean);
 }
 
@@ -116,7 +119,7 @@ const CHINESE_CONTEXT_NOTES = {
 };
 export function explainReplyContext(hint,language,translate=x=>x) {
   if(language==='none'||language==='en')return '';
-  return hint.noteParts.map(part=>language==='zh'
+  return hint.noteParts.map(part=>language!=='ja'&&FREQUENCY_NOTE_IDS[part]?frequencyLabel(FREQUENCY_NOTE_IDS[part],language):language==='zh'
     ? (CHINESE_CONTEXT_NOTES[part]||CHINESE_CONTEXT_NOTES['赤ちゃんへのやさしい呼びかけ。'])
     : translate(part)).join(' ');
 }

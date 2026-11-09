@@ -1,3 +1,4 @@
+import {FREQUENCY_BANK} from '../frequency/approved-bank.js';
 // Experimental child-directed Interaction routing. Enabled only by explicit opt-in.
 // Interaction classifications remain provisional; never compare Topic and Interaction softmax scores.
 export const INTERACTION_REPLIES = {
@@ -143,8 +144,13 @@ export const INTERACTION_REPLIES = {
   ]
 };
 
+export const LEGACY_INTERACTION_REPLIES={...INTERACTION_REPLIES};
+Object.assign(INTERACTION_REPLIES,FREQUENCY_BANK.interactions);
+
 export const INTERACTION_LABELS = ["affection","praise","achievement","effort","encouragement","invitation","start","finish","finish_check","care","inquiry","reassurance","repeat","pause"];
 
+
+INTERACTION_LABELS.push(...Object.keys(FREQUENCY_BANK.interactions));
 
 // Legacy diagnostic helper only. Even this helper uses only the Ruri
 // classifier's label and score: no Japanese keyword or regular-expression gates.

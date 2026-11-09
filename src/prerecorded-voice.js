@@ -1,3 +1,4 @@
+import {APPROVED_FREQUENCY_AUDIO,FREQUENCY_VOICE_PROFILE} from './frequency/approved-bank.js';
 export const VOICE_CACHE = 'mitsukotoba-qwen3-voice-1202-v1';
 // Offline playback may use only this release's exact manifest. A manifest
 // from another recording revision must still fail closed; no stale mapping.
@@ -63,6 +64,18 @@ export class PrerecordedVoiceBank {
       if (this.byText.has(text)) throw Error('英文の音声対応が重複しています。');
       this.byText.set(text, entry);
     }
+    // Apply the separately approved extension after checking the historical bank.
+    // Each replacement is allowed only against its exact superseded bytes.
+    const fullLegacyProfile=manifest.entries.length===FREQUENCY_VOICE_PROFILE.legacyClipCount;
+    if(fullLegacyProfile&&(manifest.modelRevision!==FREQUENCY_VOICE_PROFILE.modelRevision||manifest.referenceSha256!==FREQUENCY_VOICE_PROFILE.referenceSha256))throw Error('採用済み音声の固定モデルまたは参照音声が一致しません。');
+    for(const entry of APPROVED_FREQUENCY_AUDIO){
+      const current=this.byText.get(entry.text);
+      if(current && current.sha256!==entry.supersedesSha256 && current.sha256!==entry.sha256)
+        throw Error('承認済み音声の置き換え元が一致しません。');
+      if(current || fullLegacyProfile)this.byText.set(entry.text,entry);
+    }
+    manifest.entries=[...this.byText.values()];
+    manifest.totalBytes=manifest.entries.reduce((n,e)=>n+e.bytes,0);
     this.manifest = manifest;
     // Do not make the tutorial wait for the complete bank.
     return manifest;

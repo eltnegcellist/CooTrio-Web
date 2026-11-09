@@ -1,3 +1,4 @@
+import {FREQUENCY_BANK} from '../frequency/approved-bank.js';
 // Ruri-only decision policy. No Japanese keyword, negation, or regex
 // classification is used in the Live Lite reply route.
 // The thresholds are independent per head and provisional, not calibrated on
@@ -575,6 +576,9 @@ const COMBINED_BASE = {...BASE_COMBINED_REPLIES, ...SUPPLEMENTAL_COMBINED_REPLIE
 export const COMBINED_REPLIES = Object.fromEntries(
   Object.entries(COMBINED_BASE).map(([key,replies]) => [key,[...replies,...(FREQUENT_COMBINED_VARIANTS[key]||[])]])
 );
+
+export const LEGACY_COMBINED_REPLIES={...COMBINED_REPLIES};
+Object.assign(COMBINED_REPLIES,FREQUENCY_BANK.combined);
 
 export function selectRuriAxes(topicPrediction, interactionPrediction, allowInteraction = true) {
   const topicId = topicPrediction?.id ?? topicPrediction?.topic ?? null;

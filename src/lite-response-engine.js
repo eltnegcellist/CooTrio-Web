@@ -1,3 +1,4 @@
+import {FREQUENCY_BANK} from './frequency/approved-bank.js';
 import { selectRuriAxes, combinedCandidates } from './interaction/ruri-routing.js';
 import { selectE5Axes } from './multilingual/core.js';
 import { RuriReplyDiversity } from './interaction/diversity.js';
@@ -782,6 +783,8 @@ const SCENES = [
   }
 ];
 
+SCENES.push(...Object.entries(FREQUENCY_BANK.topics).map(([id,replies])=>({id,keywords:[],replies})));
+
 export function splitSentences(text) {
   return String(text || "").trim().split(/(?<=[.!?])\s+/).map(x => x.trim()).filter(Boolean);
 }
@@ -819,6 +822,9 @@ export function allLiteReplyGroupsForPhonemeAudit() {
   };
 }
 
+// Frozen pre-extension groups remain available only for historical planning audits.
+export function allLegacyLiteReplyGroupsForPhonemeAudit(){return Object.fromEntries(Object.entries(allLiteReplyGroupsForPhonemeAudit()).filter(([k])=>!Object.hasOwn(FREQUENCY_BANK.topics,k)));}
+
 export class LiteResponseEngine {
   constructor({diversityState=null} = {}) {
     this.diversity=new RuriReplyDiversity(diversityState);
@@ -838,15 +844,18 @@ export class LiteResponseEngine {
       : selectRuriAxes(topicPrediction, interactionPrediction, allowInteraction);
     const scene = findScene(topic);
     const pair = scene && interaction ? combinedCandidates(scene.id, interaction) : null;
-    const selected=this.diversity.select({topic:scene?.id||null,interaction,pair,
-      topicReplies:scene?.replies||null,interactionReplies:interaction ? INTERACTION_REPLIES[interaction] : null});
-    const replies = pair || scene?.replies || (interaction ? INTERACTION_REPLIES[interaction] : null)
+    // Without an approved pair, retain the newly recognized communicative intent.
+    // Select one approved standalone line; never fabricate a composite.
+    const responseScene=!pair && Object.hasOwn(FREQUENCY_BANK.interactions,interaction) ? null:scene;
+    const selected=this.diversity.select({topic:responseScene?.id||null,interaction,pair,
+      topicReplies:responseScene?.replies||null,interactionReplies:interaction ? INTERACTION_REPLIES[interaction] : null});
+    const replies = pair || responseScene?.replies || (interaction ? INTERACTION_REPLIES[interaction] : null)
       || GENERIC_REPLIES;
     const reason=selected?.reason||'generic';
     const route=reason==='combined' ? `combined:${scene.id}:${interaction}`
       : reason==='diversity_interaction' ? `interaction:${interaction}`
       : reason==='diversity_topic' ? scene.id
-      : scene?.id || (interaction ? `interaction:${interaction}` : 'generic');
+      : responseScene?.id || (interaction ? `interaction:${interaction}` : 'generic');
     // The current utterance's Ruri result is authoritative: stale context never
     // overrides a new label and cannot cause fabricated composite replies.
     this.activeSceneId = null;

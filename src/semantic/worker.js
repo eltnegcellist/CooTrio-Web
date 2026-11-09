@@ -1,3 +1,5 @@
+import {loadFrequencyClassifier,applyFrequencyClassifier} from '../frequency/classifier.js';
+let frequencyModel;
 import { classifyEmbedding, decodeHead } from './core.js';
 import { createRuriTokenizer } from './tokenize.js';
 import { downloadSemanticAsset } from './download.js';
@@ -65,7 +67,7 @@ self.onmessage = async ({ data }) => {
   const { type, requestId } = data;
   try {
     if (type === 'init') {
-      initPromise ||= prepare().catch(error => { initPromise = null; throw error; });
+      initPromise ||= prepare().then(async()=>{frequencyModel=await loadFrequencyClassifier('ruri');}).catch(error => { initPromise = null; throw error; });
       await initPromise;
       self.postMessage({ type: 'result', requestId, result: { provider: 'wasm', model: 'ruri70-int8-rowwise' } });
     } else if (type === 'predict') {
@@ -81,7 +83,7 @@ self.onmessage = async ({ data }) => {
       const output = await session.run({ input_ids: new ort.Tensor('int64', tokens, [1, ids.length]), attention_mask: new ort.Tensor('int64', mask, [1, ids.length]) });
       const embedding = Array.from(output.sentence_embedding.data);
       try {
-        const result = classifyEmbedding(embedding, heads, config.topic_thresholds);
+        const result = applyFrequencyClassifier(embedding,classifyEmbedding(embedding,heads,config.topic_thresholds),frequencyModel,'ja');
         const diagnostics = data.diagnostics ? { tokenIds: ids, embedding } : {};
         self.postMessage({ type: 'result', requestId, result: { ...result, elapsedMs: performance.now() - start, ...diagnostics } });
       } finally { for (const tensor of Object.values(output)) tensor.dispose(); }
