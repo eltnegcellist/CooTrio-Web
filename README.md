@@ -6,7 +6,7 @@
 
 English moments shared by a parent, a baby, and AI.
 
-[Open the app](https://eltnegcellist.github.io/CooTrio-Web/)
+[Open the app](https://cootrio-web.pages.dev/)
 
 The app is called “みつことば” in Japanese and “CooTrio” internationally. Speech recognition, topic and interaction classification, prerecorded English playback, and illustrations run in your browser. First use requires model downloads and microphone permission. Please check your available data allowance and storage space.
 
@@ -14,7 +14,7 @@ The app is called “みつことば” in Japanese and “CooTrio” internatio
 
 Japanese uses Moonshine Small Streaming and Ruri INT8. Other supported languages use their dedicated ASR models and E5. Multilingual mode uses Whisper Small. A fixed language does not automatically fall back to a different ASR model.
 
-Ruri is downloaded from the existing [ruri_int8 repository](https://github.com/eltnegcellist/ruri_int8), with a pinned commit and SHA-256 verification. See the [in-app inventory](https://eltnegcellist.github.io/CooTrio-Web/licenses.html?lang=en) for other models and their terms.
+Ruri is downloaded from the existing [ruri_int8 repository](https://github.com/eltnegcellist/ruri_int8), with a pinned commit and SHA-256 verification. See the [in-app inventory](https://cootrio-web.pages.dev/licenses.html?lang=en) for other models and their terms.
 
 ### Browser requirements
 
@@ -34,7 +34,7 @@ This repository contains official CooTrio Web releases. Release versions, model 
 
 親と赤ちゃんとAI、3人でつくる英語の時間。
 
-[アプリを開く](https://eltnegcellist.github.io/CooTrio-Web/)
+[アプリを開く](https://cootrio-web.pages.dev/)
 
 日本語では「みつことば」、海外向けには「CooTrio」と表示します。音声認識、話題・やりとりの判定、採用済み英語音声、イラストはブラウザ内で動作します。初回はモデル取得とマイク許可が必要です。通信量と保存容量をご確認ください。
 
@@ -42,7 +42,7 @@ This repository contains official CooTrio Web releases. Release versions, model 
 
 日本語はMoonshine Small StreamingとRuri INT8、他の対応言語は各専用ASRとE5を使用します。MultilingualはWhisper Smallを使用します。固定言語で別のASRへ自動置換しません。
 
-Ruriモデルは[既存のruri_int8](https://github.com/eltnegcellist/ruri_int8)から固定コミット・SHA-256検証付きで取得します。その他のモデルとライセンスは[アプリ内の一覧](https://eltnegcellist.github.io/CooTrio-Web/licenses.html)を参照してください。
+Ruriモデルは[既存のruri_int8](https://github.com/eltnegcellist/ruri_int8)から固定コミット・SHA-256検証付きで取得します。その他のモデルとライセンスは[アプリ内の一覧](https://cootrio-web.pages.dev/licenses.html)を参照してください。
 
 ### 利用環境
 
