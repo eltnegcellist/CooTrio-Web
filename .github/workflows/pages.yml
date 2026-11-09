@@ -1,4 +1,4 @@
-name: CooTrio release validation and Pages
+name: CooTrio release validation
 on:
   pull_request:
     branches: [main]
@@ -40,21 +40,4 @@ jobs:
           done
       - name: Build verified release artifact for GitHub and Cloudflare Pages
         run: python3 .github/scripts/build-cloudflare-pages.py
-      - uses: actions/upload-pages-artifact@v3
-        if: github.event_name != 'pull_request'
-        with:
-          path: _site
-  deploy:
-    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
-    needs: release-validation
-    permissions:
-      pages: write
-      id-token: write
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    runs-on: ubuntu-latest
-    steps:
-      - name: Deploy approved release
-        id: deployment
-        uses: actions/deploy-pages@v4
+      # Production is deployed by the Cloudflare Git integration after main updates.
