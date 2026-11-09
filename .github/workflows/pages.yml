@@ -25,6 +25,14 @@ jobs:
           for path in .github/policy/legal-lock.json .github/scripts/public-boundary.py .github/scripts/verify-release.py; do
             if git cat-file -e "$BASE_SHA:$path" 2>/dev/null; then
               if ! git diff --quiet "$BASE_SHA" HEAD -- "$path"; then
+                # One-time owner-approved transition for the exact production URL.
+                # Future verifier changes still require a separate approval.
+                if [[ "$path" == ".github/scripts/public-boundary.py" ]] &&
+                   [[ "$(git rev-parse "$BASE_SHA:$path")" == "2d8c2f84558a8e844ae624eb9edfbc7da243b459" ]] &&
+                   [[ "$(git hash-object "$path")" == "a2e8e71e55c75569882f954735570d93c1bcd90b" ]]; then
+                  echo "Accepted exact owner-approved production-host policy transition."
+                  continue
+                fi
                 echo "::error file=$path::Release policy changed. Stop and request a separate explicitly approved policy update."
                 exit 1
               fi

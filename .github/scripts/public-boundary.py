@@ -80,7 +80,7 @@ else:
 private_patterns = [
     r"(?i)\bcootrio-(?:web|android)-(?:dev|legacy)\b",
     r"(?i)https?://github\.com/[^/\s]+/[^/\s]*(?:-dev|-legacy)(?:[/?#\s]|$)",
-    r"(?i)https?://[^/\s]+\.pages\.dev(?:[/?#\s]|$)",
+    r"(?i)(?!https://cootrio-web\.pages\.dev(?:[/?#\s]|$))https?://[^/\s]+\.pages\.dev(?:[/?#\s]|$)",
     r"(?i)https?://github\.com/[^/\s]+/Web_EmmaLocal_English_for_babies",
     r"/Users/[^/\s]+/",
     r"-----BEGIN (?:RSA |EC |OPENSSH )?PRIVATE KEY-----",

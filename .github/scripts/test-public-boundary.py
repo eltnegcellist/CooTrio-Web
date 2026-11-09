@@ -54,6 +54,18 @@ with TemporaryDirectory() as d:
     bad("PRIVATE REFERENCE")
     readme.write_text("# CooTrio released\n")
     good()
+    # The owner approved exactly this HTTPS production hostname on 2026-11-09.
+    readme.write_text("https://cootrio-web.pages.dev/\n")
+    good()
+    for url in ["http://cootrio-web.pages.dev/",
+                "https://cootrio-web-dev.pages.dev/",
+                "https://abc123.cootrio-web.pages.dev/",
+                "https://other-project.pages.dev/",
+                "https://cootrio-web.pages.dev.evil.pages.dev/"]:
+        readme.write_text(url+"\n")
+        bad("PRIVATE REFERENCE")
+    readme.write_text("# CooTrio released\n")
+    good()
     m["source_commit"] = "private-dev-sha"
     save()
     bad("Private/internal release metadata")
