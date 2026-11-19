@@ -59,7 +59,7 @@ const ui = {
 };
 
 const CURRENT_SETUP_REVISION = 'moonshine-streaming-qwen3-prerecorded-1202-v11';
-const WEB_BUILD = '20261119-public-v1.1.1';
+const WEB_BUILD = '20261120-public-v1.2.0';
 
 const STORAGE = {
   setupRevision:'emma_web_setup_revision',
@@ -2983,7 +2983,7 @@ async function ensureMoonshineIsolation({isCurrent=()=>true,manualStartAfterRelo
     throw new Error('このブラウザではMoonshineに必要なService Workerを利用できません。');
   }
 
-  const registration=await navigator.serviceWorker.register('./service-worker.js?v=1.1.1',{updateViaCache:'none'});
+  const registration=await navigator.serviceWorker.register('./service-worker.js?v=1.2.0',{updateViaCache:'none'});
   await registration.update().catch(()=>{});
 
   const candidate=registration.installing || registration.waiting;
@@ -3022,6 +3022,6 @@ window.addEventListener('load',()=>{
   if(!VISUAL_CUE_TRIAL && 'serviceWorker' in navigator) {
     // Register for offline assets now. Reload for isolation only when ASR starts,
     // so background setup cannot discard settings or Japanese text being edited.
-    navigator.serviceWorker.register('./service-worker.js?v=1.1.1',{updateViaCache:'none'}).catch(error=>console.warn('Service Worker setup:',error));
+    navigator.serviceWorker.register('./service-worker.js?v=1.2.0',{updateViaCache:'none'}).catch(error=>console.warn('Service Worker setup:',error));
   }
 });

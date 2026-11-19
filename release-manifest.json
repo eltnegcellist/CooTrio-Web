@@ -1,5 +1,5 @@
 {
-  "version": "v1.1.1",
+  "version": "v1.2.0",
   "models": {
     "ruri": {
       "url": "https://raw.githubusercontent.com/eltnegcellist/ruri_int8/181a9f2a8b3706d430116ed8ae992866cb603b26/model.onnx",
@@ -7456,7 +7456,7 @@
     {
       "path": "index.html",
       "bytes": 123229,
-      "sha256": "1d5dd570ccaf1747f92c6ea87839544faecf78944169186116f9ef9ded98337a"
+      "sha256": "eb2dd93d32b2bf4cddb43e88994832c23f6ba37dfe7e91c97550cfd5eaf6c423"
     },
     {
       "path": "licenses/CURRENT-LICENSE-DIGESTS.json",
@@ -7726,7 +7726,7 @@
     {
       "path": "service-worker.js",
       "bytes": 20980,
-      "sha256": "f643a2f17836eb8b07431ebeed879e28b27ac43014ae2954bbba6d1e8a7495be"
+      "sha256": "bb614c003f14e9a7906384cc53eede9fb0c6b0c6363a9834bd61aa024677fa00"
     },
     {
       "path": "shared/play-topics.json",
@@ -7741,7 +7741,7 @@
     {
       "path": "src/app.js",
       "bytes": 142516,
-      "sha256": "e7e2f883b0db7821d94456a0c812dc6fd5b360c5d2fe4b2c7b5c58f07a87f3ee"
+      "sha256": "2f3e41019a1045ff952262f0e76e1d78cc413c059aaccde81715b695dd8f2a46"
     },
     {
       "path": "src/asr-client.js",
