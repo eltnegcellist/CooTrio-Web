@@ -1,4 +1,5 @@
 import {FREQUENCY_BANK} from './frequency/approved-bank.js';
+import {approvedTemperatureCandidates} from './frequency/temperature-english-candidates.js';
 import { selectRuriAxes, combinedCandidates } from './interaction/ruri-routing.js';
 import { selectE5Axes } from './multilingual/core.js';
 import { RuriReplyDiversity } from './interaction/diversity.js';
@@ -838,18 +839,23 @@ export class LiteResponseEngine {
   // Sole live classification path: Topic and Interaction labels come exclusively
   // from their independent Ruri linear heads. Legacy respond() remains only for
   // diagnostic comparison of the old rule engine, never for live Lite playback.
-  respondRuri(transcript, spokenBabyName = "", topicPrediction = null, interactionPrediction = null, allowInteraction = true, source = 'ruri') {
+  respondRuri(transcript, spokenBabyName = "", topicPrediction = null, interactionPrediction = null, allowInteraction = true, source = 'ruri', temperaturePrediction = null) {
     const { topic, interaction } = source==='e5'
       ? selectE5Axes(topicPrediction,interactionPrediction,allowInteraction)
       : selectRuriAxes(topicPrediction, interactionPrediction, allowInteraction);
     const scene = findScene(topic);
-    const pair = scene && interaction ? combinedCandidates(scene.id, interaction) : null;
+    // Only SHA-pinned, human-approved full 26-clip Qwen batches can replace
+    // the established neutral temperature response pools.
+    const directional=scene?.id==='temperature'?
+      approvedTemperatureCandidates(temperaturePrediction?.id,interaction):null;
+    const pair = scene && interaction ? (directional?.combined||combinedCandidates(scene.id, interaction)) : null;
     // Without an approved pair, retain the newly recognized communicative intent.
     // Select one approved standalone line; never fabricate a composite.
     const responseScene=!pair && Object.hasOwn(FREQUENCY_BANK.interactions,interaction) ? null:scene;
-    const selected=this.diversity.select({topic:responseScene?.id||null,interaction,pair,
-      topicReplies:responseScene?.replies||null,interactionReplies:interaction ? INTERACTION_REPLIES[interaction] : null});
-    const replies = pair || responseScene?.replies || (interaction ? INTERACTION_REPLIES[interaction] : null)
+    const topicReplies=responseScene?.id==='temperature'&&directional?.topics?directional.topics:responseScene?.replies||null;
+    const selected=this.diversity.select({topic:responseScene?.id? (directional?'temperature_'+temperaturePrediction.id:responseScene.id):null,interaction,pair,
+      topicReplies,interactionReplies:interaction ? INTERACTION_REPLIES[interaction] : null});
+    const replies = pair || topicReplies || (interaction ? INTERACTION_REPLIES[interaction] : null)
       || GENERIC_REPLIES;
     const reason=selected?.reason||'generic';
     const route=reason==='combined' ? `combined:${scene.id}:${interaction}`
@@ -865,8 +871,18 @@ export class LiteResponseEngine {
     const styled = this.alignToBabyStyle(raw, transcript, scene?.id);
     this.remember(raw, styled);
     this.turnCounter++;
+    // Until the Qwen clips are individually approved, keep the exact recorded
+    // temperature reply but carry the second-stage meaning to the Visual Cue.
+    // Never label an Interaction-only fallback as a temperature illustration.
+    const temperatureTexts=FREQUENCY_BANK.topics.temperature;
+    const temperaturePairs=['care','inquiry','reassurance'].flatMap(id=>FREQUENCY_BANK.combined['temperature|'+id]||[]);
+    const activeTemperatureTexts=directional?[...directional.topics,...(directional.combined||[])]:[...temperatureTexts,...temperaturePairs];
+    const temperatureDirection=scene?.id==='temperature' &&
+      activeTemperatureTexts.includes(raw) &&
+      ['hot','cold'].includes(temperaturePrediction?.id) ? temperaturePrediction.id : null;
     return {
       english: styled, scene: route, topic: scene?.id || null,
+      temperatureDirection,
       interaction: interaction || null, combined: reason==='combined', score: 0,
       selectionReason:reason,
       ruleScene: 'unused', semanticUsed: true, contextUsed: false

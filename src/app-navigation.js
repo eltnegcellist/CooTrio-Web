@@ -10,7 +10,7 @@ export function resolveAppPopScreen(currentScreen, previousScreen, state) {
   const stateScreen = state?.[APP_HISTORY_KEY];
   if (APP_SCREENS.has(stateScreen)) return stateScreen;
   if (currentScreen === 'about' && APP_SCREENS.has(previousScreen)) return previousScreen;
-  if (currentScreen === 'why') return 'settings';
+  if (currentScreen === 'why') return previousScreen === 'onboarding' ? 'onboarding' : 'settings';
   if (currentScreen === 'settings') return 'home';
   return null;
 }

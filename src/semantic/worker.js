@@ -1,4 +1,6 @@
 import {loadFrequencyClassifier,applyFrequencyClassifier} from '../frequency/classifier.js';
+import {classifyTemperatureWithEncoder} from '../frequency/temperature-direction.js';
+import {selectRuriAxes} from '../interaction/ruri-routing.js';
 let frequencyModel;
 import { classifyEmbedding, decodeHead } from './core.js';
 import { createRuriTokenizer } from './tokenize.js';
@@ -84,6 +86,20 @@ self.onmessage = async ({ data }) => {
       const embedding = Array.from(output.sentence_embedding.data);
       try {
         const result = applyFrequencyClassifier(embedding,classifyEmbedding(embedding,heads,config.topic_thresholds),frequencyModel,'ja');
+        // Reuse the same verified Ruri ONNX session to embed six cached prototypes
+        // only when the original model has detected the temperature Topic.
+        if(selectRuriAxes(result.topic,result.interaction).topic==='temperature'){
+          const encodePrototype=async text=>{
+            const tokenIds=tokenizer(text);
+            if(!tokenIds.length||tokenIds.length>config.max_length)throw Error('Temperature prototype length invalid');
+            const inputIds=new ort.Tensor('int64',BigInt64Array.from(tokenIds,BigInt),[1,tokenIds.length]);
+            const attentionMask=new ort.Tensor('int64',BigInt64Array.from(tokenIds,()=>1n),[1,tokenIds.length]);
+            const outputs=await session.run({input_ids:inputIds,attention_mask:attentionMask});
+            try{return Array.from(outputs.sentence_embedding.data);}
+            finally{for(const tensor of Object.values(outputs))tensor.dispose();inputIds.dispose();attentionMask.dispose();}
+          };
+          result.temperatureDirection=await classifyTemperatureWithEncoder(embedding,result,'ruri','ja',encodePrototype);
+        }
         const diagnostics = data.diagnostics ? { tokenIds: ids, embedding } : {};
         self.postMessage({ type: 'result', requestId, result: { ...result, elapsedMs: performance.now() - start, ...diagnostics } });
       } finally { for (const tensor of Object.values(output)) tensor.dispose(); }

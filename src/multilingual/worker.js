@@ -1,7 +1,8 @@
 import {loadFrequencyClassifier,applyFrequencyClassifier} from '../frequency/classifier.js';
+import {classifyTemperatureWithEncoder} from '../frequency/temperature-direction.js';
 let frequencyModel;
 import {prepareAssets,digest} from './assets.js';
-import {classifyE5,decodeE5Heads,speechLanguage} from './core.js';
+import {classifyE5,decodeE5Heads,speechLanguage,selectE5Axes} from './core.js';
 import {resolveWhisperThreads} from './performance.js';
 import {LOCAL_SEMANTIC_ASSETS} from './local-semantic-assets.js';
 let recognizer,extractor,heads,runtime,preparing,effectiveThreads=1;
@@ -110,8 +111,21 @@ async function handle(data) {
   if(data.type==='predict'){
     const start=performance.now();
     const features=await extractor('query: '+String(data.text),{pooling:'mean',normalize:true,truncation:true,max_length:512});
-    try{return {...applyFrequencyClassifier(Array.from(features.data),classifyE5(Array.from(features.data),heads),frequencyModel,data.language||'en'),elapsedMs:performance.now()-start,
-      ...(data.diagnostics?{embedding:Array.from(features.data),tokenIds:Array.from(extractor.tokenizer('query: '+String(data.text),{truncation:true,max_length:512}).input_ids.data,Number)}:{})};}finally{features.dispose();}
+    try{
+      const embedding=Array.from(features.data),language=data.language||'en';
+      const result=applyFrequencyClassifier(embedding,classifyE5(embedding,heads),frequencyModel,language);
+      if(selectE5Axes(result.topic,result.interaction).topic==='temperature'){
+        // Exact same pinned E5 encoder, with the same query prefix and pooling.
+        // Prototypes are computed once per language and then held in memory.
+        const encodePrototype=async text=>{
+          const vector=await extractor('query: '+text,{pooling:'mean',normalize:true,truncation:true,max_length:512});
+          try{return Array.from(vector.data);}finally{vector.dispose();}
+        };
+        result.temperatureDirection=await classifyTemperatureWithEncoder(embedding,result,'e5',language,encodePrototype);
+      }
+      return {...result,elapsedMs:performance.now()-start,
+        ...(data.diagnostics?{embedding,tokenIds:Array.from(extractor.tokenizer('query: '+String(data.text),{truncation:true,max_length:512}).input_ids.data,Number)}:{})};
+    }finally{features.dispose();}
   }
   throw Error('Unsupported multilingual request');
 }

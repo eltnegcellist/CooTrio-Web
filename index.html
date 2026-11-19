@@ -9,7 +9,7 @@
   <meta name="apple-mobile-web-app-title" content="みつことば" />
   <link rel="icon" href="./icons/mitsukotoba-baby-abc-v2-192.png?v=20260930-icon-r1" type="image/png" sizes="192x192" />
   <link rel="apple-touch-icon" href="./icons/mitsukotoba-baby-abc-v2-192.png?v=20260930-icon-r1" sizes="192x192" />
-  <link rel="stylesheet" href="./styles.css?v=20261104-why-settings-r1" />
+  <link rel="stylesheet" href="./styles.css?v=1.1.1" />
   <title>みつことば</title>
 </head>
 <body>
@@ -445,6 +445,7 @@
 
         <section class="status-section" aria-live="polite">
           <p id="statusDetail" class="muted hidden"></p>
+          <p id="conversationBgmStatus" class="small muted hidden" role="status" data-no-i18n></p>
           <div id="progressWrap" class="progress-wrap hidden" aria-hidden="true">
             <div class="progress-track"><div id="progressBar" class="progress-bar"></div></div>
             <div id="progressText" class="progress-text"></div>
@@ -540,6 +541,37 @@
           <p id="gradientDescription" class="small muted"></p>
         </article>
 
+        <article id="conversationBgmSettings" class="card hidden" data-no-i18n>
+          <h2>会話中の音楽</h2>
+          <label class="toggle-line"><span>エマが起きたら音楽を流す</span><span class="switch"><input id="conversationBgmEnabled" type="checkbox" aria-describedby="conversationBgmHelp" /><span></span></span></label>
+          <p id="conversationBgmHelp" class="small muted">標準では、音楽と一緒にWebRTC AEC3のエコーキャンセルがオンになります。Androidではメディア音量を使います。</p>
+          <div class="choice-setting">
+            <div>
+              <label class="choice-setting-title" for="conversationBgmVolume">BGMの音量</label>
+              <output id="conversationBgmVolumeValue" for="conversationBgmVolume" class="small muted">20%</output>
+            </div>
+            <div class="volume-slider">
+              <input id="conversationBgmVolume" type="range" min="0" max="100" value="20" aria-valuetext="20%" />
+              <span id="conversationBgmVolumeTrack" class="volume-slider-track" aria-hidden="true">
+                <span id="conversationBgmVolumeThumb" class="volume-slider-thumb"></span>
+              </span>
+            </div>
+          </div>
+          <div class="choice-setting">
+            <label class="choice-setting-title" for="conversationBgmSongMode">曲の流し方</label>
+            <select id="conversationBgmSongMode">
+              <option value="random">ランダム</option>
+              <option value="selected">曲を選ぶ</option>
+            </select>
+          </div>
+          <div id="conversationBgmSongChoice" class="choice-setting hidden">
+            <label class="choice-setting-title" for="conversationBgmSong">再生する曲</label>
+            <select id="conversationBgmSong"></select>
+          </div>
+          <button id="bgmPreviewButton" class="outline-button" type="button">試聴する</button>
+          <p id="bgmPreviewStatus" class="small muted" role="status"></p>
+        </article>
+
         <article id="englishIllustrationSettings" class="card">
           <h2>英語のイラスト</h2>
           <label class="toggle-line"><span>英語の内容を表すイラストを表示する</span><span class="switch"><input id="visualCueEnabled" type="checkbox" checked aria-describedby="visualCueHelp" /><span></span></span></label>
@@ -591,6 +623,18 @@
           <p class="small muted">実験中はEmmaの声が小さくなる場合があります。設定は次の英語返答から反映されます。画面オフを試す場合は「画面をスリープさせない」をオフにするか、手動でロックしてください。</p>
           <p id="microphoneContinuityStatus" class="small muted" role="status" aria-live="polite">通常方式：音声再生時にマイクを再取得します。</p>
           <p class="small muted">画面ロック中や他のアプリ使用中の会話継続は、ブラウザの制限により保証できません。</p>
+          <section id="developerConversationBgm" class="hidden" data-no-i18n>
+            <h3>会話中の音楽</h3>
+            <div class="choice-setting">
+              <label class="choice-setting-title" for="conversationBgmMode">音量とエコーキャンセル</label>
+              <select id="conversationBgmMode" aria-describedby="conversationBgmModeHelp">
+                <option value="aec3">WebRTC AEC3・メディア音量（標準）</option>
+                <option value="native">端末のエコーキャンセル・通話音量</option>
+                <option value="media">旧アプリ内のエコーキャンセル・メディア音量（試験用）</option>
+              </select>
+            </div>
+            <p id="conversationBgmModeHelp" class="small muted">変更は次の会話から適用されます。</p>
+          </section>
 <section id="developerJapaneseAsr">
           <h3>音声認識モデル（日本語・開発者用）</h3>
           <div id="developerAsrModelSetting" class="choice-setting"><span class="choice-setting-title">Moonshineモデル</span>
@@ -823,6 +867,6 @@
     </div>
   </main>
 
-  <script type="module" src="./src/app.js?v=20261104-why-settings-r1"></script>
+  <script type="module" src="./src/app.js?v=1.1.1"></script>
 </body>
 </html>

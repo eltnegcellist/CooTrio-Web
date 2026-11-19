@@ -1,4 +1,5 @@
 import {APPROVED_FREQUENCY_AUDIO,FREQUENCY_VOICE_PROFILE} from './frequency/approved-bank.js';
+import {APPROVED_TEMPERATURE_AUDIO,approvedTemperatureAudioComplete} from './frequency/temperature-english-candidates.js';
 export const VOICE_CACHE = 'mitsukotoba-qwen3-voice-1202-v1';
 // Offline playback may use only this release's exact manifest. A manifest
 // from another recording revision must still fail closed; no stale mapping.
@@ -73,6 +74,14 @@ export class PrerecordedVoiceBank {
       if(current && current.sha256!==entry.supersedesSha256 && current.sha256!==entry.sha256)
         throw Error('承認済み音声の置き換え元が一致しません。');
       if(current || fullLegacyProfile)this.byText.set(entry.text,entry);
+    }
+    // Direction-specific English must never be available to routing unless the
+    // complete verified batch is present. 0 entries is the approved neutral fallback.
+    if(APPROVED_TEMPERATURE_AUDIO.length && !approvedTemperatureAudioComplete())
+      throw Error('温度の新音声が全26件承認されていません。');
+    for(const clip of fullLegacyProfile ? APPROVED_TEMPERATURE_AUDIO : []){
+      if(this.byText.has(clip.text))throw Error('温度の録音英文が既存の承認済み音声と重複しています。');
+      this.byText.set(clip.text,clip);
     }
     manifest.entries=[...this.byText.values()];
     manifest.totalBytes=manifest.entries.reduce((n,e)=>n+e.bytes,0);

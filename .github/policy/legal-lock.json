@@ -4,7 +4,7 @@
   "license_files": {
     "assets/vad/LICENSE-SILERO-VAD-MIT.txt": "0bf5e90cac691b999d4a35044f97167d7bbbf0b9",
     "DEPENDENCY_AUDIT.md": "4957bb3f7bcbc1ff13fad2acc95327b077793f02",
-    "licenses.html": "8a74cf7a5412e62303b39c3d840757d1d2c74a92",
+    "licenses.html": "04ed727a83adcf421de6d4885506b97c80b10285",
     "licenses/CURRENT-LICENSE-DIGESTS.json": "7b24b63e16486643804b83dfcf49338b1ea775c5",
     "licenses/CURRENT-MODEL-INVENTORY.json": "c066d7c20faeeb61c05fddeb9ee5c2243dcb085d",
     "licenses/multilingual/E5-MIT.txt": "5ae193c94d0ca44b222ff24d76eaf41709ce2b4f",
@@ -36,6 +36,8 @@
     "src/vendor/moonshine/LICENSE": "53cade1c30a4daf00dc0eebc92319027fd3f81d4",
     "src/vendor/sherpa-pengcheng-1.12.32-th/LICENSE-APACHE-2.0.txt": "d645695673349e3947e8e5ae42332d0ac3164cd7",
     "src/vendor/sherpa-sensevoice-1.12.32/LICENSE-APACHE-2.0.txt": "d645695673349e3947e8e5ae42332d0ac3164cd7",
-    "THIRD_PARTY_NOTICES.md": "bf48194ea58913f5d744d24d05d2a4b0c317dceb"
+    "THIRD_PARTY_NOTICES.md": "bf48194ea58913f5d744d24d05d2a4b0c317dceb",
+    "assets/experimental-aec3/LICENSE": "880b0185d9ed64fcc32c68a45c6d2c75d8d22e16",
+    "assets/experimental-aec3/THIRD-PARTY-NOTICES.md": "6c96eb746429bbfbd4d98d9297d1fb1070e46f6e"
   }
 }
