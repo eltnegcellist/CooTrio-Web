@@ -1,5 +1,5 @@
 {
-  "version": "v1.1.0",
+  "version": "v1.2.0",
   "models": {
     "ruri": {
       "url": "https://raw.githubusercontent.com/eltnegcellist/ruri_int8/181a9f2a8b3706d430116ed8ae992866cb603b26/model.onnx",
@@ -37,6 +37,61 @@
       "path": "_headers",
       "bytes": 219,
       "sha256": "04d63bff56069d438fb28f2cbebed9ee2683dc9f3a1f88c6c56bef1df7ffa2ce"
+    },
+    {
+      "path": "assets/conversation-bgm/BWV_Anh_114-Xy01-2(Fast).mp3",
+      "bytes": 1401545,
+      "sha256": "127b232cd47143b3437d49dba02e699e95c1b3966d3558e5f3d3778ed44d28c7"
+    },
+    {
+      "path": "assets/conversation-bgm/Haru_Yo_Koi-Xy02-2(Shuffle).mp3",
+      "bytes": 836196,
+      "sha256": "c0b9f7f5837c2b4bd590d3313972906dd0d171a77c0e6e6bc83155b32b47ede0"
+    },
+    {
+      "path": "assets/conversation-bgm/Kokage_De_Yuttari-1(Slow).mp3",
+      "bytes": 2710160,
+      "sha256": "a7d1b1883ee0ee7e2b41c213b14380f7e30e01f71e2ceebf6d3da2761b817d0e"
+    },
+    {
+      "path": "assets/conversation-bgm/Kurarinetto_Kowashichatta-Xy02-2(Shuffle).mp3",
+      "bytes": 1589265,
+      "sha256": "21e39b51eb78febf01ee32d4475982d772e683eca69eaf99fee08dc9372e836a"
+    },
+    {
+      "path": "assets/conversation-bgm/Momiji-Xy02-2(Fast).mp3",
+      "bytes": 1425300,
+      "sha256": "2130c0440e6aeb22c71d611d3e6ad672ef4afd417fe9b88c37fd8335a70f6991"
+    },
+    {
+      "path": "assets/conversation-bgm/Piano_Sonata_No16(Mozart)-Xy02-2(Fast).mp3",
+      "bytes": 3003974,
+      "sha256": "239dafde76ab158f5db8e6966c911eb2a90c8c0b346cb33fed15b2f83a948dbf"
+    },
+    {
+      "path": "assets/conversation-bgm/Picnic-Xy02-1(Fast).mp3",
+      "bytes": 2071498,
+      "sha256": "59bc3bf9a2bd2a794c8af15d1cb15cf898845a61fa79196c6eec2c40a34f1bd6"
+    },
+    {
+      "path": "assets/conversation-bgm/The_Entertainer-Xy02-1(Slow).mp3",
+      "bytes": 4079737,
+      "sha256": "6cf29ab1b0a34fa2b67b4994a52cee3fab7dac07c495704e41188650c1e8ecdd"
+    },
+    {
+      "path": "assets/conversation-bgm/Tritsch_Tratsch_Polka-Xy02-2(Slow).mp3",
+      "bytes": 2942742,
+      "sha256": "df86fb39c3176464ffe23da4bbd205b526c06bab137e1d01cd1ecde1f4f8e776"
+    },
+    {
+      "path": "assets/conversation-bgm/Yama_No_Ongakuka-Xy02-1(Straight).mp3",
+      "bytes": 1679566,
+      "sha256": "4bc648bf0a1ef831de48d9781fa9d1eab0b170f7bd34052d0c35d7d848c60695"
+    },
+    {
+      "path": "assets/conversation-bgm/credits.txt",
+      "bytes": 1873,
+      "sha256": "5debb11e6f6ba0f40ec4b515ab40760cacfda87a4ac55aa0ac7c8d2a2c07488f"
     },
     {
       "path": "assets/emma-background-cues/calm-poster.svg",
@@ -122,6 +177,26 @@
       "path": "assets/emma-face/emma-face-talk-small.svg",
       "bytes": 5851,
       "sha256": "f94a3f168624a4104ed21cd4b7b24189957b1cd06fb42922c8571eddacab4a27"
+    },
+    {
+      "path": "assets/experimental-aec3/LICENSE",
+      "bytes": 12891,
+      "sha256": "b856d5bfca0fe7768e08fb8dc1949d6ce1255e7f0db7b84d39d6c1e1e00e68f8"
+    },
+    {
+      "path": "assets/experimental-aec3/THIRD-PARTY-NOTICES.md",
+      "bytes": 50343,
+      "sha256": "bde2db2722b497b0499cd20ec629fd11acb9d4f16e4654c389eff65e04d317c2"
+    },
+    {
+      "path": "assets/experimental-aec3/index.js",
+      "bytes": 7783,
+      "sha256": "6dc18ec3d4e7c03229462717e788ab511cf4a280e5aa76b22cf708424affa00c"
+    },
+    {
+      "path": "assets/experimental-aec3/webrtc-audio-processing.wasm",
+      "bytes": 536773,
+      "sha256": "3f3e9317a226a11053db4ef8899e08b632e04bfb35cba6fe08f32e7a387f95e7"
     },
     {
       "path": "assets/frequency-1202/clips/010da114f30298c001efbe9a.m4a",
@@ -1224,6 +1299,136 @@
       "sha256": "62705bf8983a18cd19b1c2c10a8b435412218a8cbeb0fc5a8d3dd2e31e1d42b2"
     },
     {
+      "path": "assets/temperature-1202/clips/037ed4f87b065ef72d086ef5.m4a",
+      "bytes": 59907,
+      "sha256": "0df9d040ff682b40ee1faf3353a90216361d5f3c2f4105b8436fc8ce18018c5a"
+    },
+    {
+      "path": "assets/temperature-1202/clips/1201edfb9cb8731de8be0243.m4a",
+      "bytes": 57924,
+      "sha256": "2e5af95a94af64506cbf5f64c7c94f4de4ccf2fc49b96d3d3885862b8202826c"
+    },
+    {
+      "path": "assets/temperature-1202/clips/1e255e3ac34fa8a12d00cffd.m4a",
+      "bytes": 50420,
+      "sha256": "aeb26c27a281b5818edb1453a95c3f758e7b1036c2680babd5cfb7f3f7cb9be0"
+    },
+    {
+      "path": "assets/temperature-1202/clips/1e5e20353fd99264c71364b7.m4a",
+      "bytes": 55056,
+      "sha256": "3a004b77910e77be217dac4d061faa79b2c32f8d33fb4187a27bb765e907ee26"
+    },
+    {
+      "path": "assets/temperature-1202/clips/2168465f22d5b053a4e27c55.m4a",
+      "bytes": 59409,
+      "sha256": "c5d3560d253d904f056ddb03b4d5279deca26272cd7f7174149564d0491e83ae"
+    },
+    {
+      "path": "assets/temperature-1202/clips/3070de3c4789daa93f06cd7c.m4a",
+      "bytes": 55946,
+      "sha256": "12592324a54b446de8b44a3ba29b157d12dc756c0d0cb29707f456a76fa75fe7"
+    },
+    {
+      "path": "assets/temperature-1202/clips/38a198912ef282c0492aaabb.m4a",
+      "bytes": 64049,
+      "sha256": "4d0c04fb28effa9b29c4a0583cf9480d592c6d901745d4aacdf6852794549948"
+    },
+    {
+      "path": "assets/temperature-1202/clips/39d3f6db6ffcc672029727f7.m4a",
+      "bytes": 58265,
+      "sha256": "31107371e7a0fab9f172c9bad54903f1ee39b390239a22da9f484e2caed26921"
+    },
+    {
+      "path": "assets/temperature-1202/clips/3c63cfdf5355f1aef252f1ce.m4a",
+      "bytes": 56185,
+      "sha256": "507141a781d075779537735e36c2cade4308eb00473fb0122fe761032dc6090a"
+    },
+    {
+      "path": "assets/temperature-1202/clips/4f015d537a405b9a7a60b62f.m4a",
+      "bytes": 53488,
+      "sha256": "be5953ee65824b710d2f8cb699861b84ed31ee6f27c0f547620412103a115bb3"
+    },
+    {
+      "path": "assets/temperature-1202/clips/5de652e208f28dbc1d5510e3.m4a",
+      "bytes": 54435,
+      "sha256": "6eb896a42c718dab17a5fd2b157fc308646329be6fcf2422dfe4fab8d8303efb"
+    },
+    {
+      "path": "assets/temperature-1202/clips/7a29711c738d20ebb184cf41.m4a",
+      "bytes": 46087,
+      "sha256": "04cc7c7fc3366fb5e126c63358ec05da9d4c735bd5edd974edb7b00787b04370"
+    },
+    {
+      "path": "assets/temperature-1202/clips/7da2c85f2cb1b2f125309aca.m4a",
+      "bytes": 67546,
+      "sha256": "231d90777b6dd92bb6ae82f375b0d34a11bdb604563d9ae7790786a553d923a7"
+    },
+    {
+      "path": "assets/temperature-1202/clips/87749bb68b3deb850340d73d.m4a",
+      "bytes": 57272,
+      "sha256": "3f92bd25841295707b111884a38cb7747a2d0e7de7d1d0fec494ceb9a5231555"
+    },
+    {
+      "path": "assets/temperature-1202/clips/8d650903b5bd82d0b6d1b050.m4a",
+      "bytes": 54980,
+      "sha256": "78dc905f24bd4a9484fdccfac481cc4eddb34cb3d177ac450ec3ffc2fdef1702"
+    },
+    {
+      "path": "assets/temperature-1202/clips/92bfa97d9db998ad66b1edb5.m4a",
+      "bytes": 53775,
+      "sha256": "306047cae422f6a2cc4a8c6f61277bce2285433224cff84f3a46b7d1eae9b6fb"
+    },
+    {
+      "path": "assets/temperature-1202/clips/a716d90a781e8a7fa4c4d0b7.m4a",
+      "bytes": 47955,
+      "sha256": "11d6825c86b4f4f1dfd6ab7e9848fd722a3742b37b11471468ee6bffcc304d84"
+    },
+    {
+      "path": "assets/temperature-1202/clips/a73c4e140fc548dad2b0b0c0.m4a",
+      "bytes": 56689,
+      "sha256": "b174961e3add351cfa2d2d2e395f8c2330d9c2f66ade727a2fb8befff1cd0361"
+    },
+    {
+      "path": "assets/temperature-1202/clips/b16d6e9106fa44f5a4c3528b.m4a",
+      "bytes": 60227,
+      "sha256": "0d25417a4721c698c69d989857ec764dce5878088e7786dc5ed1de4e57c36351"
+    },
+    {
+      "path": "assets/temperature-1202/clips/bc413d2fa72ea0d8eb72eb17.m4a",
+      "bytes": 59704,
+      "sha256": "3342181a42acdb41acb2f57e0dec2a27a3e3f88f532ab92bcfbeaac968a17430"
+    },
+    {
+      "path": "assets/temperature-1202/clips/c49caa4c23ed26ab784c2e99.m4a",
+      "bytes": 53323,
+      "sha256": "edade849d34b6ee3f8578b62a1d95b7d9800010adf8eb22e1924f230464d4840"
+    },
+    {
+      "path": "assets/temperature-1202/clips/cce4ddcc59e3dbd17c42f972.m4a",
+      "bytes": 56301,
+      "sha256": "9649f703536d1fb9aa8a55a865781afdc1c9f3c49d67a7f90133ff64da51f9ce"
+    },
+    {
+      "path": "assets/temperature-1202/clips/d03ebc01f3fc0b5c3db46816.m4a",
+      "bytes": 51896,
+      "sha256": "acbba547d555d4eafa1ec64bd643eafbdcc0aa26e75e10270d88613dbfb5a2fe"
+    },
+    {
+      "path": "assets/temperature-1202/clips/d86a8514c3b7ea5855e6a3da.m4a",
+      "bytes": 58462,
+      "sha256": "727b5175790d6cc5291e543eccb73126140c28efbe8a37cb9e3d17401b3f4eaf"
+    },
+    {
+      "path": "assets/temperature-1202/clips/db87658b870abcdbca002315.m4a",
+      "bytes": 54353,
+      "sha256": "44d7864bb703ce6a63eea688d58c750fad16f0e679bbdaa2b5b6d0ff66151373"
+    },
+    {
+      "path": "assets/temperature-1202/clips/dce8a50299014e2670a36fb5.m4a",
+      "bytes": 62276,
+      "sha256": "dd033bfbfae4da192d874072a765f8b6b8ef134f15908a18dcc53b3a27cf8de4"
+    },
+    {
       "path": "assets/vad/LICENSE-SILERO-VAD-MIT.txt",
       "bytes": 1075,
       "sha256": "2e63e9a38b6e8fc0c7bc37ce174caca1862870856c6daf5697cfb785e925520b"
@@ -1547,6 +1752,11 @@
       "path": "assets/visual-cue/frequency-stills/revisions-20261108-front/parent-surprise.webp",
       "bytes": 37668,
       "sha256": "45de3cf6c8fae75e019d9ff58c3e074aa2354eec6f8c1484971c3ef878e89beb"
+    },
+    {
+      "path": "assets/visual-cue/frequency-stills/revisions-20261108-temperature/temperature-cold-still.webp",
+      "bytes": 19504,
+      "sha256": "1b1b3207396d932eb977a27719d03424975d9fbc6427ed2be55c91fe4df12220"
     },
     {
       "path": "assets/visual-cue/frequency-stills/revisions-20261108-temperature/temperature-comfort-check-poster.webp",
@@ -7245,8 +7455,8 @@
     },
     {
       "path": "index.html",
-      "bytes": 120267,
-      "sha256": "80f2dc6272f768bf065d273004cb88f92919994370695bf11066f7cf47abb1ca"
+      "bytes": 123229,
+      "sha256": "eb2dd93d32b2bf4cddb43e88994832c23f6ba37dfe7e91c97550cfd5eaf6c423"
     },
     {
       "path": "licenses/CURRENT-LICENSE-DIGESTS.json",
@@ -7345,8 +7555,8 @@
     },
     {
       "path": "licenses.html",
-      "bytes": 24972,
-      "sha256": "f7231810256d8512eccdeb122eb5d2b9040168825f29aaa77aded575de2e5a5e"
+      "bytes": 27380,
+      "sha256": "642c3d647680914dca73434496a31160a0bc26ee6f5c7792471f94e30d6c22a2"
     },
     {
       "path": "manifest.intl.webmanifest",
@@ -7515,8 +7725,8 @@
     },
     {
       "path": "service-worker.js",
-      "bytes": 19505,
-      "sha256": "522853ed7a97a2f9e79a3051d4759cefa9faffb58b2260beb297d357533be314"
+      "bytes": 20980,
+      "sha256": "bb614c003f14e9a7906384cc53eede9fb0c6b0c6363a9834bd61aa024677fa00"
     },
     {
       "path": "shared/play-topics.json",
@@ -7525,13 +7735,13 @@
     },
     {
       "path": "src/app-navigation.js",
-      "bytes": 722,
-      "sha256": "72d426d0d108f8ff7328d1ddf824daff761bce730d7b72557db676851e8bf2db"
+      "bytes": 771,
+      "sha256": "97bffea5e86edad20de92c81438b817a841bd90c486a2dc092b540c35bf47b73"
     },
     {
       "path": "src/app.js",
-      "bytes": 131155,
-      "sha256": "0e3bb40372c1026015bfb75dcdbd8f7287e629abdf9305e7d681e808f4febc45"
+      "bytes": 142516,
+      "sha256": "2f3e41019a1045ff952262f0e76e1d78cc413c059aaccde81715b695dd8f2a46"
     },
     {
       "path": "src/asr-client.js",
@@ -7545,8 +7755,13 @@
     },
     {
       "path": "src/audio-capture.js",
-      "bytes": 13065,
-      "sha256": "9b541ccdb61eb4fefbffaa69b914a0a4bdb8e878ee5df35c101b8c5dea184cc7"
+      "bytes": 16486,
+      "sha256": "d8c7d09351fea8d2d880666a673722e06ccd7f9626d8c13829e60ca3e8e7d335"
+    },
+    {
+      "path": "src/bgm-echo-filter.js",
+      "bytes": 5251,
+      "sha256": "3198c1a2d25236c518241c7c84cfaf8625a6560e88d0a73297475c2af63edb5f"
     },
     {
       "path": "src/conversation-history.js",
@@ -7557,6 +7772,16 @@
       "path": "src/emma-background-cues.js",
       "bytes": 4002,
       "sha256": "80501f6fbaaddd775fe2413890112a08464c330a38d0f75b84faeb295a3f443c"
+    },
+    {
+      "path": "src/emma-bgm-tracks.js",
+      "bytes": 1913,
+      "sha256": "5a7618693a027ce49c0ecfa527bca97444eccffdfed7c018158baba66c95094a"
+    },
+    {
+      "path": "src/emma-bgm.js",
+      "bytes": 4127,
+      "sha256": "cd796ab6deec4987a59027209e2d6816b77cc8bf79b649154a85153790c80547"
     },
     {
       "path": "src/emma-color-palettes.js",
@@ -7592,6 +7817,26 @@
       "path": "src/frequency/model-assets.js",
       "bytes": 641,
       "sha256": "0a98345ef4cef72f1cd9c05dbc0f071a35bdd2208776612ad7c78268e682e9d2"
+    },
+    {
+      "path": "src/frequency/temperature-direction.js",
+      "bytes": 4765,
+      "sha256": "11ebfbd1c5e932f822d8a4cd77cfa4f2d6489e8c4b085d030c557774762f1647"
+    },
+    {
+      "path": "src/frequency/temperature-english-candidates.js",
+      "bytes": 15125,
+      "sha256": "be2a4e2f8874134f1da228149a8751ccba5b1472014e0c9ccd7dc8b03cc28d44"
+    },
+    {
+      "path": "src/frequency/temperature-prototypes.js",
+      "bytes": 3237,
+      "sha256": "aa4884a05b073fed378e64b5766bca96267cad234458a44fe2f081c783b27321"
+    },
+    {
+      "path": "src/frequency/temperature-visuals.js",
+      "bytes": 715,
+      "sha256": "7481be4bd1ac79532a1cb12cf0cfb3af01807036d10fe0749896a184b11c786c"
     },
     {
       "path": "src/interaction/diagnostics.js",
@@ -7630,8 +7875,8 @@
     },
     {
       "path": "src/lite-response-engine.js",
-      "bytes": 42805,
-      "sha256": "8b69576cef2b58e4a9aa48ecb768d52036e05bca879dee229609d1e42ebcfe05"
+      "bytes": 44166,
+      "sha256": "0f358784c91bc846c500e546075d48f52f7565594334c80b9f4040fb013cc95d"
     },
     {
       "path": "src/lite-topic-matcher.js",
@@ -7810,13 +8055,13 @@
     },
     {
       "path": "src/multilingual/worker.js",
-      "bytes": 7935,
-      "sha256": "1d7c5d9869e88deefa177313deac5105c7d70e8c2539a01ed575407308bd4924"
+      "bytes": 8699,
+      "sha256": "67c9e8abb013e8f8f6db4b347cf2f214799c16c3eba886cda296c0d4119b290b"
     },
     {
       "path": "src/prerecorded-voice.js",
-      "bytes": 10782,
-      "sha256": "81e6e05118cac3af262f9011da179967b2c880018421d9c5172abce657a84892"
+      "bytes": 11487,
+      "sha256": "8d6eaa02b328b6f7e5f042e765758a898ad839569d5df17fc905dafb6e913e86"
     },
     {
       "path": "src/reply-display-hint.js",
@@ -7840,8 +8085,8 @@
     },
     {
       "path": "src/semantic/controller.js",
-      "bytes": 5799,
-      "sha256": "3f04bbc0ebf88d273fdbdfea219d70ef8b770e2f5e9ebcf2e6e3047baf729976"
+      "bytes": 5832,
+      "sha256": "250f617171cec8ea52770d7b7a5f6820a71b6fd6936b38c293e794ef90eb3dfc"
     },
     {
       "path": "src/semantic/core.js",
@@ -7865,8 +8110,8 @@
     },
     {
       "path": "src/semantic/worker.js",
-      "bytes": 6155,
-      "sha256": "425b7e44a6f8c6a4e6eab96c861f5de8647fda138c18d3d407217027986df90f"
+      "bytes": 7413,
+      "sha256": "fc67d2343b103c1ef14d165f0c912ea1e2eeefc773ed1f52eb402dd8fadfd530"
     },
     {
       "path": "src/semantic-assets-manifest.json",
@@ -8095,8 +8340,8 @@
     },
     {
       "path": "src/visual-cue-controller.js",
-      "bytes": 4070,
-      "sha256": "08bdee53015475da1b952cdb9725a7f98ab336e347f395e7316cbeab7146facf"
+      "bytes": 5391,
+      "sha256": "d0aec209d91a21f04400830244de680abbe4e2433e8239efe980b94926f3164a"
     },
     {
       "path": "src/visual-cue-frequency-catalog.js",
@@ -8105,8 +8350,8 @@
     },
     {
       "path": "src/visual-cue-runtime-catalog.js",
-      "bytes": 560,
-      "sha256": "7fc6d0d9ebaa595c7a67d9564d7616d1b548db49cd28024d5c46fc7efa3fd907"
+      "bytes": 663,
+      "sha256": "a41a03c15c4d1ce959f394eaf3ab40a249d26b02cd2cb37c0e14628511e0ec69"
     },
     {
       "path": "src/visual-cue-settings.js",
@@ -8115,13 +8360,23 @@
     },
     {
       "path": "styles.css",
-      "bytes": 60214,
-      "sha256": "287599676189d75a63e24c6845a936ad9ae9f48fa4c77dcf86903c591da05b12"
+      "bytes": 61180,
+      "sha256": "6b75aecccef42bad595f47664dbed1fb221120d4b7d4aa08da2dd57872b07d68"
     },
     {
       "path": "topic-guide.html",
       "bytes": 17493,
       "sha256": "049471082ab91784f355b68507ecfebe41ba82931dda79fc2f0b9a183eb5d37d"
+    },
+    {
+      "path": "worklets/aec3-pcm-capture-worklet.js",
+      "bytes": 1601,
+      "sha256": "d2df9c49e9cdc31d9df1902a4efcb49063ad34c91282611d48d37fd3f9e866b9"
+    },
+    {
+      "path": "worklets/bgm-pcm-capture-worklet.js",
+      "bytes": 535,
+      "sha256": "b02a239cd0caf37820b8362770470317ae5c03dfd16d8553b30a23d86f3220d3"
     },
     {
       "path": "worklets/pcm-capture-worklet.js",

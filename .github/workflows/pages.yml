@@ -33,6 +33,13 @@ jobs:
                   echo "Accepted exact owner-approved production-host policy transition."
                   continue
                 fi
+                # Approved exact notice update for OtoLogic recordings and the WebRTC AEC3 bundle.
+                if [[ "$path" == ".github/policy/legal-lock.json" ]] &&
+                   [[ "$(git rev-parse "$BASE_SHA:$path")" == "fe07a0d9b25491cc69f850a5f035e60dbcb4ad7f" ]] &&
+                   [[ "$(git hash-object "$path")" == "e376de492dd4e53f2fe555fad67096cdeba383ac" ]]; then
+                  echo "Accepted exact approved OtoLogic and AEC3 notice entries."
+                  continue
+                fi
                 echo "::error file=$path::Release policy changed. Stop and request a separate explicitly approved policy update."
                 exit 1
               fi

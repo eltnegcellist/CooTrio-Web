@@ -1398,6 +1398,26 @@ body{
 .language-picker select{max-width:100%;min-width:180px;min-height:44px;padding:8px 12px;border:1px solid #b5afba;border-radius:12px;background:var(--surface,#fff);color:var(--text,#242028);font:inherit;font-weight:400;}
 #settingsScreen .choice-setting{display:grid;gap:9px;margin:13px 0;min-width:0}
 #settingsScreen .choice-setting-title{font-size:1rem;font-weight:700}
+.volume-slider{position:relative;padding:15px 18px;direction:ltr}
+.volume-slider>input{position:absolute;inset:0;margin:0;opacity:0;pointer-events:none}
+.volume-slider-track{
+  --volume-position:20%;
+  position:relative;display:block;height:6px;border-radius:999px;
+  background:linear-gradient(to right,var(--primary) var(--volume-position),var(--outline,#b5afba) var(--volume-position))
+}
+.volume-slider-thumb{
+  position:absolute;left:var(--volume-position);top:50%;transform:translate(-50%,-50%);
+  display:grid;place-items:center;width:36px;height:36px;border-radius:50%;
+  cursor:grab;touch-action:pan-y;user-select:none
+}
+.volume-slider-thumb::after{
+  content:"";width:20px;height:20px;border-radius:50%;background:var(--primary);
+  border:2px solid var(--surface,#fff)
+}
+.volume-slider-thumb:active{cursor:grabbing}
+.volume-slider>input:focus-visible+.volume-slider-track .volume-slider-thumb::after{
+  outline:2px solid var(--primary);outline-offset:2px
+}
 #settingsScreen select.choice-select-enhanced{position:absolute!important;width:1px!important;height:1px!important;opacity:0!important;clip-path:inset(50%)!important;pointer-events:none!important;padding:0!important;margin:0!important}
 #settingsScreen .settings-choice-buttons{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,138px),1fr));gap:9px;margin:6px 0 10px;min-width:0}
 #settingsScreen .settings-choice-button{min-height:48px;padding:10px 12px;border:2px solid var(--outline,#b5afba);border-radius:14px;background:var(--surface,#fff);color:var(--on-surface,#242028);font-size:1rem;line-height:1.4;font-weight:650;overflow-wrap:anywhere;cursor:pointer;text-align:center;touch-action:manipulation}

@@ -1,7 +1,28 @@
 import {VISUAL_CUE_RUNTIME_CATALOG} from './visual-cue-runtime-catalog.js';
+import {TEMPERATURE_DIRECTION_TEXTS,approvedTemperatureAudioComplete} from './frequency/temperature-english-candidates.js';
 import { createEmmaBackground } from './emma-background-cues.js?v=20261020-english-illustrations-v2';
 export const normalizeCueText=text=>String(text||'').replaceAll('’',"'").trim().replace(/\s+/g,' ').toLowerCase();
-export function resolveVisualCue(text,catalog=VISUAL_CUE_RUNTIME_CATALOG){return catalog.bindings[normalizeCueText(text)]||null;}
+export function resolveVisualCue(text,catalog=VISUAL_CUE_RUNTIME_CATALOG,temperatureDirection=null){
+  const plan=catalog.bindings[normalizeCueText(text)]||null;
+  // When all 26 clips are eventually approved, the newly recorded texts also
+  // resolve to their corresponding direction-specific cue, without changing
+  // or polluting any original legacy text binding.
+  if(approvedTemperatureAudioComplete()&&['hot','cold'].includes(temperatureDirection)){
+    const bank=TEMPERATURE_DIRECTION_TEXTS[temperatureDirection];
+    if([...bank.topics,...Object.values(bank.combined).flat()].some(x=>normalizeCueText(x)===normalizeCueText(text))){
+      const assetId='temperature-'+temperatureDirection+'-candidate';
+      if(catalog.assets[assetId])return {type:'asset',assetId};
+    }
+  }
+  // Only replace the approved neutral-temperature animation when the current
+  // Topic turn has an accepted embedding direction. All other cues are unchanged.
+  if(plan?.type==='asset'&&plan.assetId==='temperature-comfort-check'&&
+    ['hot','cold'].includes(temperatureDirection)){
+    const assetId='temperature-'+temperatureDirection+'-candidate';
+    if(catalog.assets[assetId])return {type:'asset',assetId};
+  }
+  return plan;
+}
 
 /** Optional turn-owned visual. Audio may end before the next parent utterance finishes. */
 export function createVisualCueController({document=globalThis.document,baseUrl=new URL('../',import.meta.url),catalog=VISUAL_CUE_RUNTIME_CATALOG,loadImage,media=globalThis.matchMedia?.('(prefers-reduced-motion: reduce)'),onChange=()=>{}}={}){
@@ -45,12 +66,12 @@ export function createVisualCueController({document=globalThis.document,baseUrl=
  document.addEventListener('visibilitychange',visibility);media?.addEventListener?.('change',reduction);
  return {
   configure(settings={}){mode=settings.mode==='visual'?'visual':'emma';motion=settings.motion!==false;void render();},
-  begin(text){const token=++serial;current={token,plan:resolveVisualCue(text,catalog),playbackFinished:false};void render();return token;},
+  begin(text,{temperatureDirection=null}={}){const token=++serial;current={token,plan:resolveVisualCue(text,catalog,temperatureDirection),playbackFinished:false};void render();return token;},
   // End of Emma's voice does not end the illustration: hold it while the parent speaks.
   end(token){if(current?.token===token)current.playbackFinished=true;},
   // The microphone/VAD decides when the parent's next utterance has ended.
   nextUtteranceFinished(){stop();},stop,
-  preload(text){const p=resolveVisualCue(text,catalog);if(mode!=='visual'||p?.type!=='asset')return;const a=catalog.assets[p.assetId];if(a)decode(new URL(motion&&!media?.matches?a.image:a.poster,baseUrl).href).catch(()=>{});},
+  preload(text,{temperatureDirection=null}={}){const p=resolveVisualCue(text,catalog,temperatureDirection);if(mode!=='visual'||p?.type!=='asset')return;const a=catalog.assets[p.assetId];if(a)decode(new URL(motion&&!media?.matches?a.image:a.poster,baseUrl).href).catch(()=>{});},
   dispose(){stop();disposed=true;document.removeEventListener('visibilitychange',visibility);media?.removeEventListener?.('change',reduction);}
  };
 }

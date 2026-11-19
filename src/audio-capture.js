@@ -7,8 +7,13 @@ const safeMicError=error=>['NotAllowedError','NotReadableError','NotFoundError',
   'AbortError','NotSupportedError','SecurityError','TimeoutError'].includes(error?.name)
   ? error.name : 'Error';
 export class EmmaMicrophone {
-  constructor({ onState, onUtterance, shouldIgnore, onDiagnostic, endpointMode = 'silero', onWarning, onError }) {
+  constructor({ onState, onUtterance, shouldIgnore, onDiagnostic, endpointMode = 'silero', onWarning, onError, echoCancellation = false, bgmContext = null, aec3 = false, onAec3Failure = null }) {
     this.endpointMode = endpointMode;
+    this.bgmContext = bgmContext;
+    this.aec3 = Boolean(aec3);
+    this.aec3Ready = false;
+    this.onAec3Failure = onAec3Failure;
+    this.micRequest={...MIC_REQUEST,audio:{...MIC_REQUEST.audio,echoCancellation}};
     this.onWarning = onWarning;
     this.onError = onError;
     this.onState = onState;
@@ -28,7 +33,7 @@ export class EmmaMicrophone {
 
   async start() {
     const generation = ++this.generation;
-    const requested = navigator.mediaDevices.getUserMedia(MIC_REQUEST);
+    const requested = navigator.mediaDevices.getUserMedia(this.micRequest);
     requested.then(stream=>{ if(generation !== this.generation) stream.getTracks().forEach(track=>track.stop()); },()=>{});
     let stream;
     try { stream = await withTimeout(requested, 15000,
@@ -36,7 +41,7 @@ export class EmmaMicrophone {
     catch(error) { if(generation === this.generation) this.generation++; throw error; }
     if(generation !== this.generation) return;
     this.stream = stream;
-    const context = this.context = new AudioContext({ latencyHint: 'interactive' });
+    const context = this.context = this.bgmContext ?? new AudioContext({ latencyHint: 'interactive' });
     if (this.context.state === 'suspended') {
       await withTimeout(
         this.context.resume(),
@@ -45,8 +50,56 @@ export class EmmaMicrophone {
       );
     }
     if(generation !== this.generation) return;
+    let bgmNode;
+    if (this.bgmContext) {
+      try {
+        if(this.aec3) {
+          // This experimental route never enables Android's native AEC.
+          // WASM is staged locally at install time; there is no runtime CDN.
+          if(context.sampleRate!==48000 && context.sampleRate!==16000)
+            throw Error('AEC3 supports 48 kHz or 16 kHz audio only');
+          const wasmUrl=new URL('../assets/experimental-aec3/webrtc-audio-processing.wasm',import.meta.url);
+          const response=await withTimeout(fetch(wasmUrl),12000,'AEC3 WASM fetch timed out');
+          if(!response.ok)throw Error('AEC3 WASM unavailable (HTTP '+response.status+')');
+          const wasmModule=await withTimeout(WebAssembly.compile(await response.arrayBuffer()),12000,'AEC3 compilation timed out');
+          await withTimeout(context.audioWorklet.addModule(
+            new URL('../worklets/aec3-pcm-capture-worklet.js',import.meta.url)),12000,'AEC3 processor unavailable');
+          if(generation!==this.generation)return;
+          bgmNode=new AudioWorkletNode(context,'emma-aec3-pcm-capture',{
+            numberOfInputs:2,channelCount:1,channelCountMode:'explicit',
+            processorOptions:{module:wasmModule}
+          });
+          const aecNode=bgmNode;
+          await withTimeout(new Promise((resolve,reject)=>{
+            aecNode.port.onmessage=event=>{
+              if(event.data?.type==='ready')resolve();
+              else if(event.data?.type==='aec3-error')reject(Error(event.data.message||'AEC3 failed'));
+            };
+          }),10000,'AEC3 initialization timed out');
+          if(generation!==this.generation){aecNode.disconnect();return;}
+          this.aec3Ready=true;
+        } else {
+          await withTimeout(context.audioWorklet.addModule(
+            new URL('../worklets/bgm-pcm-capture-worklet.js',import.meta.url)),
+            5000,'BGM echo filter did not load');
+          if(generation!==this.generation)return;
+          bgmNode=new AudioWorkletNode(context,'emma-bgm-pcm-capture',{
+            numberOfInputs:2,channelCount:1,channelCountMode:'explicit'
+          });
+        }
+        this.bgmReference=bgmNode;
+      } catch(error) {
+        if(generation!==this.generation)return;
+        try{bgmNode?.disconnect();}catch{}
+        bgmNode=null;
+        this.aec3Ready=false;
+        this.onDiagnostic?.('bgm-echo-filter-unavailable',{name:safeMicError(error)});
+        if(this.aec3)this.onAec3Failure?.(error);
+        // Fail closed: continue raw microphone capture, but never play BGM.
+      }
+    }
     try {
-      await withTimeout(
+      if (!bgmNode) await withTimeout(
         context.audioWorklet.addModule(new URL('../worklets/pcm-capture-worklet.js', import.meta.url)),
         15000,
         'マイク音声処理の読み込みが完了しませんでした。ページを再読み込みして、もう一度お試しください。'
@@ -78,12 +131,16 @@ export class EmmaMicrophone {
       }
     } else this.vad=new AdaptiveEndpointDetector();
     const source = this.source = this.context.createMediaStreamSource(this.stream);
-    this.node = new AudioWorkletNode(this.context, 'emma-pcm-capture');
-    const silent = this.context.createGain();
+    this.node = bgmNode ?? new AudioWorkletNode(this.context, 'emma-pcm-capture');
+    const silent = this.silent = this.context.createGain();
     silent.gain.value = 0;
     source.connect(this.node).connect(silent).connect(this.context.destination);
-    this.node.port.onmessage = (event) => {
-      if(generation===this.generation && this.context===context)this.handleFrame(event.data);
+    this.node.port.onmessage = event => {
+      if(generation!==this.generation || this.context!==context)return;
+      if(event.data?.type==='aec3-error'){
+        this.aec3Ready=false;
+        this.onAec3Failure?.(Error(event.data.message||'AEC3 processing error'));
+      } else if(event.data instanceof Float32Array) this.handleFrame(event.data);
     };
     this.onState?.('listening');
   }
@@ -116,7 +173,7 @@ export class EmmaMicrophone {
     let expired=false,accepted=false,released=false,nextStream=null,nextSource=null;
     const release=stream=>{if(!stream||released)return;released=true;try{stopStream(stream);}catch{}};
     try {
-      const request=Promise.resolve().then(()=>navigator.mediaDevices.getUserMedia(MIC_REQUEST));
+      const request=Promise.resolve().then(()=>navigator.mediaDevices.getUserMedia(this.micRequest));
       request.then(stream=>{
         if(expired||generation!==this.generation||context!==this.context||!canApply())
           release(stream);
@@ -206,12 +263,20 @@ export class EmmaMicrophone {
     this.generation++;
     this.vadAbort?.abort();
     this.vadAbort=null;
-    if(this.node?.port)this.node.port.onmessage=null;
+    if(this.node?.port){
+      if(this.aec3Ready)this.node.port.postMessage({type:'stop'});
+      this.node.port.onmessage=null;
+    }
+    this.aec3Ready=false;
     this.node?.disconnect();
+    if (this.bgmReference !== this.node) this.bgmReference?.disconnect();
+    this.bgmReference = null;
+    this.silent?.disconnect?.();
+    this.silent = null;
     this.source?.disconnect?.();
     this.source=null;
     stopStream(this.stream);
-    if (this.context && this.context.state !== 'closed') await this.context.close();
+    if (this.context && !this.bgmContext && this.context.state !== 'closed') await this.context.close();
     this.stream = null;
     this.context = null;
     this.node = null;

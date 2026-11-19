@@ -24,6 +24,8 @@ import {WHISPER_THREAD_KEY,WHISPER_LANGUAGE_MODE_KEY,normalizeThreads,normalizeL
 import {installWhisperPerformanceControls} from './multilingual/performance-controls.js';
 import {importAcftModel,hasImportedAcftModel} from './multilingual/acft-model-store.js';
 import {chooseEnglishResumeGreeting} from './resume-greeting.js';
+import {EmmaBgm, DEFAULT_BGM_VOLUME} from './emma-bgm.js?v=conversation-bgm-volume-r1';
+import {emmaBgmTracks} from './emma-bgm-tracks.js';
 
 const $ = (id) => document.getElementById(id);
 const VISUAL_CUE_TRIAL = document.documentElement.dataset.visualCueTrial === 'true';
@@ -57,7 +59,7 @@ const ui = {
 };
 
 const CURRENT_SETUP_REVISION = 'moonshine-streaming-qwen3-prerecorded-1202-v11';
-const WEB_BUILD = '20261109-public-v1.1.0';
+const WEB_BUILD = '20261120-public-v1.2.0';
 
 const STORAGE = {
   setupRevision:'emma_web_setup_revision',
@@ -74,7 +76,11 @@ const STORAGE = {
   tutorialDone:'emma_web_tutorial_completed_v1',
   modelCacheSnapshot:'emma_moonshine_cache_snapshot_v1',
   modelCacheLoss:'emma_moonshine_cache_loss_v1',
-  replyDiversity:'emma_ruri_reply_diversity_v1'
+  replyDiversity:'emma_ruri_reply_diversity_v1',
+  conversationBgm:'emma_conversation_bgm_v1',
+  conversationBgmMode:'emma_conversation_bgm_mode_v3',
+  conversationBgmSong:'emma_conversation_bgm_song_v1',
+  conversationBgmVolume:'emma_conversation_bgm_volume_v1'
 };
 
 // Migrate old public preferences once, then keep explicit developer overrides.
@@ -148,6 +154,19 @@ let moonshineStage='idle';
 let asrInfoCache=null, ttsInfoCache=null, ttsWorkerSignature='';
 let running=false, workersReady=false, processing=false, speaking=false;
 let persistentMicSession=false;
+let conversationBgmRequested=false;
+let conversationBgmMode='aec3';
+let conversationBgmSong=null;
+let conversationBgmUnavailable=false;
+const conversationBgm=new EmmaBgm(error=>{
+  conversationBgmUnavailable=true;
+  recordRuntimeDiagnosticEvent('background-music-unavailable',error);
+  refreshConversationBgmStatus('音楽を再生できませんでした。話しかけることはできます。');
+});
+const bgmPreview=new EmmaBgm(error=>{
+  recordRuntimeDiagnosticEvent('background-music-preview-unavailable',error);
+  stopBgmPreview('曲を再生できませんでした。');
+});
 let lastReplyMicMode='unmeasured';
 let micRestartAttempts=0;
 let micRestartFailures=0;
@@ -173,6 +192,7 @@ let tutorialStep=null;
 let tutorialIntroPlayed=false;
 let tutorialUserSpoke=false;
 let previousScreen='home';
+let whyOriginScreen='settings';
 let currentScreen='home';
 let appearanceTimer=null;
 let developerTapCount=0;
@@ -328,6 +348,7 @@ languageUI=installLanguageUI({onExplanationsChange:refreshReplyContext,onRedetec
   }
   if(epoch!==modelSelectionEpoch)return;
   commit(); // The language picker updates immediately, before model downloading.
+  updateConversationBgmSetting();
   updateRuntimeBackend();updateWebTimingDiagnostics();
   whisperPerformanceControls?.apply(next);refreshReplyContext();
   await semanticPanel.setEnabled(true,{prepare:false,mode:'semantic'});
@@ -447,6 +468,7 @@ function initUi() {
   for(const id of ['colorMode','softPalette','vividPalette','filledPalette','asrModel','endpointMode']) enhanceChoiceSelect($(id));
   updateAsrModelStatus();
   bindEvents();
+  updateConversationBgmSetting();
   updateAiNameUi();
   applyAppearance();
   updateAppearanceSettings();
@@ -509,12 +531,29 @@ function bindEvents() {
     }
   });
   ui.stopButton.addEventListener('click', stopEmma);
+  $('conversationBgmEnabled')?.addEventListener('change',event=>{
+    try {localStorage.setItem(STORAGE.conversationBgm,String(event.currentTarget.checked));} catch {}
+  });
+  $('conversationBgmMode')?.addEventListener('change',event=>{
+    try {localStorage.setItem(STORAGE.conversationBgmMode,event.currentTarget.value);} catch {}
+  });
+  bindVolumeControl('conversationBgmVolume',STORAGE.conversationBgmVolume,DEFAULT_BGM_VOLUME,volume=>{
+    conversationBgm.setVolume(volume);
+    bgmPreview.setVolume(volume);
+  });
+  const songSelect=$('conversationBgmSong');
+  if(songSelect){
+    songSelect.replaceChildren(...emmaBgmTracks.map(track=>new Option(track.title,track.file)));
+    $('conversationBgmSongMode').addEventListener('change',saveConversationBgmSong);
+    songSelect.addEventListener('change',saveConversationBgmSong);
+    $('bgmPreviewButton').addEventListener('click',toggleBgmPreview);
+  }
   ui.manualReplyButton.addEventListener('click', forceReplyNow);
   ui.enableAudioButton?.addEventListener('click',unlockPlaybackAudioFromGesture);
   document.addEventListener('pointerdown',()=>{ if(!audioUnlocked) unlockPlaybackAudioFromGesture(); },{capture:true,passive:true});
   ui.prepareEmmaButton.addEventListener('click',()=>{ unlockPlaybackAudioFromGesture(); prepareFirstRun(); });
 
-  ui.whyMitsukotobaButton.addEventListener('click',()=>{previousScreen='settings';openSubpage('why');});
+  ui.whyMitsukotobaButton.addEventListener('click',()=>{previousScreen='settings';whyOriginScreen='settings';openSubpage('why');});
   ui.whyResearchButton.addEventListener('click',()=>openAbout('why'));
   // The approved-only Visual Cue viewer is packaged on Cloudflare Dev.
   // It is intentionally not an HTML href in the exportable Public shell.
@@ -522,7 +561,7 @@ function bindEvents() {
     const url='./visual-cue-guide/?lang='+encodeURIComponent(languageUI.language);
     window.open(url,'_blank','noopener,noreferrer');
   });
-  ui.onboardingAboutButton.addEventListener('click',()=>openAbout('onboarding'));
+  ui.onboardingAboutButton.addEventListener('click',()=>{previousScreen='onboarding';whyOriginScreen='onboarding';openSubpage('why');});
   ui.aboutBackButton.addEventListener('click',backFromSubpage);
   ui.whyBackButton.addEventListener('click',backFromSubpage);
   ui.settingsBackButton.addEventListener('click',backFromSubpage);
@@ -531,7 +570,7 @@ function bindEvents() {
     openSubpage('settings');
   });
   window.addEventListener('popstate',(event)=>{
-    const target=resolveAppPopScreen(currentScreen,previousScreen,event.state);
+    const target=resolveAppPopScreen(currentScreen,currentScreen==='why'?whyOriginScreen:previousScreen,event.state);
     if(target) showScreen(target,{autoStart:false});
   });
 
@@ -572,7 +611,7 @@ function bindEvents() {
     localStorage.setItem('emma_web_persistent_microphone_experiment_v1',String(ui.keepMicrophone.checked));
     // Apply to the next reply, even if the conversation was already started.
     // Do not tear down the microphone or attempt another getUserMedia on toggle.
-    if(running && mic)persistentMicSession=ui.keepMicrophone.checked;
+    if(running && mic)persistentMicSession=canPlayConversationBgm()||ui.keepMicrophone.checked;
     updateMicContinuityStatus();
   });
 
@@ -697,7 +736,7 @@ function bindEvents() {
     const english=stripAiSpeakerLabel(response.english);
     showConversation(text,english,response.scene);
     await ensureWorkersForDebug();
-    await speakResponse(english);
+    await speakResponse(english,{temperatureDirection:response.temperatureDirection});
   });
 
   document.addEventListener('visibilitychange',async()=>{
@@ -718,10 +757,18 @@ function bindEvents() {
       if(running && ui.keepAwake.checked) await requestWakeLock();
     }
   });
-  window.addEventListener('pagehide',requestBackgroundModelContinuation,{capture:true});
+  window.addEventListener('pagehide',()=>{
+    conversationBgm.stop();
+    stopBgmPreview();
+    requestBackgroundModelContinuation();
+  },{capture:true});
+  window.addEventListener('pageshow',event=>{
+    if(event.persisted)startConversationBgm();
+  });
 }
 
 function showScreen(name,{autoStart=true}={}) {
+  if(currentScreen==='settings'&&name!=='settings')stopBgmPreview();
   currentScreen=name;
   for (const key of ['onboarding','home','settings','why','about']) {
     ui[key+'Screen'].classList.toggle('hidden',key!==name);
@@ -766,7 +813,7 @@ function backFromSubpage() {
     window.history.back();
     return;
   }
-  showScreen(currentScreen==='about'?previousScreen:currentScreen==='why'?'settings':'home',{autoStart:false});
+  showScreen(currentScreen==='about'?previousScreen:currentScreen==='why'?whyOriginScreen:'home',{autoStart:false});
 }
 
 function openAbout(from) {
@@ -1108,6 +1155,11 @@ async function startEmma({ auto = false } = {}) {
     // actual capture path can proceed, and one-time permission must be allowed
     // to show its browser prompt on every new launch.
     running=true;
+    conversationBgmRequested=languageUI.language==='ja'&&conversationBgmEnabled();
+    conversationBgmMode=preferredConversationBgmMode();
+    conversationBgmSong=selectedConversationBgmSong();
+    conversationBgmUnavailable=false;
+    refreshConversationBgmStatus();
     persistentMicSession=persistentMicrophoneEnabled(localStorage);
     lastReplyMicMode='unmeasured';
     micRestartAttempts=0;
@@ -1154,35 +1206,19 @@ async function startEmma({ auto = false } = {}) {
     updateAudioUnlockUi();
 
     ui.mainButton.classList.add('hidden');
-    ui.manualReplyButton.classList.remove('hidden');
     ui.stopButton.classList.remove('hidden');
-    preparingConversation=false;
     setBusy(false);
     showProgress(false);
-    if(ui.keepAwake.checked) await requestWakeLock();
     const isRestart=hasStartedConversation;
     hasStartedConversation=true;
-    if(isRestart && tutorialStep===null) {
-      try {
-        const response=await fetch(new URL('../shared/play-topics.json',import.meta.url));
-        if(!response.ok) throw Error('挨拶カテゴリの読み込みに失敗しました。');
-        const topics=await response.json();
-        if(epoch!==conversationEpoch)return;
-        const greeting=chooseEnglishResumeGreeting(topics,previousEnglishResumeGreeting);
-        if(greeting) {
-          // Greeting and regular replies both use the same Qwen3 recorded English clips.
-          // No Japanese voice or platform speech-synthesis fallback.
-          previousEnglishResumeGreeting=greeting;
-          showConversation('',greeting,'greeting');
-          await speakResponse(greeting);
-          if(epoch!==conversationEpoch)return;
-        }
-      }catch(error) {
-        if(epoch!==conversationEpoch)return;
-        console.warn('Recorded English resume greeting unavailable',error);
-        // Greeting playback failure must never block resuming microphone capture.
-      }
-    }
+    if(isRestart && tutorialStep===null)await playConversationGreeting(epoch);
+    if(epoch!==conversationEpoch)return;
+    preparingConversation=false;
+    ui.manualReplyButton.classList.remove('hidden');
+    updateAudioUnlockUi();
+    startConversationBgm();
+    if(ui.keepAwake.checked) await requestWakeLock();
+    if(epoch!==conversationEpoch)return;
     setState('listening',`${getAiName()}が聞いています`,
       languageUI.language==='ja'?'いつもどおり日本語で赤ちゃんへ話しかけてください。必要なら「今すぐAIが返事する」で区切れます。':
         '選択した言語で赤ちゃんに話しかけてください。');
@@ -1190,6 +1226,7 @@ async function startEmma({ auto = false } = {}) {
     if(epoch!==conversationEpoch)return;
     console.error(error);
     running=false;
+    stopConversationBgm();
     persistentMicSession=false;
     finishHiddenCaptureObservation('start-failed');
     updateMicContinuityStatus();
@@ -1207,6 +1244,29 @@ async function startEmma({ auto = false } = {}) {
       setState('error','開始できませんでした',friendlyError(error));
     }
     ui.mainButton.disabled=false;
+  }
+}
+
+async function playConversationGreeting(epoch) {
+  // The original four prerecorded resume greetings; no fixed greeting fallback.
+  if(tutorialStep!==null)return;
+  try {
+    const response=await fetch(new URL('../shared/play-topics.json',import.meta.url));
+    if(!response.ok) throw Error('挨拶カテゴリの読み込みに失敗しました。');
+    const topics=await response.json();
+    if(epoch!==conversationEpoch)return;
+    const greeting=chooseEnglishResumeGreeting(topics,previousEnglishResumeGreeting);
+    if(greeting) {
+      // Greeting and regular replies both use the same Qwen3 recorded English clips.
+      // No Japanese voice or platform speech-synthesis fallback.
+      previousEnglishResumeGreeting=greeting;
+      showConversation('',greeting,'greeting');
+      await speakResponse(greeting);
+      if(epoch!==conversationEpoch)return;
+    }
+  }catch(error) {
+    if(epoch===conversationEpoch)console.warn('Recorded English resume greeting unavailable',error);
+    // Greeting playback failure must never block resuming microphone capture.
   }
 }
 
@@ -1258,6 +1318,7 @@ async function stopEmma() {
   }
   while(audioUnlockWaiters.length)audioUnlockWaiters.shift()?.();
   running=false;
+  stopConversationBgm();
   persistentMicSession=false;
   updateMicContinuityStatus();
   preparingConversation=false;
@@ -1377,7 +1438,16 @@ async function forceReplyNow() {
 async function startMoonshineCapture() {
   if(mic) return;
   const epoch=conversationEpoch;
+  const filterBgm=conversationBgmRequested&&(conversationBgmMode==='media'||conversationBgmMode==='aec3');
   const capture=new EmmaMicrophone({
+    echoCancellation:conversationBgmRequested&&conversationBgmMode==='native',
+    bgmContext:filterBgm?ensureAudioContextCreated():null,
+    aec3:conversationBgmRequested&&conversationBgmMode==='aec3',
+    onAec3Failure:()=>{
+      conversationBgmUnavailable=true;
+      conversationBgm.stop();
+      refreshConversationBgmStatus('AEC3が動作しなかったため、音楽を止めて通常の聞き取りを続けています。');
+    },
     endpointMode:localStorage.getItem(STORAGE.endpointMode)==='legacy'?'legacy':'silero',
     onWarning:message=>{if(epoch===conversationEpoch)showNotice('従来方式で会話します',message);},
     onError:async error=>{if(epoch===conversationEpoch){await stopEmma();setState('error','音声の判定が中断しました',error.message);}},
@@ -1406,6 +1476,13 @@ async function startMoonshineCapture() {
     if(epoch!==conversationEpoch || !running){
       await capture.stop();
       if(mic===capture)mic=null;
+    } else if(conversationBgmRequested && !conversationBgmUnavailable) {
+      if(canPlayConversationBgm()) {
+        persistentMicSession=true;
+      } else {
+        refreshConversationBgmStatus('この端末ではエコーキャンセルを確認できなかったため、音楽を止めています。');
+      }
+      startConversationBgm();
     }
   } catch(error) {
     // A rejected getUserMedia call must never leave a non-operational mic object
@@ -1770,7 +1847,7 @@ async function processTranscript(text,{manual=false,revision=null}={}) {
   // while allowing the microphone/VAD to detect a continuation.
   processing=revision!==null;
   setBusy(revision!==null);
-  await speakResponse(english,{entry:createHistoryEntry(sessionId,clean,english,response.scene),revision});
+  await speakResponse(english,{entry:createHistoryEntry(sessionId,clean,english,response.scene),revision,temperatureDirection:response.temperatureDirection});
   // Do not complete the tutorial here: the speculative playback commit resets
   // turnRevisions, so isLiveTurn(revision) is no longer true after playback.
 }
@@ -1811,20 +1888,22 @@ async function restoreMicrophoneAfterEmmaVoice() {
   }
 }
 
-async function speakResponse(text,{entry=null,revision=null}={}) {
-  visualCue.preload(text);
+async function speakResponse(text,{entry=null,revision=null,temperatureDirection=null}={}) {
+  visualCue.preload(text,{temperatureDirection});
   const epoch=conversationEpoch;
   if(!ttsWorker)throw Error('AIの声がまだ準備されていません');
   const speculative=revision!==null;
-  const valid=()=>isLiveTurn(revision,epoch);
   // Re-read the user's experiment choice at each reply, not just at session
   // startup; this also covers changing Settings while a conversation is active.
-  if(running && mic)persistentMicSession=persistentMicrophoneEnabled(localStorage);
+  if(running && mic)persistentMicSession=canPlayConversationBgm()||persistentMicrophoneEnabled(localStorage);
   const shouldReleaseMic=shouldReleaseMicrophoneForReply({running,hasMicrophone:Boolean(mic),persistent:persistentMicSession});
   if(running && mic)lastReplyMicMode=shouldReleaseMic?'restart':'persistent';
   updateMicContinuityStatus();
   let micReleased=false;
   let startedPlayback=false;
+  // After committing playback, the original turn revision has been reset.
+  // Only a session change can invalidate the playing reply and its cleanup.
+  const valid=()=>startedPlayback?epoch===conversationEpoch:isLiveTurn(revision,epoch);
   if(!speculative && shouldReleaseMic){
     setState('thinking','AIが話す準備をしています','マイクを一時停止してスピーカー音量へ切り替えています。');
     await releaseMicrophoneForEmmaVoice();
@@ -1841,7 +1920,7 @@ async function speakResponse(text,{entry=null,revision=null}={}) {
   audioQueues.set(requestId,{
     items:new Map(),next:0,total:0,playing:false,generationDone:false,
     resolve:null,reject:null,generationResolve:null,generationReject:null,
-    deferPlayback:speculative,revision,entry,started:false,text,cacheKey,generated:[],
+    deferPlayback:speculative,revision,entry,started:false,text,cacheKey,generated:[],temperatureDirection,
     ttsRequestStartedAt,firstChunkRecorded:false,firstAudioRecorded:false
   });
   const queue=audioQueues.get(requestId);
@@ -1873,6 +1952,7 @@ async function speakResponse(text,{entry=null,revision=null}={}) {
       // new turn, not a continuation of words we have already answered.
       speculativeEngineSnapshot=null;
       turnRevisions.reset();
+      queue.revision=null;
       processing=false;
       setBusy(false);
       speaking=true;
@@ -1915,7 +1995,7 @@ async function speakResponse(text,{entry=null,revision=null}={}) {
     }
   }
   if(!valid())return;
-  if(running)setState('listening','AIが聞いています',
+  if(running)setState('listening',`${getAiName()}が聞いています`,
     languageUI.language==='ja'?'いつもどおり日本語で赤ちゃんへ話しかけてください。':
       '選択した言語で赤ちゃんに話しかけてください。');
   else setState('idle','Emmaはおやすみ中','大きな「呼びかけを始める」から会話を再開できます。');
@@ -1961,12 +2041,178 @@ async function pumpAudio(requestId) {
   }
 }
 
+function conversationBgmEnabled() {
+  try {return localStorage.getItem(STORAGE.conversationBgm)==='true';}
+  catch {return false;}
+}
+
+function preferredConversationBgmMode() {
+  try {
+    const choice=localStorage.getItem(STORAGE.conversationBgmMode);
+    if(choice==='media'||choice==='native'||choice==='aec3')return choice;
+  } catch {}
+  return 'aec3';
+}
+
+function selectedConversationBgmSong() {
+  if($('conversationBgmSongMode').value!=='selected')return null;
+  const index=emmaBgmTracks.findIndex(track=>track.file===$('conversationBgmSong').value);
+  return index<0?null:index;
+}
+
+function saveConversationBgmSong() {
+  const selecting=$('conversationBgmSongMode').value==='selected';
+  $('conversationBgmSongChoice').classList.toggle('hidden',!selecting);
+  try {localStorage.setItem(STORAGE.conversationBgmSong,selecting?$('conversationBgmSong').value:'');} catch {}
+  stopBgmPreview();
+}
+
+function bindVolumeControl(id,storageKey,defaultVolume,applyVolume) {
+  const slider=$(id);
+  if(!slider)return;
+  const track=$(id+'Track');
+  const thumb=$(id+'Thumb');
+  const output=$(id+'Value');
+  const min=Number(slider.min);
+  const max=Number(slider.max);
+  const span=max-min;
+  const clamp=percent=>Math.max(min,Math.min(max,percent));
+  const update=()=>{
+    const percent=slider.valueAsNumber;
+    const label=`${percent}%`;
+    output.value=label;
+    slider.setAttribute('aria-valuetext',label);
+    track.style.setProperty('--volume-position',`${100*(percent-min)/span}%`);
+    applyVolume(percent/100);
+  };
+  let drag;
+  slider.addEventListener('input',update);
+  slider.addEventListener('change',()=>{
+    try {localStorage.setItem(storageKey,slider.value);} catch {}
+  });
+  thumb.addEventListener('pointerdown',event=>{
+    if(drag||!event.isPrimary||event.button!==0)return;
+    const width=track.getBoundingClientRect().width;
+    if(!width)return;
+    thumb.setPointerCapture(event.pointerId);
+    drag={id:event.pointerId,x:event.clientX,width,start:slider.valueAsNumber,moved:false};
+    slider.focus({preventScroll:true});
+  });
+  thumb.addEventListener('pointermove',event=>{
+    if(drag?.id!==event.pointerId)return;
+    const delta=event.clientX-drag.x;
+    if(!drag.moved&&Math.abs(delta)<4)return;
+    drag.moved=true;
+    const before=slider.valueAsNumber;
+    const percent=Math.round(drag.start+span*delta/drag.width);
+    slider.valueAsNumber=clamp(percent);
+    if(slider.valueAsNumber!==before)slider.dispatchEvent(new Event('input',{bubbles:true}));
+  });
+  const finishDrag=event=>{
+    if(drag?.id!==event.pointerId)return;
+    const changed=slider.valueAsNumber!==drag.start;
+    drag=null;
+    if(changed)slider.dispatchEvent(new Event('change',{bubbles:true}));
+  };
+  for(const type of ['pointerup','pointercancel','lostpointercapture'])thumb.addEventListener(type,finishDrag);
+  let saved;
+  try {saved=localStorage.getItem(storageKey);} catch {}
+  const percent=saved==null?NaN:Number(saved);
+  slider.value=String(clamp(Number.isFinite(percent)?percent:defaultVolume*100));
+  update();
+}
+
+function updateConversationBgmSetting() {
+  const control=$('conversationBgmEnabled');
+  if(!control)return;
+  control.checked=conversationBgmEnabled();
+  $('conversationBgmMode').value=preferredConversationBgmMode();
+  let savedSong;
+  try {savedSong=localStorage.getItem(STORAGE.conversationBgmSong);} catch {}
+  const song=emmaBgmTracks.find(track=>track.file===savedSong);
+  $('conversationBgmSongMode').value=song?'selected':'random';
+  $('conversationBgmSong').value=(song??emmaBgmTracks[0]).file;
+  $('conversationBgmSongChoice').classList.toggle('hidden',!song);
+  const japanese=languageUI.language==='ja';
+  $('conversationBgmSettings').classList.toggle('hidden',!japanese);
+  $('developerConversationBgm').classList.toggle('hidden',!japanese);
+  if(!japanese)stopBgmPreview();
+}
+
+function toggleBgmPreview() {
+  if(bgmPreview.context){
+    stopBgmPreview();
+    return;
+  }
+  try {
+    unlockPlaybackAudioFromGesture();
+    bgmPreview.start(audioContext,{song:selectedConversationBgmSong(),loop:false,onEnded:()=>stopBgmPreview()});
+    $('bgmPreviewButton').textContent='試聴を止める';
+    $('bgmPreviewStatus').textContent='';
+  } catch(error) {
+    recordRuntimeDiagnosticEvent('background-music-preview-unavailable',error);
+    stopBgmPreview('曲を再生できませんでした。');
+  }
+}
+
+function stopBgmPreview(message='') {
+  bgmPreview.stop();
+  const button=$('bgmPreviewButton');
+  if(!button)return;
+  button.textContent='試聴する';
+  $('bgmPreviewStatus').textContent=message;
+}
+
+function refreshConversationBgmStatus(text='') {
+  const status=$('conversationBgmStatus');
+  if(!status)return;
+  status.textContent=text;
+  status.classList.toggle('hidden',!text);
+}
+
+function canPlayConversationBgm() {
+  if(!conversationBgmRequested||conversationBgmUnavailable||!mic)return false;
+  if(conversationBgmMode==='media'||conversationBgmMode==='aec3')return Boolean(mic.bgmReference && mic.node===mic.bgmReference && (conversationBgmMode!=='aec3'||mic.aec3Ready));
+  const echoCancellation=mic.stream?.getAudioTracks()[0]?.getSettings().echoCancellation;
+  return echoCancellation===true||echoCancellation==='all';
+}
+
+function startConversationBgm() {
+  if(!running||preparingConversation||!conversationBgmRequested||conversationBgmUnavailable||
+      audioContext?.state!=='running')return;
+  if(!canPlayConversationBgm()){
+    conversationBgm.stop();
+    refreshConversationBgmStatus('この端末ではエコーキャンセルを確認できなかったため、音楽を止めています。');
+    return;
+  }
+  try {
+    // BGM keeps the same source and volume as Emma's reply starts and ends.
+    conversationBgm.start(audioContext,{song:conversationBgmSong,loop:true,reference:mic.bgmReference??null});
+    refreshConversationBgmStatus();
+  } catch(error) {
+    conversationBgm.stop();
+    conversationBgmUnavailable=true;
+    recordRuntimeDiagnosticEvent('background-music-unavailable',error);
+    refreshConversationBgmStatus('音楽を再生できませんでした。話しかけることはできます。');
+  }
+}
+
+function stopConversationBgm() {
+  conversationBgmRequested=false;
+  conversationBgmUnavailable=false;
+  conversationBgm.stop();
+  refreshConversationBgmStatus();
+}
+
 function ensureAudioContextCreated() {
   if(!audioContext||audioContext.state==='closed') {
     audioContext=new AudioContext({latencyHint:'interactive'});
     audioContext.addEventListener?.('statechange',()=>{
       if(audioContext?.state==='running') markAudioUnlocked();
-      else updateAudioUnlockUi();
+      else {
+        audioUnlocked=false;
+        updateAudioUnlockUi();
+      }
     });
   }
   if(audioContext.state==='running') markAudioUnlocked();
@@ -1977,21 +2223,29 @@ function markAudioUnlocked() {
   audioUnlocked=true;
   updateAudioUnlockUi();
   while(audioUnlockWaiters.length) audioUnlockWaiters.shift()?.();
+  startConversationBgm();
 }
 
 function updateAudioUnlockUi() {
   if(!ui.enableAudioButton) return;
   ui.enableAudioButton.classList.toggle('hidden',audioUnlocked);
+  if(running&&!preparingConversation&&canPlayConversationBgm()&&!audioUnlocked){
+    refreshConversationBgmStatus('音楽を流すには、画面を一度タップしてください。');
+  }
 }
 
 function unlockPlaybackAudioFromGesture() {
-  const ctx=ensureAudioContextCreated();
+  resumePlaybackAudio(ensureAudioContextCreated());
+}
+
+function resumePlaybackAudio(ctx) {
   const finish=()=>{
+    if(ctx!==audioContext)return;
     if(ctx.state==='running') markAudioUnlocked();
     else updateAudioUnlockUi();
   };
   try {
-    const resumed=ctx.state==='suspended' ? ctx.resume() : Promise.resolve();
+    const resumed=ctx.state!=='running' ? ctx.resume() : Promise.resolve();
     Promise.resolve(resumed).then(finish).catch(error=>{
       console.warn('AudioContext resume failed.',error);
       updateAudioUnlockUi();
@@ -2012,13 +2266,19 @@ async function waitForPlaybackAudio() {
   audioUnlocked=false;
   updateAudioUnlockUi();
   setState('speaking','AIの声を再開してください','画面を一度タップすると音声を再開します。');
-  await new Promise(resolve=>audioUnlockWaiters.push(resolve));
+  const ready=new Promise(resolve=>audioUnlockWaiters.push(resolve));
+  resumePlaybackAudio(ctx);
+  await ready;
 }
 
 async function playBlob(blob,requestId) {
+  if(!audioQueues.has(requestId))return;
   await waitForPlaybackAudio();
+  if(!audioQueues.has(requestId))return;
   const buffer=await blob.arrayBuffer();
   const decoded=await audioContext.decodeAudioData(buffer.slice(0));
+  if(!audioQueues.has(requestId))return;
+  if(audioContext.state!=='running')await waitForPlaybackAudio();
   if(!audioQueues.has(requestId))return;
   const source=audioContext.createBufferSource();
   activeAudioSource=source;
@@ -2031,6 +2291,9 @@ async function playBlob(blob,requestId) {
   const analyser=audioContext.createAnalyser();
   analyser.fftSize=256;
   source.connect(gainNode).connect(analyser).connect(audioContext.destination);
+  // AEC3 receives the same Emma playback signal as the speaker, alongside BGM.
+  if(mic?.aec3Ready && mic.bgmReference && mic.context===audioContext)
+    gainNode.connect(mic.bgmReference,0,1);
   const data=new Uint8Array(analyser.frequencyBinCount);
   let raf;
   const animate=()=>{
@@ -2045,7 +2308,7 @@ async function playBlob(blob,requestId) {
   const ended=new Promise(resolve=>source.onended=resolve);
   source.start();
   const q=audioQueues.get(requestId);
-  const cueToken=visualCue.begin(q?.text);
+  const cueToken=visualCue.begin(q?.text,{temperatureDirection:q?.temperatureDirection});
   if(q && !q.firstAudioRecorded){
     q.firstAudioRecorded=true;
     lastTtsFirstAudioMillis=Math.round(diagnosticNow()-q.ttsRequestStartedAt);
@@ -2274,7 +2537,7 @@ function showOnboardingProgress(show,value=0,text='') {
 function showConversation(parentText,emmaText,route='generic') {
   // Do not render the parent's ASR transcript on the live home screen.
   // The original transcript is still consumed by Ruri and saved by history.
-  // Preserve the initial "Hi, I'm Emma." and the most recent spoken reply
+  // Preserve the most recent greeting and the most recent spoken reply
   // while Moonshine/Ruri process the next utterance. Only a genuine new
   // English response replaces the card, never an intermediate empty ASR turn.
   if(!emmaText)return;
@@ -2323,8 +2586,10 @@ function tryRecoverHiddenMicrophone(probe) {
     document.visibilityState==='hidden' && !speaking && !processing && !preparingConversation;
   // Do not block Worklet message processing or repeatedly request permissions.
   Promise.resolve().then(()=>activeMic.reacquireInput({canApply})).then(result=>{
-    if(hiddenCaptureProbe===probe)
+    if(hiddenCaptureProbe===probe){
       probe.markRecovery(result?.status||'failed',result?.errorName||'none');
+      if(result?.status==='replaced-no-signal')startConversationBgm();
+    }
   }).catch(()=>{
     if(hiddenCaptureProbe===probe)probe.markRecovery('failed','Error');
   });
@@ -2718,7 +2983,7 @@ async function ensureMoonshineIsolation({isCurrent=()=>true,manualStartAfterRelo
     throw new Error('このブラウザではMoonshineに必要なService Workerを利用できません。');
   }
 
-  const registration=await navigator.serviceWorker.register('./service-worker.js?v=20261104-settings-why-r1',{updateViaCache:'none'});
+  const registration=await navigator.serviceWorker.register('./service-worker.js?v=1.2.0',{updateViaCache:'none'});
   await registration.update().catch(()=>{});
 
   const candidate=registration.installing || registration.waiting;
@@ -2757,6 +3022,6 @@ window.addEventListener('load',()=>{
   if(!VISUAL_CUE_TRIAL && 'serviceWorker' in navigator) {
     // Register for offline assets now. Reload for isolation only when ASR starts,
     // so background setup cannot discard settings or Japanese text being edited.
-    navigator.serviceWorker.register('./service-worker.js?v=20261104-settings-why-r1',{updateViaCache:'none'}).catch(error=>console.warn('Service Worker setup:',error));
+    navigator.serviceWorker.register('./service-worker.js?v=1.2.0',{updateViaCache:'none'}).catch(error=>console.warn('Service Worker setup:',error));
   }
 });
