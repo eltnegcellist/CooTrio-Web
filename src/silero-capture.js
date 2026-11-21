@@ -25,7 +25,7 @@ export class SileroCaptureDetector {
           if(this.pendingEnd)return;
           let event;try { event=this.policy.push(data.probability); } catch { this.fail();return; }
           if(event==='speech-start') { this.captureStart=Math.max(0,data.endSample-Math.round(this.rate*.55));this.onResult({event}); }
-          if(event==='cancel')this.captureStart=null;
+          if(event==='cancel') { this.captureStart=null;this.onResult({event:'speech-cancel'}); }
           if(event==='utterance') { this.pendingEnd=data.endSample+Math.round(this.rate*.14);this.flushEndpoint(); }
         }
       };

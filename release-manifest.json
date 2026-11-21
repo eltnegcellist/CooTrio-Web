@@ -1,5 +1,5 @@
 {
-  "version": "v1.2.0",
+  "version": "v1.2.1",
   "models": {
     "ruri": {
       "url": "https://raw.githubusercontent.com/eltnegcellist/ruri_int8/181a9f2a8b3706d430116ed8ae992866cb603b26/model.onnx",
@@ -7456,7 +7456,7 @@
     {
       "path": "index.html",
       "bytes": 123229,
-      "sha256": "eb2dd93d32b2bf4cddb43e88994832c23f6ba37dfe7e91c97550cfd5eaf6c423"
+      "sha256": "b9611bdbafa9ff1295df32d8155a5e05980ca11d3be4108263a9b874f72723be"
     },
     {
       "path": "licenses/CURRENT-LICENSE-DIGESTS.json",
@@ -7726,7 +7726,7 @@
     {
       "path": "service-worker.js",
       "bytes": 20980,
-      "sha256": "bb614c003f14e9a7906384cc53eede9fb0c6b0c6363a9834bd61aa024677fa00"
+      "sha256": "49bbc5c2912ca0f4326c2948b071b7f3e0677f07d0a387f4058f896908af70ed"
     },
     {
       "path": "shared/play-topics.json",
@@ -7741,7 +7741,7 @@
     {
       "path": "src/app.js",
       "bytes": 142516,
-      "sha256": "2f3e41019a1045ff952262f0e76e1d78cc413c059aaccde81715b695dd8f2a46"
+      "sha256": "a98e6c39a1552146be012fccb7392fa2f2892e751d711afad23251734b2a29a2"
     },
     {
       "path": "src/asr-client.js",
@@ -7755,8 +7755,8 @@
     },
     {
       "path": "src/audio-capture.js",
-      "bytes": 16486,
-      "sha256": "d8c7d09351fea8d2d880666a673722e06ccd7f9626d8c13829e60ca3e8e7d335"
+      "bytes": 16626,
+      "sha256": "378602596670af26f03c88728a66dfbf4d61196263aa7aec76754a33960cac0c"
     },
     {
       "path": "src/bgm-echo-filter.js",
@@ -8130,8 +8130,8 @@
     },
     {
       "path": "src/silero-capture.js",
-      "bytes": 5869,
-      "sha256": "d3d1f2dac8057a4781e392903b425cadeb68f2103639dca50f5b503563327f34"
+      "bytes": 5913,
+      "sha256": "cac136466da568613025d7c7b8c582a320cb39b9573389302dc1438ec11d5bd0"
     },
     {
       "path": "src/silero-endpoint.js",

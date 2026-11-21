@@ -221,6 +221,11 @@ export class EmmaMicrophone {
 
   handleResult(result) {
     if(!this.context)return;
+    if(result.event==='speech-cancel') {
+      this.onDiagnostic?.('speech-cancel');
+      this.onState?.('listening');
+      return;
+    }
     if (result.event === 'speech-start') {
       this.onDiagnostic?.('speech-start');
       this.onState?.('endpoint');
