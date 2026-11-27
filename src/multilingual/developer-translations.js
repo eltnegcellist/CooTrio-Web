@@ -1,6 +1,10 @@
 // Developer-only UI text. Each row is [ja, en, de, fr, ko, th].
 // Diagnostic values/IDs remain untouched; only UI copy is localized.
 export const DEVELOPER_TRANSLATIONS=[
+  ["従来のQwen音声を使う", "Use the previous Qwen voice", "Frühere Qwen-Stimme verwenden",
+    "Utiliser l’ancienne voix Qwen", "이전 Qwen 음성 사용", "ใช้เสียง Qwen รุ่นเดิม"],
+  ["標準：A3", "Default: A3", "Standard: A3",
+    "Par défaut : A3", "기본: A3", "ค่าเริ่มต้น: A3"],
   [
     "開発者向け：Semantic比較・モデル診断・音声確認・診断情報・完全リセット",
     "Developer tools: semantic comparison, model and audio diagnostics, reports, and full reset",

@@ -1,3 +1,7 @@
+import {a3TwoSentenceExcerpt, firstEnglishSentence} from './a3-sentence-excerpts.js?v=1';
+
+export {firstEnglishSentence};
+
 export function nextPhrase(phrases,previous,random=Math.random) {
   const choices=phrases.filter(text=>text!==previous);
   const pool=choices.length ? choices : phrases;
@@ -6,6 +10,31 @@ export function nextPhrase(phrases,previous,random=Math.random) {
 
 export function allTopicPhrases(data) {
   return [...new Set((data?.topics||[]).flatMap(topic=>topic.phrases||[]))];
+}
+
+// The opening alone does not deliver the core message of these replies.
+const CONTEXT_DEPENDENT_OPENINGS=new Set([
+  'Too hot?', 'Too cold?', 'Too hot or cold?', 'Hot or cold?', 'Warm or cold?', 'Warm or cool?',
+  'Again?', 'Again, again!', 'All right!', 'All right, baby!', 'Go right ahead!',
+  'Could that be it?', 'Do you like it?', 'How about this?', 'Is that the end?',
+  'Got the toy!', 'Here I am!', 'Here we are!', 'Here we go!', 'Here you are!',
+  'Just a moment.', 'Wait a moment.', 'Hold on, sweetheart.', 'No need to rush.',
+  "Let's begin!", "Let's do it again.", "Let's follow along!",
+  "Let's slow down now.", "Let's stop a moment.", "Let's try it!", "It's time to start.",
+  'Give it a try!', 'Okay, okay!', "Okay, let's do it!", "Okay, let's try!",
+  'One more go?', 'One more time!', 'One more time?', 'One more try?', 'One more turn?',
+  'Oh dear!', 'Oh my!', 'Oh my goodness!', 'Oh, goodness me!', 'Oh, wow!', 'Ooh, wow!',
+  'Oops!', 'Oopsie-daisy!', 'Uh-oh!', 'Whoa!', 'Whoops!', 'Wow!', 'Wow, oh wow!', 'Wow, wow, wow!',
+  'Ready?', 'Ready, baby?', 'Sure, little one!', 'Sure, why not?', 'That was a lot.',
+  "That's everything.", "That's it!", "That's the end.", 'There it is!', 'There you go!',
+  'This way, baby!', 'This way, sweetheart!', 'Want to try?', 'Want to try this?',
+  'What is it?', "What's going on?", 'Would you like some?', 'Yes!', 'Yes, yes!', "Yes, that's right!",
+]);
+
+export function singleSentenceReply(phrase) {
+  const first=firstEnglishSentence(phrase);
+  if (!CONTEXT_DEPENDENT_OPENINGS.has(first)) return first;
+  return a3TwoSentenceExcerpt(phrase)?.text ?? phrase;
 }
 
 export function singleSentencePhrases(phrases) {
@@ -33,7 +62,7 @@ export function localHistoryStamp(value,locale=undefined) {
   };
 }
 
-export function installFeatureScreens({stop,prepare,speak,history,isSpeaking,avatar,translate=value=>value,confirmAction=message=>globalThis.confirm(message),describeError=error=>error?.message||'音声の準備または再生に失敗しました。',playSentenceCount=()=>1,setPlaySentenceCount=()=>{}}) {
+export function installFeatureScreens({stop,prepare,speak,history,isSpeaking,avatar,translate=value=>value,confirmAction=message=>globalThis.confirm(message),describeError=error=>error?.message||'音声の準備または再生に失敗しました。',playSentenceCount=()=>3,setPlaySentenceCount=()=>{},usePartialPlayback=()=>false}) {
   const $=id=>document.getElementById(id);
   const dialog=$('featureDialog'), body=$('featureBody'), title=$('featureTitle');
   let generation=0,kind='';
@@ -136,7 +165,7 @@ export function installFeatureScreens({stop,prepare,speak,history,isSpeaking,ava
               if(token!==generation||ticket!==replayTicket)return;
               await prepare();
               if(token!==generation||ticket!==replayTicket)return;
-              await speak(entry.englishText);
+              await speak(entry.englishText,{recordingText:entry.recordingText||entry.englishText});
             }catch(error){
               if(token===generation&&ticket===replayTicket)card.append(text(translate('再生できませんでした：')+describeError(error)));
             }finally{
@@ -223,12 +252,15 @@ export function installFeatureScreens({stop,prepare,speak,history,isSpeaking,ava
     const tap=button('声を準備しています…',async()=>{
       if(tap.disabled||isSpeaking())return;
       tap.disabled=true;
-      const candidates=phrasesForSentenceCount(phrases,playSentenceCount());
+      const count=playSentenceCount();
+      const partial=count===1 && usePartialPlayback();
+      const candidates=partial ? phrases : phrasesForSentenceCount(phrases,count);
       const phrase=nextPhrase(candidates,previous);previous=phrase;
-      englishText.textContent=phrase;
+      const shown=partial ? singleSentenceReply(phrase) : phrase;
+      englishText.textContent=shown;
       actionLabel.textContent='一緒に聞こう';
       tap.classList.add('is-speaking');
-      try{await speak(phrase);}catch(error){if(token===generation)englishText.textContent=translate('再生できませんでした：')+describeError(error);}
+      try{await speak(shown,{recordingText:phrase});}catch(error){if(token===generation)englishText.textContent=translate('再生できませんでした：')+describeError(error);}
       finally{
         if(token===generation){
           tap.classList.remove('is-speaking');

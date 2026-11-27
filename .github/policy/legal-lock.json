@@ -2,9 +2,12 @@
   "schema": 1,
   "purpose": "Immutable baseline of reviewed third-party attribution / license and provenance material. New or changed legal surface must be explicitly reviewed and the lock updated in a separately authorized security change.",
   "license_files": {
-    "assets/vad/LICENSE-SILERO-VAD-MIT.txt": "0bf5e90cac691b999d4a35044f97167d7bbbf0b9",
     "DEPENDENCY_AUDIT.md": "4957bb3f7bcbc1ff13fad2acc95327b077793f02",
-    "licenses.html": "04ed727a83adcf421de6d4885506b97c80b10285",
+    "THIRD_PARTY_NOTICES.md": "bf48194ea58913f5d744d24d05d2a4b0c317dceb",
+    "assets/experimental-aec3/LICENSE": "880b0185d9ed64fcc32c68a45c6d2c75d8d22e16",
+    "assets/experimental-aec3/THIRD-PARTY-NOTICES.md": "6c96eb746429bbfbd4d98d9297d1fb1070e46f6e",
+    "assets/vad/LICENSE-SILERO-VAD-MIT.txt": "0bf5e90cac691b999d4a35044f97167d7bbbf0b9",
+    "licenses.html": "295bd4dedd53e6677c3aec08a8bd277d187ebd98",
     "licenses/CURRENT-LICENSE-DIGESTS.json": "7b24b63e16486643804b83dfcf49338b1ea775c5",
     "licenses/CURRENT-MODEL-INVENTORY.json": "c066d7c20faeeb61c05fddeb9ee5c2243dcb085d",
     "licenses/multilingual/E5-MIT.txt": "5ae193c94d0ca44b222ff24d76eaf41709ce2b4f",
@@ -24,6 +27,9 @@
     "licenses/semantic/LICENSE-TOKENIZER-MIT.txt": "72c5f302cd40c5d5152148ddf11a893c6c607237",
     "licenses/semantic/MODEL-CARD.md": "beeff856ae0dfe348d6b475ad5702fd73ad8eb34",
     "licenses/semantic/ONNXRUNTIME-ThirdPartyNotices.txt": "75af6ad7e3db5c34e9ff923734ea49056c578d5f",
+    "licenses/speex/PROVENANCE.json": "7459ed99f1a6fbbd6b1f1c9eb7b3688c5356c872",
+    "licenses/speex/SPEEX-KMP-MIT.txt": "7b4cb745002623d50a979e1d460255824b9e5c13",
+    "licenses/speex/XIPH-BSD.txt": "7d6dc4aabd38f6e184028ff871744ac6b71b63ae",
     "multilingual-assets/runtime/LICENSE-onnxruntime.txt": "48bc6bb4996ac924359e8e28b9ae88970e5ed3fc",
     "multilingual-assets/runtime/LICENSE-transformers.txt": "d645695673349e3947e8e5ae42332d0ac3164cd7",
     "semantic-assets/runtime-ort1.30.0-tokenizers0.2.0/LICENSE-JS-TOKENIZERS-APACHE-2.0.txt": "261eeb9e9f8b2b4b0d119366dda99c6fd7d35c64",
@@ -35,9 +41,6 @@
     "semantic-assets/ruri70-int8-bd500193/MODEL-CARD.md": "beeff856ae0dfe348d6b475ad5702fd73ad8eb34",
     "src/vendor/moonshine/LICENSE": "53cade1c30a4daf00dc0eebc92319027fd3f81d4",
     "src/vendor/sherpa-pengcheng-1.12.32-th/LICENSE-APACHE-2.0.txt": "d645695673349e3947e8e5ae42332d0ac3164cd7",
-    "src/vendor/sherpa-sensevoice-1.12.32/LICENSE-APACHE-2.0.txt": "d645695673349e3947e8e5ae42332d0ac3164cd7",
-    "THIRD_PARTY_NOTICES.md": "bf48194ea58913f5d744d24d05d2a4b0c317dceb",
-    "assets/experimental-aec3/LICENSE": "880b0185d9ed64fcc32c68a45c6d2c75d8d22e16",
-    "assets/experimental-aec3/THIRD-PARTY-NOTICES.md": "6c96eb746429bbfbd4d98d9297d1fb1070e46f6e"
+    "src/vendor/sherpa-sensevoice-1.12.32/LICENSE-APACHE-2.0.txt": "d645695673349e3947e8e5ae42332d0ac3164cd7"
   }
 }

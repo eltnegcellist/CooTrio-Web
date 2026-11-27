@@ -1,6 +1,9 @@
 import {emmaBgmTracks} from './emma-bgm-tracks.js';
 
 export const DEFAULT_BGM_VOLUME = .2;
+const SPEECH_BGM_GAIN = .25;
+const DUCK_SECONDS = .05;
+const RESTORE_SECONDS = .15;
 
 export class EmmaBgm {
   constructor(onError, loadTrack = fetchTrack, random = Math.random) {
@@ -8,6 +11,8 @@ export class EmmaBgm {
     this.loadTrack = loadTrack;
     this.random = random;
     this.volume = DEFAULT_BGM_VOLUME;
+    this.ducked = false;
+    this.volumeRamp = null;
   }
 
   start(context, {song = null, loop = song === null, onEnded = null, reference = null} = {}) {
@@ -15,12 +20,14 @@ export class EmmaBgm {
       this.setReference(reference);
       return;
     }
+    const ducked = this.ducked;
     this.stop();
+    this.ducked = ducked;
     this.context = context;
     this.song = song;
     this.loop = loop;
     this.gain = context.createGain();
-    this.gain.gain.value = this.volume;
+    this.gain.gain.value = this.outputVolume();
     this.gain.connect(context.destination);
     this.setReference(reference);
     const playback = this.playback = new AbortController();
@@ -33,7 +40,38 @@ export class EmmaBgm {
 
   setVolume(volume) {
     this.volume = volume;
-    if (this.gain) this.gain.gain.value = volume;
+    this.applyVolume();
+  }
+
+  setDucked(ducked) {
+    if (this.ducked === ducked) return;
+    this.ducked = ducked;
+    this.applyVolume(ducked ? DUCK_SECONDS : RESTORE_SECONDS);
+  }
+
+  outputVolume() {
+    return this.volume * (this.ducked ? SPEECH_BGM_GAIN : 1);
+  }
+
+  applyVolume(seconds = 0) {
+    if (!this.gain) return;
+    const value = this.outputVolume();
+    const now = this.context.currentTime;
+    const gain = this.gain.gain;
+    const ramp = this.volumeRamp;
+    const current = ramp
+      ? ramp.from + (ramp.to - ramp.from) * Math.min(1, (now - ramp.start) / (ramp.end - ramp.start))
+      : gain.value;
+    gain.cancelScheduledValues(now);
+    if (!seconds) {
+      gain.setValueAtTime(value, now);
+      this.volumeRamp = null;
+      return;
+    }
+    const end = now + seconds;
+    gain.setValueAtTime(current, now);
+    gain.linearRampToValueAtTime(value, end);
+    this.volumeRamp = {from:current, to:value, start:now, end};
   }
 
   setReference(node) {
@@ -115,6 +153,8 @@ export class EmmaBgm {
     }
     this.gain?.disconnect();
     this.gain = null;
+    this.ducked = false;
+    this.volumeRamp = null;
     this.reference = null;
     this.context = null;
     this.song = null;

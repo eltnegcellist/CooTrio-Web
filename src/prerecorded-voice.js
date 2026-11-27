@@ -1,5 +1,9 @@
 import {APPROVED_FREQUENCY_AUDIO,FREQUENCY_VOICE_PROFILE} from './frequency/approved-bank.js';
 import {APPROVED_TEMPERATURE_AUDIO,approvedTemperatureAudioComplete} from './frequency/temperature-english-candidates.js';
+import {A3_RECORDING, QWEN_RECORDING} from './emma-voice-selection.js';
+import {A3_BANK_ID, A3_MANIFEST} from './a3-voice-release.js?v=4';
+import {a3TwoSentenceExcerpt, firstEnglishSentence} from './a3-sentence-excerpts.js?v=1';
+export const A3_VOICE_CACHE = 'mitsukotoba-a3-strong-20261127-v1';
 export const VOICE_CACHE = 'mitsukotoba-qwen3-voice-1202-v1';
 // Offline playback may use only this release's exact manifest. A manifest
 // from another recording revision must still fail closed; no stale mapping.
@@ -9,10 +13,15 @@ export const normalizeVoiceText = text => String(text || '').trim().replace(/\s+
 
 /** Fixed-text voice bank. Every downloaded clip is checked before caching/playback. */
 export class PrerecordedVoiceBank {
-  constructor({manifestUrl = new URL('../assets/voice-1202/manifest.json', import.meta.url),
+  constructor({recording = QWEN_RECORDING,
+    manifestUrl = new URL(recording === A3_RECORDING
+      ? '../assets/voice-a3/manifest.json?v=4' : '../assets/voice-1202/manifest.json', import.meta.url),
     fetcher = (...args) => globalThis.fetch(...args), cacheStorage = globalThis.caches,
     wait = ms => new Promise(resolve => setTimeout(resolve, ms))} = {}) {
     this.manifestUrl = String(manifestUrl);
+    this.isA3 = recording === A3_RECORDING;
+    this.cacheName = this.isA3 ? A3_VOICE_CACHE : VOICE_CACHE;
+    this.manifestIdentity = this.isA3 ? A3_MANIFEST : OFFLINE_VOICE_MANIFEST;
     this.fetcher = fetcher;
     this.cacheStorage = cacheStorage;
     this.wait = wait;
@@ -37,23 +46,28 @@ export class PrerecordedVoiceBank {
   }
 
   async prepare(onStatus) {
-    this.cache = this.cacheStorage ? await this.cacheStorage.open(VOICE_CACHE).catch(() => null) : null;
+    this.cache = this.cacheStorage ? await this.cacheStorage.open(this.cacheName).catch(() => null) : null;
     let response;
     try {
       response = await this.fetcher(this.manifestUrl, {cache: 'no-store'});
       if (!response.ok) throw Error('音声一覧を取得できません。');
+      if (this.isA3 && !await this.valid(await response.clone().arrayBuffer(), this.manifestIdentity))
+        throw Error('標準音声の一覧がこのバージョンと一致しません。');
       await this.cache?.put(this.manifestUrl, response.clone()).catch(error => {
         console.warn('音声一覧のキャッシュ保存をスキップします', error);
       });
     } catch (error) {
       const cached=await this.cache?.match(this.manifestUrl).catch(()=>null);
-      if(!cached || !await this.valid(await cached.clone().arrayBuffer(),OFFLINE_VOICE_MANIFEST))
+      if(!cached || !await this.valid(await cached.clone().arrayBuffer(), this.manifestIdentity))
         throw Error('最新版の音声一覧を取得できません。通信を確認して再準備してください。');
       response=cached;
       this.offlineManifest=true;
     }
     const manifest = await response.json();
-    if (manifest.schemaVersion !== 1 || manifest.generationSeed !== 1202 || !manifest.entries?.length) {
+    const profileMatches = this.isA3
+      ? manifest.profileId === A3_BANK_ID && manifest.entries?.length === A3_MANIFEST.entries
+      : manifest.generationSeed === 1202 && manifest.entries?.length;
+    if (manifest.schemaVersion !== 1 || !profileMatches) {
       throw Error('音声一覧の形式または固定seedが一致しません。');
     }
     this.byText = new Map();
@@ -65,6 +79,15 @@ export class PrerecordedVoiceBank {
       if (this.byText.has(text)) throw Error('英文の音声対応が重複しています。');
       this.byText.set(text, entry);
     }
+    if (!this.isA3) this.applyQwenExtensions(manifest);
+    manifest.entries=[...this.byText.values()];
+    manifest.totalBytes=manifest.entries.reduce((n,e)=>n+e.bytes,0);
+    this.manifest = manifest;
+    // Do not make the tutorial wait for the complete bank.
+    return manifest;
+  }
+
+  applyQwenExtensions(manifest) {
     // Apply the separately approved extension after checking the historical bank.
     // Each replacement is allowed only against its exact superseded bytes.
     const fullLegacyProfile=manifest.entries.length===FREQUENCY_VOICE_PROFILE.legacyClipCount;
@@ -83,11 +106,6 @@ export class PrerecordedVoiceBank {
       if(this.byText.has(clip.text))throw Error('温度の録音英文が既存の承認済み音声と重複しています。');
       this.byText.set(clip.text,clip);
     }
-    manifest.entries=[...this.byText.values()];
-    manifest.totalBytes=manifest.entries.reduce((n,e)=>n+e.bytes,0);
-    this.manifest = manifest;
-    // Do not make the tutorial wait for the complete bank.
-    return manifest;
   }
 
   async clip(entry, {background = false} = {}) {
@@ -222,6 +240,22 @@ export class PrerecordedVoiceBank {
     if (bytes.byteLength !== entry.bytes) return false;
     const hash = await crypto.subtle.digest('SHA-256', bytes);
     return [...new Uint8Array(hash)].map(x => x.toString(16).padStart(2, '0')).join('') === entry.sha256;
+  }
+
+  async audioForExcerpt(text, excerptText) {
+    await this.init();
+    const fullText = normalizeVoiceText(text);
+    const excerpt = normalizeVoiceText(excerptText);
+    const full = this.byText.get(fullText);
+    if (this.isA3 && full) {
+      const second = a3TwoSentenceExcerpt(fullText);
+      const playbackDurationMs = second?.text === excerpt ? second.durationMs
+        : firstEnglishSentence(fullText) === excerpt ? full.firstSentenceEndMs : undefined;
+      if (Number.isInteger(playbackDurationMs) && playbackDurationMs > 0) {
+        return {blob: await this.clip(full), playbackDurationMs};
+      }
+    }
+    return {blob: await this.audioFor(excerpt)};
   }
 
   async audioFor(text) {

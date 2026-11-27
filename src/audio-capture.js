@@ -2,17 +2,36 @@ import { SileroCaptureDetector } from './silero-capture.js';
 
 const MIC_REQUEST={audio:{channelCount:1,echoCancellation:false,
   noiseSuppression:false,autoGainControl:false},video:false};
+const BGM_WASM_ENGINES={
+  aec3:{
+    label:'AEC3',
+    wasm:new URL('../assets/experimental-aec3/webrtc-audio-processing.wasm',import.meta.url),
+    worklet:new URL('../worklets/aec3-pcm-capture-worklet.js',import.meta.url),
+  },
+  speex:{
+    label:'SpeexDSP',
+    wasm:new URL('./vendor/speex-dsp/speex.wasm',import.meta.url),
+    worklet:new URL('../worklets/speex-pcm-capture-worklet.js',import.meta.url),
+  },
+};
 const stopStream=stream=>stream?.getTracks?.().forEach(track=>track.stop());
 const safeMicError=error=>['NotAllowedError','NotReadableError','NotFoundError',
   'AbortError','NotSupportedError','SecurityError','TimeoutError'].includes(error?.name)
   ? error.name : 'Error';
 export class EmmaMicrophone {
-  constructor({ onState, onUtterance, shouldIgnore, onDiagnostic, endpointMode = 'silero', onWarning, onError, echoCancellation = false, bgmContext = null, aec3 = false, onAec3Failure = null }) {
+  constructor({ onState, onUtterance, shouldIgnore, onDiagnostic, endpointMode = 'silero', onWarning, onError,
+    echoCancellation = false, bgmContext = null, aec3 = false, onAec3Failure = null,
+    speex = false, onSpeexFailure = null, onSpeechActivity = null }) {
     this.endpointMode = endpointMode;
     this.bgmContext = bgmContext;
-    this.aec3 = Boolean(aec3);
+    this.bgmReference = null;
+    this.bgmWasmMode = speex ? 'speex' : aec3 ? 'aec3' : null;
     this.aec3Ready = false;
+    this.speexReady = false;
     this.onAec3Failure = onAec3Failure;
+    this.onSpeexFailure = onSpeexFailure;
+    this.onSpeechActivity = onSpeechActivity;
+    this.sileroSpeechActive = false;
     this.micRequest={...MIC_REQUEST,audio:{...MIC_REQUEST.audio,echoCancellation}};
     this.onWarning = onWarning;
     this.onError = onError;
@@ -28,7 +47,7 @@ export class EmmaMicrophone {
     this.recoveryPending = false;
     this.vad = new AdaptiveEndpointDetector();
     // Aggregate levels only: diagnostics never retain or export microphone PCM.
-    this.captureStats = {frames:0,samples:0,lastRms:0,peakRms:0};
+    this.captureStats = {frames:0,samples:0,nonzeroFrames:0,lastRms:0,peakRms:0};
   }
 
   async start() {
@@ -53,19 +72,17 @@ export class EmmaMicrophone {
     let bgmNode;
     if (this.bgmContext) {
       try {
-        if(this.aec3) {
-          // This experimental route never enables Android's native AEC.
-          // WASM is staged locally at install time; there is no runtime CDN.
-          if(context.sampleRate!==48000 && context.sampleRate!==16000)
+        const mode=this.bgmWasmMode;
+        if(mode) {
+          const engine=BGM_WASM_ENGINES[mode];
+          if(mode==='aec3' && context.sampleRate!==48000 && context.sampleRate!==16000)
             throw Error('AEC3 supports 48 kHz or 16 kHz audio only');
-          const wasmUrl=new URL('../assets/experimental-aec3/webrtc-audio-processing.wasm',import.meta.url);
-          const response=await withTimeout(fetch(wasmUrl),12000,'AEC3 WASM fetch timed out');
-          if(!response.ok)throw Error('AEC3 WASM unavailable (HTTP '+response.status+')');
-          const wasmModule=await withTimeout(WebAssembly.compile(await response.arrayBuffer()),12000,'AEC3 compilation timed out');
-          await withTimeout(context.audioWorklet.addModule(
-            new URL('../worklets/aec3-pcm-capture-worklet.js',import.meta.url)),12000,'AEC3 processor unavailable');
+          const response=await withTimeout(fetch(engine.wasm),12000,engine.label+' WASM fetch timed out');
+          if(!response.ok)throw Error(engine.label+' WASM unavailable (HTTP '+response.status+')');
+          const wasmModule=await withTimeout(WebAssembly.compile(await response.arrayBuffer()),12000,engine.label+' compilation timed out');
+          await withTimeout(context.audioWorklet.addModule(engine.worklet),12000,engine.label+' processor unavailable');
           if(generation!==this.generation)return;
-          bgmNode=new AudioWorkletNode(context,'emma-aec3-pcm-capture',{
+          bgmNode=new AudioWorkletNode(context,'emma-'+mode+'-pcm-capture',{
             numberOfInputs:2,channelCount:1,channelCountMode:'explicit',
             processorOptions:{module:wasmModule}
           });
@@ -73,11 +90,13 @@ export class EmmaMicrophone {
           await withTimeout(new Promise((resolve,reject)=>{
             aecNode.port.onmessage=event=>{
               if(event.data?.type==='ready')resolve();
-              else if(event.data?.type==='aec3-error')reject(Error(event.data.message||'AEC3 failed'));
+              else if(event.data?.type===mode+'-error')reject(Error(event.data.message||engine.label+' failed'));
             };
-          }),10000,'AEC3 initialization timed out');
+            aecNode.onprocessorerror=()=>reject(Error(engine.label+' processor failed'));
+          }),10000,engine.label+' initialization timed out');
           if(generation!==this.generation){aecNode.disconnect();return;}
-          this.aec3Ready=true;
+          this.aec3Ready=mode==='aec3';
+          this.speexReady=mode==='speex';
         } else {
           await withTimeout(context.audioWorklet.addModule(
             new URL('../worklets/bgm-pcm-capture-worklet.js',import.meta.url)),
@@ -92,9 +111,9 @@ export class EmmaMicrophone {
         if(generation!==this.generation)return;
         try{bgmNode?.disconnect();}catch{}
         bgmNode=null;
-        this.aec3Ready=false;
+        this.bgmReference=null;
         this.onDiagnostic?.('bgm-echo-filter-unavailable',{name:safeMicError(error)});
-        if(this.aec3)this.onAec3Failure?.(error);
+        this.handleBgmEchoFailure(error);
         // Fail closed: continue raw microphone capture, but never play BGM.
       }
     }
@@ -137,12 +156,32 @@ export class EmmaMicrophone {
     source.connect(this.node).connect(silent).connect(this.context.destination);
     this.node.port.onmessage = event => {
       if(generation!==this.generation || this.context!==context)return;
-      if(event.data?.type==='aec3-error'){
-        this.aec3Ready=false;
-        this.onAec3Failure?.(Error(event.data.message||'AEC3 processing error'));
+      if(this.bgmWasmMode && event.data?.type===this.bgmWasmMode+'-error'){
+        this.handleBgmEchoFailure(Error(event.data.message||'Echo cancellation failed'));
       } else if(event.data instanceof Float32Array) this.handleFrame(event.data);
     };
+    if(bgmNode && this.bgmWasmMode) {
+      this.node.onprocessorerror=()=>{
+        if(generation!==this.generation || this.context!==context)return;
+        this.handleBgmEchoFailure(Error('Echo cancellation processor failed'));
+        this.onError?.(Error('音声の処理が中断しました。会話を再開してください。'));
+      };
+    }
     this.onState?.('listening');
+  }
+
+  handleBgmEchoFailure(error) {
+    this.aec3Ready=false;
+    this.speexReady=false;
+    this.setSileroSpeechActive(false);
+    if(this.bgmWasmMode==='aec3')this.onAec3Failure?.(error);
+    if(this.bgmWasmMode==='speex')this.onSpeexFailure?.(error);
+  }
+
+  setSileroSpeechActive(active) {
+    if (this.sileroSpeechActive === active) return;
+    this.sileroSpeechActive = active;
+    this.onSpeechActivity?.(active);
   }
 
   handleFrame(frame) {
@@ -152,10 +191,12 @@ export class EmmaMicrophone {
     const rms=frame.length?Math.sqrt(power/frame.length):0;
     this.captureStats.frames++;this.captureStats.samples+=frame.length;
     this.captureStats.lastRms=rms;this.captureStats.peakRms=Math.max(this.captureStats.peakRms,rms);
+    if(rms>0)this.captureStats.nonzeroFrames++;
     const ignored=Boolean(this.shouldIgnore?.());
     this.onDiagnostic?.('frame',{rms,samples:frame.length,ignored});
     if (ignored) {
       this.vad.resetSpeechOnly();
+      this.setSileroSpeechActive(false);
       return;
     }
     const result = this.vad.push(frame, this.context.sampleRate, performance.now());
@@ -188,6 +229,7 @@ export class EmmaMicrophone {
       const oldStream=this.stream,oldSource=this.source;
       // A new capture may become active after a quiet period; reset partial VAD.
       this.vad.resetSpeechOnly();
+      this.setSileroSpeechActive(false);
       this.source=nextSource;
       this.stream=nextStream;
       accepted=true;
@@ -222,15 +264,18 @@ export class EmmaMicrophone {
   handleResult(result) {
     if(!this.context)return;
     if(result.event==='speech-cancel') {
+      this.setSileroSpeechActive(false);
       this.onDiagnostic?.('speech-cancel');
       this.onState?.('listening');
       return;
     }
     if (result.event === 'speech-start') {
+      if(this.vad instanceof SileroCaptureDetector) this.setSileroSpeechActive(true);
       this.onDiagnostic?.('speech-start');
       this.onState?.('endpoint');
     }
     if (result.event === 'utterance') {
+      this.setSileroSpeechActive(false);
       const downsampled = resampleLinear(result.audio, this.context.sampleRate, 16000);
       if (downsampled.length >= 16000 * 0.32) {
         this.onDiagnostic?.('utterance');
@@ -242,11 +287,13 @@ export class EmmaMicrophone {
 
   resetDetector() {
     this.vad.reset();
+    this.setSileroSpeechActive(false);
   }
 
   forceUtterance() {
     if (!this.context) return null;
     const audio = this.vad.forceCurrentUtterance();
+    this.setSileroSpeechActive(false);
     if (!audio || !audio.length) return null;
     const downsampled = resampleLinear(audio, this.context.sampleRate, 16000);
     if (downsampled.length < 16000 * 0.32) return null;
@@ -266,13 +313,16 @@ export class EmmaMicrophone {
 
   async stop() {
     this.generation++;
+    this.setSileroSpeechActive(false);
     this.vadAbort?.abort();
     this.vadAbort=null;
     if(this.node?.port){
-      if(this.aec3Ready)this.node.port.postMessage({type:'stop'});
+      if(this.aec3Ready || this.speexReady)this.node.port.postMessage({type:'stop'});
       this.node.port.onmessage=null;
+      this.node.onprocessorerror=null;
     }
     this.aec3Ready=false;
+    this.speexReady=false;
     this.node?.disconnect();
     if (this.bgmReference !== this.node) this.bgmReference?.disconnect();
     this.bgmReference = null;

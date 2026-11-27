@@ -1,0 +1,12 @@
+{
+  "package": "@enaium/speex-kmp@1.2.1-1",
+  "source": "https://github.com/Enaium/speex-kmp/tree/05966ca81aeaa8d9e645adcca74fe47d310781bc",
+  "packageIntegrity": "sha512-YB+XB6Y7KPJLPGB+MeucFQblb8LlW/urPV44h1aEwm83pXJaSCreKixGG2m9PGn1JC1klhyO/YOvnX1DXhmZRQ==",
+  "originalFile": "speex_wasm.wasm",
+  "file": "src/vendor/speex-dsp/speex.wasm",
+  "bytes": 203812,
+  "sha256": "faafd1a6c93953b4c9733d6c1213e5a6c5630cbd17d8bf7f381377341459498b",
+  "speexRevision": "09b569d1b437e5edccf3406a38714ad795e46d38",
+  "speexDspRevision": "7a158783df74efe7c2d1c6ee8363c1e695c71226",
+  "licenseFiles": ["SPEEX-KMP-MIT.txt", "XIPH-BSD.txt"]
+}

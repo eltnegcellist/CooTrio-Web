@@ -3,6 +3,18 @@ import {DEVELOPER_TRANSLATIONS} from './developer-translations.js';
 import {appendOperationalMessages} from './operational-messages.js?v=20261020-ui-audit-v3';
 // Shared with Android. These are UI strings, never translations of user speech.
 export const CATALOG = [
+["画面オフモード","Screen-off mode","Modus mit schwarzem Bildschirm","Mode écran noir","화면 끄기 모드","โหมดหน้าจอดำ"],
+["画面オフモードを使う","Use screen-off mode","Modus mit schwarzem Bildschirm verwenden","Utiliser le mode écran noir","화면 끄기 모드 사용","ใช้โหมดหน้าจอดำ"],
+["赤ちゃんにスマートフォンの画面を見せずに、英語の呼びかけを楽しめるモードです。会話中は画面が真っ黒になり、赤ちゃんが画面に触れても、誤タッチで元の画面に戻らないようになっています。","Enjoy speaking English with your baby without showing them the phone screen. During a conversation, the screen turns completely black, and accidental touches will not bring back the normal screen.","Genieße englische Ansprache mit deinem Baby, ohne ihm den Handybildschirm zu zeigen. Während des Gesprächs wird der Bildschirm ganz schwarz; versehentliches Antippen bringt die normale Ansicht nicht zurück.","Profitez des échanges en anglais avec votre bébé sans lui montrer l’écran du téléphone. Pendant la conversation, l’écran devient entièrement noir et les contacts accidentels ne rétablissent pas l’affichage normal.","아기에게 스마트폰 화면을 보여 주지 않고 영어로 말을 걸 수 있는 모드예요. 대화 중에는 화면이 완전히 검게 바뀌며, 아기가 실수로 화면을 터치해도 원래 화면으로 돌아가지 않아요.","สนุกกับการพูดภาษาอังกฤษกับลูกน้อยโดยไม่ต้องให้ลูกเห็นหน้าจอโทรศัพท์ ระหว่างสนทนาหน้าจอจะดำสนิท และการแตะโดยไม่ตั้งใจจะไม่ทำให้กลับสู่หน้าจอปกติ"],
+["画面をタップすると操作ボタンが表示され、長押しでAIに返答を促したり、会話を終了したりできます。","Tap the screen to show the controls, then press and hold a button to prompt an AI reply or end the conversation.","Tippe auf den Bildschirm, um die Bedienelemente anzuzeigen. Halte eine Taste gedrückt, um eine KI-Antwort auszulösen oder das Gespräch zu beenden.","Touchez l’écran pour afficher les commandes, puis maintenez un bouton enfoncé pour déclencher une réponse de l’IA ou terminer la conversation.","화면을 터치하면 조작 버튼이 나타나요. 버튼을 길게 누르면 AI의 답변을 요청하거나 대화를 종료할 수 있어요.","แตะหน้าจอเพื่อแสดงปุ่มควบคุม แล้วกดปุ่มค้างไว้เพื่อให้ AI ตอบหรือจบการสนทนา"],
+["画面を戻す","Restore screen","Bildschirm anzeigen","Rétablir l’écran","화면 복원","คืนหน้าจอ"],
+["会話で読む文の数","Sentences per reply","Sätze pro Antwort","Phrases par réponse","응답당 문장 수","จำนวนประโยคต่อคำตอบ"],
+["1文","1 sentence","1 Satz","1 phrase","문장 1개","1 ประโยค"],
+["3文","3 sentences","3 Sätze","3 phrases","문장 3개","3 ประโยค"],
+["（長押し）","(Press and hold)","(Gedrückt halten)","(Appui prolongé)","(길게 누르기)","(กดค้าง)"],
+['バックグラウンドから戻った後の音声入力を確認しています。','Checking microphone input after returning to the app.','Mikrofoneingang nach der Rückkehr zur App prüfen.','Vérification du micro après le retour à l’application.','앱으로 돌아온 뒤 마이크 입력을 확인하고 있어요.','กำลังตรวจสอบไมโครโฟนหลังกลับเข้าแอป'],
+['「呼びかけを始める」を押して再開してください。','Tap Start talking to restart the microphone.','Tippe auf Gespräch starten, um das Mikrofon neu zu starten.','Appuyez sur Commencer à parler pour redémarrer le micro.','마이크를 다시 시작하려면 대화 시작을 눌러 주세요.','แตะเริ่มพูดคุยเพื่อเปิดไมโครโฟนอีกครั้ง'],
+
 ["セマンティックモデルを準備しています…","Preparing the semantic model…","Semantisches Modell wird vorbereitet…","Préparation du modèle sémantique…","의미 분석 모델 준비 중…","กำลังเตรียมโมเดลวิเคราะห์ความหมาย…"],
 ["セマンティックモデルをダウンロードしています…","Downloading the semantic model…","Semantisches Modell wird heruntergeladen…","Téléchargement du modèle sémantique…","의미 분석 모델 다운로드 중…","กำลังดาวน์โหลดโมเดลวิเคราะห์ความหมาย…"],
 ["セマンティックモデルを初期化しています…","Initializing the semantic model…","Semantisches Modell wird initialisiert…","Initialisation du modèle sémantique…","의미 분석 모델 초기화 중…","กำลังเริ่มใช้งานโมเดลวิเคราะห์ความหมาย…"],

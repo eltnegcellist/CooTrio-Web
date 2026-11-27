@@ -40,6 +40,13 @@ jobs:
                   echo "Accepted exact approved OtoLogic and AEC3 notice entries."
                   continue
                 fi
+                # Approved exact SpeexDSP notice and provenance update.
+                if [[ "$path" == ".github/policy/legal-lock.json" ]] &&
+                   [[ "$(git rev-parse "$BASE_SHA:$path")" == "e376de492dd4e53f2fe555fad67096cdeba383ac" ]] &&
+                   [[ "$(git hash-object "$path")" == "c2fe94db5fd505d1b901581a3c14b81813d09a93" ]]; then
+                  echo "Accepted exact approved SpeexDSP notice entries."
+                  continue
+                fi
                 echo "::error file=$path::Release policy changed. Stop and request a separate explicitly approved policy update."
                 exit 1
               fi

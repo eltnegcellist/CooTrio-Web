@@ -12,6 +12,8 @@ export const TOPIC_ACCEPT_PROBABILITY = 0.50;
 export const TOPIC_ACCEPT_MARGIN = 0.05;
 export const TOPIC_RESCUE_PROBABILITY = 0.30;
 export const TOPIC_RESCUE_MARGIN = 0.10;
+export const RURI_C_SOURCE = 'ruri-c';
+const RURI_C_PAIR_PROBABILITY = 0.50;
 
 const BASE_COMBINED_REPLIES = {
   "milk|invitation": [
@@ -605,6 +607,33 @@ export function selectRuriAxes(topicPrediction, interactionPrediction, allowInte
     topic = rawTopic;
   }
   return {topic,interaction};
+}
+
+function topRuriCandidate(prediction, abstention) {
+  // The worker has already applied the extension's support gate. rawId is
+  // the actual top label even when the legacy Topic margin set id to generic.
+  const id = prediction?.rawId ?? prediction?.id;
+  const probability = prediction?.probability;
+  return typeof id === 'string' && id && id !== abstention && Number.isFinite(probability) && probability >= 0 && probability <= 1
+    ? {id, probability} : null;
+}
+
+export function selectRuriCAxes(topicPrediction, interactionPrediction, allowInteraction = true) {
+  const topic = topRuriCandidate(topicPrediction, 'generic');
+  const candidate = allowInteraction ? topRuriCandidate(interactionPrediction, 'none') : null;
+  const interaction = candidate && Object.hasOwn(INTERACTION_REPLIES, candidate.id) ? candidate : null;
+  if (!topic || !interaction) {
+    return {topic: topic?.id ?? null, interaction: interaction?.id ?? null};
+  }
+  const enoughTopic = topic.probability >= RURI_C_PAIR_PROBABILITY;
+  const enoughInteraction = interaction.probability >= RURI_C_PAIR_PROBABILITY;
+  if (enoughTopic || enoughInteraction) {
+    return {topic: enoughTopic ? topic.id : null, interaction: enoughInteraction ? interaction.id : null};
+  }
+  // With both scores below 50%, keep only the stronger axis. Ties favor Interaction.
+  return topic.probability > interaction.probability
+    ? {topic: topic.id, interaction: null}
+    : {topic: null, interaction: interaction.id};
 }
 
 export function combinedCandidates(topic, interaction) {

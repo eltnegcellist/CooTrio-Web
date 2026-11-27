@@ -1,6 +1,6 @@
 import {FREQUENCY_BANK} from './frequency/approved-bank.js';
 import {approvedTemperatureCandidates} from './frequency/temperature-english-candidates.js';
-import { selectRuriAxes, combinedCandidates } from './interaction/ruri-routing.js';
+import { selectRuriAxes, selectRuriCAxes, RURI_C_SOURCE, combinedCandidates } from './interaction/ruri-routing.js';
 import { selectE5Axes } from './multilingual/core.js';
 import { RuriReplyDiversity } from './interaction/diversity.js';
 import { selectInteraction, INTERACTION_REPLIES } from './interaction/response.js';
@@ -842,19 +842,21 @@ export class LiteResponseEngine {
   respondRuri(transcript, spokenBabyName = "", topicPrediction = null, interactionPrediction = null, allowInteraction = true, source = 'ruri', temperaturePrediction = null) {
     const { topic, interaction } = source==='e5'
       ? selectE5Axes(topicPrediction,interactionPrediction,allowInteraction)
-      : selectRuriAxes(topicPrediction, interactionPrediction, allowInteraction);
+      : (source === RURI_C_SOURCE ? selectRuriCAxes : selectRuriAxes)(topicPrediction, interactionPrediction, allowInteraction);
     const scene = findScene(topic);
     // Only SHA-pinned, human-approved full 26-clip Qwen batches can replace
     // the established neutral temperature response pools.
     const directional=scene?.id==='temperature'?
       approvedTemperatureCandidates(temperaturePrediction?.id,interaction):null;
-    const pair = scene && interaction ? (directional?.combined||combinedCandidates(scene.id, interaction)) : null;
+    const pair = scene && interaction
+      ? (directional ? directional.combined : combinedCandidates(scene.id, interaction))
+      : null;
     // Without an approved pair, retain the newly recognized communicative intent.
     // Select one approved standalone line; never fabricate a composite.
-    const responseScene=!pair && Object.hasOwn(FREQUENCY_BANK.interactions,interaction) ? null:scene;
+    const responseScene=!directional && !pair && Object.hasOwn(FREQUENCY_BANK.interactions,interaction) ? null:scene;
     const topicReplies=responseScene?.id==='temperature'&&directional?.topics?directional.topics:responseScene?.replies||null;
     const selected=this.diversity.select({topic:responseScene?.id? (directional?'temperature_'+temperaturePrediction.id:responseScene.id):null,interaction,pair,
-      topicReplies,interactionReplies:interaction ? INTERACTION_REPLIES[interaction] : null});
+      topicReplies,interactionReplies:interaction && !directional ? INTERACTION_REPLIES[interaction] : null});
     const replies = pair || topicReplies || (interaction ? INTERACTION_REPLIES[interaction] : null)
       || GENERIC_REPLIES;
     const reason=selected?.reason||'generic';

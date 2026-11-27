@@ -1,0 +1,87 @@
+// Reviewed two-sentence prefixes. Times refer to the original A3 recordings.
+const SECOND_SENTENCE_END_MS = new Map([
+  ["Again, again! Little by little! I see you!", 4520],
+  ["Again? Let's do that. One more time!", 1820],
+  ["All right! Let's do that. I'm here with you.", 1880],
+  ["All right, baby! You can try. I'll stay nearby.", 2840],
+  ["Could that be it? Let's see. Are we done yet?", 2420],
+  ["Do you like it? Want another bite? No need to hurry.", 2460],
+  ["Give it a try! I'll stay close. You can do this!", 2520],
+  ["Go right ahead! That's okay. I'm with you.", 3090],
+  ["Got the toy! You did it! Yay, yay!", 2880],
+  ["Here I am! Come this way. Take your time!", 2400],
+  ["Here we are! You and me! Hello, sweetie!", 3060],
+  ["Here we go! It's time to start. Ready for this?", 2810],
+  ["Here we go! We're beginning now. Ready, little one?", 3080],
+  ["Here you are! You're awake now. So good to see!", 3860],
+  ["Hold on, sweetheart. Just a moment. I'm with you.", 3080],
+  ["Hot or cold? Let's check together. Nice and easy.", 3180],
+  ["How about this? We can try. Let's do it together.", 3280],
+  ["It's time to start. Ready, little one? Let's do this.", 3490],
+  ["Just a moment. I'll be right here. We can wait.", 3280],
+  ["Let's begin! Now we start. Ready for this?", 2810],
+  ["Let's do it again. Ready for more? We can start.", 2390],
+  ["Let's slow down now. We have time. I'll stay with you.", 3040],
+  ["Let's stop a moment. Our walk can wait. I'll stay near.", 3500],
+  ["Let's try it! Here we go! You and me!", 2390],
+  ["No need to rush. I hear you crying. We're here together.", 4040],
+  ["Oh dear! That's all right. Take your time.", 2260],
+  ["Oh my goodness! That's a surprise! Wow, wow, wow!", 3490],
+  ["Oh my! That surprised me! Let's look together.", 2980],
+  ["Oh, goodness me! What a surprise! Let's see what happens.", 3770],
+  ["Oh, wow! What a surprise! Look with me.", 3460],
+  ["Okay, let's do it! I'm right here. Go ahead, baby!", 2850],
+  ["Okay, let's try! Yes, that's fine. I'm here too!", 3500],
+  ["Okay, okay! I'm listening. Go right ahead!", 2370],
+  ["One more go? Let's try it again. Here we go!", 2870],
+  ["One more time? Let's try again. Ready to go?", 2430],
+  ["One more try? I'm here too. You've got this!", 2860],
+  ["Ooh, wow! What was that? Let's look together.", 3760],
+  ["Oopsie-daisy! It's all right. We'll take it slowly.", 2450],
+  ["Ready, baby? Here we go! You and me!", 2300],
+  ["Ready? We're starting now. Let's go together.", 2560],
+  ["Sure, little one! Let's have a go. I'm here too!", 2750],
+  ["Sure, little one! We can play. Let's start gently!", 3510],
+  ["Sure, why not? Let's try together. Here we go!", 3470],
+  ["That was a lot. Let's rest your tummy. I'm right here.", 3840],
+  ["That's everything. We're all finished. Time for a break.", 3510],
+  ["That's it! We're finished now. All done together.", 2750],
+  ["That's the end. All finished now. We did it.", 3110],
+  ["There it is! You did it! Hooray for you!", 2790],
+  ["There you go! Look what you did! Let's clap together!", 2970],
+  ["This way, baby! Let's look outside. Whenever you're ready!", 3060],
+  ["This way, sweetheart! I'll wait here. Take your time!", 2800],
+  ["Too hot or cold? I'll check carefully. We'll go slowly.", 3340],
+  ["Too hot or cold? Let's check carefully. I'm right here!", 3850],
+  ["Uh-oh! Are you okay? I'm right here.", 2690],
+  ["Uh-oh! That's okay. Let's try again.", 1890],
+  ["Wait a moment. Not just yet. I'll stay close.", 2620],
+  ["Want to try? Let's do it. Let's try together.", 2300],
+  ["Warm or cold? How does it feel? Let's check gently.", 3900],
+  ["Warm or cool? Let's check gently. Are you comfortable?", 4410],
+  ["Warm or cool? Let's find out. We'll take care.", 3690],
+  ["Warm or cool? We'll check gently. I'm right here.", 3960],
+  ["What is it? Can you show me? I'll listen closely.", 2590],
+  ["What's going on? Let's figure it out. What do you need?", 3000],
+  ["Whoa! What a surprise! Let's look together.", 3000],
+  ["Whoops! It happens sometimes. We can pause.", 2850],
+  ["Would you like some? Here's a little sip. There you go!", 3260],
+  ["Wow! What a surprise! Look at that!", 2740],
+  ["Wow, oh wow! What a surprise! Let's look again.", 4290],
+  ["Yes! You made it! That's wonderful!", 2700],
+  ["Yes, that's right! I hear you. Let's keep going.", 3650],
+  ["Yes, yes! That sounds right. I'm right here.", 2520],
+]);
+
+const ENGLISH_SENTENCE = /[^.!?]+[.!?]*/g;
+
+export function firstEnglishSentence(phrase) {
+  return (String(phrase || '').match(ENGLISH_SENTENCE)?.[0] || '').trim();
+}
+
+export function a3TwoSentenceExcerpt(phrase) {
+  const durationMs = SECOND_SENTENCE_END_MS.get(phrase);
+  if (durationMs === undefined) return;
+  const text = phrase.match(ENGLISH_SENTENCE).slice(0, 2).join('').trim();
+  return {text, durationMs};
+}

@@ -1,4 +1,6 @@
-// Direction-specific English replies and their verified recordings.
+// All 26 proposed full English utterances. They are not selected by the
+// application before the exact Qwen recordings are approved and SHA pinned.
+// Source: shared/temperature-split-candidates.json
 export const TEMPERATURE_DIRECTION_TEXTS={
   "hot": {
     "topics": [
@@ -312,7 +314,7 @@ export const APPROVED_TEMPERATURE_AUDIO=[
     "referenceSha256": "49e2939ab96482595d300d52135bc57234df4a019aca773f739d2f6f8be3a8d0",
     "humanApproved": true
   }
-];
+]; // populated only after 26 voice reviews
 const SHA=/^[a-f0-9]{64}$/;
 export function approvedTemperatureAudioComplete(){
   const texts=[...Object.values(TEMPERATURE_DIRECTION_TEXTS).flatMap(d=>[...d.topics,...Object.values(d.combined).flat()])];
