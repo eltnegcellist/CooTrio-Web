@@ -25,8 +25,10 @@ export function resolveVisualCue(text,catalog=VISUAL_CUE_RUNTIME_CATALOG,tempera
 }
 
 /** Optional turn-owned visual. Audio may end before the next parent utterance finishes. */
-export function createVisualCueController({document=globalThis.document,baseUrl=new URL('../',import.meta.url),catalog=VISUAL_CUE_RUNTIME_CATALOG,loadImage,media=globalThis.matchMedia?.('(prefers-reduced-motion: reduce)'),onChange=()=>{}}={}){
- let mode='emma',motion=true,serial=0,generation=0,current=null,disposed=false;
+export const VISUAL_CUE_POST_AUDIO_MS=10_000;
+export function createVisualCueController({document=globalThis.document,baseUrl=new URL('../',import.meta.url),catalog=VISUAL_CUE_RUNTIME_CATALOG,loadImage,media=globalThis.matchMedia?.('(prefers-reduced-motion: reduce)'),onChange=()=>{},setTimer=setTimeout,clearTimer=clearTimeout}={}){
+ let mode='emma',motion=true,serial=0,generation=0,current=null,disposed=false,expiryTimer=null;
+ const cancelExpiry=()=>{if(expiryTimer!==null){clearTimer(expiryTimer);expiryTimer=null;}};
  const hosts=()=>[...document.querySelectorAll('[data-visual-cue-host]')];
  const clear=()=>{for(const host of hosts()){host.replaceChildren();host.hidden=true;const avatar=host.closest('.avatar');avatar?.classList.remove('has-visual-cue','has-emma-background');delete host.dataset.layer;}onChange(null);};
  const decode=loadImage||((url)=>new Promise((resolve,reject)=>{
@@ -59,16 +61,21 @@ export function createVisualCueController({document=globalThis.document,baseUrl=
    avatar?.classList.toggle('has-emma-background',background);
   }
   onChange(p);
+
  }
- const stop=()=>{serial++;generation++;current=null;clear();};
+ const stop=()=>{serial++;generation++;cancelExpiry();current=null;clear();};
  const visibility=()=>{if(document.hidden)stop();};
  const reduction=()=>{void render();};
  document.addEventListener('visibilitychange',visibility);media?.addEventListener?.('change',reduction);
  return {
   configure(settings={}){mode=settings.mode==='visual'?'visual':'emma';motion=settings.motion!==false;void render();},
-  begin(text,{temperatureDirection=null}={}){const token=++serial;current={token,plan:resolveVisualCue(text,catalog,temperatureDirection),playbackFinished:false};void render();return token;},
-  // End of Emma's voice does not end the illustration: hold it while the parent speaks.
-  end(token){if(current?.token===token)current.playbackFinished=true;},
+  begin(text,{temperatureDirection=null}={}){cancelExpiry();const token=++serial;current={token,plan:resolveVisualCue(text,catalog,temperatureDirection),playbackFinished:false};void render();return token;},
+  // Hold the cue throughout playback and for ten seconds after audio ends.
+  end(token){
+   if(current?.token!==token||current.playbackFinished||disposed)return;
+   current.playbackFinished=true;
+   expiryTimer=setTimer(()=>{if(current?.token===token&&!disposed)stop();},VISUAL_CUE_POST_AUDIO_MS);
+  },
   // The microphone/VAD decides when the parent's next utterance has ended.
   nextUtteranceFinished(){stop();},stop,
   preload(text,{temperatureDirection=null}={}){const p=resolveVisualCue(text,catalog,temperatureDirection);if(mode!=='visual'||p?.type!=='asset')return;const a=catalog.assets[p.assetId];if(a)decode(new URL(motion&&!media?.matches?a.image:a.poster,baseUrl).href).catch(()=>{});},

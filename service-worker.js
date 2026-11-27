@@ -1,6 +1,6 @@
 // Install a complete new generation before replacing an existing active shell.
 // The fallback below can only read the currently activated, complete cache.
-const CACHE='cootrio-web-shell-public-v1.2.1';
+const CACHE='cootrio-web-shell-public-v1.3.0';
 const SHELL=['./src/settings-sharing.js','./src/multilingual/additional-translations.js','./src/multilingual/additional-about.js','./src/multilingual/why-page.js','./src/visual-cue-settings.js','./src/visual-cue-controller.js','./src/visual-cue-catalog.js','./src/emma-background-cues.js','./src/multilingual/confirmation.js','./src/multilingual/operational-messages.js','./src/multilingual/core.js','./src/multilingual/performance.js','./src/multilingual/performance-controls.js','./src/multilingual/translations.js','./src/multilingual/ui.js','./src/settings-choice-buttons.js','./src/multilingual/about-page.js','./src/multilingual/client.js','./src/multilingual/worker.js','./src/multilingual/assets.js','./src/multilingual/assets.json','./src/multilingual/semantic-client.js','./src/multilingual/specialist-asr.js','./src/multilingual/vosk-asr.js','./src/multilingual/vosk-models.js','./src/multilingual/vosk-archive.js','./src/multilingual/vosk-archive-worker.js','./src/multilingual/sensevoice-asr.js','./src/multilingual/sensevoice-worker.js','./src/multilingual/pengcheng-asr.js','./src/multilingual/pengcheng-worker.js','./src/prerecorded-voice.js?v=20261021-audio-recovery-v2','./src/prerecorded-voice.js','./assets/voice-1202/manifest.json','./src/semantic/panel.js','./src/semantic/controller.js','./src/semantic/core.js','./src/semantic/client.js','./src/semantic/worker.js','./src/semantic/download.js', './src/semantic/tokenize.js','./src/semantic-assets-manifest.json','./src/conversation-history.js','./src/feature-screens.js','./src/app-navigation.js','./shared/play-topics.json','./','./index.html','./topic-guide.html','./src/multilingual/topic-guide.js','./src/multilingual/topic-guide-examples.js','./reset.html','./styles.css','./manifest.webmanifest','./manifest.intl.webmanifest','./icons/mitsukotoba-baby-abc-v2-192.png','./assets/mitsukotoba-parent.png','./assets/mitsukotoba-baby.png','./assets/mitsukotoba-ai.png','./assets/emma-face/emma-face-idle-open.svg','./assets/emma-face/emma-face-idle-half.svg','./assets/emma-face/emma-face-idle-closed.svg','./assets/emma-face/emma-face-talk-small.svg','./assets/emma-face/emma-face-talk-medium.svg','./assets/emma-face/emma-face-talk-large.svg','./assets/emma-face/emma-face-talk-small-half.svg','./assets/emma-face/emma-face-talk-small-closed.svg','./assets/emma-face/emma-face-talk-medium-half.svg','./assets/emma-face/emma-face-talk-medium-closed.svg','./assets/emma-face/emma-face-talk-large-half.svg','./assets/emma-face/emma-face-talk-large-closed.svg','./src/resume-greeting.js','./src/app.js','./src/microphone-continuity.js','./src/asr-worker.js','./src/moonshine-keyterm-bias.js','./src/asr-client.js','./src/turn-revisions.js','./src/emma-color-palettes.js','./src/resumable-download.js','./src/moonshine-module.js','./src/audio-capture.js','./src/silero-capture.js','./src/silero-endpoint.js','./src/silero-worker.js','./src/lite-response-engine.js','./src/interaction/diagnostics.js','./src/interaction/diversity.js','./src/interaction/frequent-replies.js','./src/interaction/supplemental-replies.js','./src/interaction/ruri-routing.js','./src/interaction/response.js','./src/lite-topic-matcher.js','./src/lite-phonetic-scene-matcher.js','./src/tts-worker.js','./worklets/pcm-capture-worklet.js'];
 // Complete the transitive static ES module graph of src/app.js. These imports
 // must survive a first-visit offline restart even before an online reload has
@@ -10,8 +10,16 @@ SHELL.push('./src/reply-display-hint.js','./src/vendor/moonshine/asset-downloade
   './src/multilingual/acft-client.js','./src/multilingual/acft-window-policy.js',
   './src/multilingual/developer-translations.js');
 SHELL.push('./src/multilingual/local-semantic-assets.js');
-SHELL.push('./src/app.js?v=1.2.1','./styles.css?v=1.2.1',
-  './src/emma-bgm.js?v=conversation-bgm-volume-r1',
+SHELL.push('./src/black-screen-mode.js','./assets/mitsukotoba-ai.png?v=20260930-layout-r7',
+  './assets/mitsukotoba-baby.png?v=20260930-layout-r7','./assets/mitsukotoba-parent.png?v=20260930-layout-r7');
+SHELL.push('./src/emma-voice-selection.js','./src/a3-voice-release.js',
+  './src/prerecorded-voice.js?v=a3-v6','./src/tts-worker.js?v=a3-v6','./assets/voice-a3/manifest.json?v=4',
+  './src/a3-voice-release.js?v=4','./src/feature-screens.js?v=a3-v7','./src/a3-sentence-excerpts.js?v=1');
+SHELL.push('./src/multilingual/ui.js?v=20261127-language-last','./src/app.js?v=a3-v7','./styles.css?v=conversation-aec3-r6',
+  './src/emma-bgm.js?v=speex-bgm-r1','./src/audio-capture.js?v=speex-bgm-r1',
+  './src/speex-echo-canceller.js','./src/vendor/speex-dsp/speex.wasm',
+  './worklets/speex-pcm-capture-worklet.js','./licenses/speex/SPEEX-KMP-MIT.txt',
+  './licenses/speex/XIPH-BSD.txt','./licenses/speex/PROVENANCE.json',
   './src/emma-bgm.js','./src/emma-bgm-tracks.js','./src/bgm-echo-filter.js',
   './worklets/bgm-pcm-capture-worklet.js','./worklets/aec3-pcm-capture-worklet.js','./assets/conversation-bgm/credits.txt',
   './assets/conversation-bgm/Yama_No_Ongakuka-Xy02-1(Straight).mp3',
@@ -24,7 +32,8 @@ SHELL.push('./src/app.js?v=1.2.1','./styles.css?v=1.2.1',
   './assets/conversation-bgm/Kurarinetto_Kowashichatta-Xy02-2(Shuffle).mp3',
   './assets/conversation-bgm/Kokage_De_Yuttari-1(Slow).mp3',
   './assets/conversation-bgm/The_Entertainer-Xy02-1(Slow).mp3');
-// Cache the temperature routing data and baseline illustrations.
+// The temperature split retains the approved recorded voice but adds two
+// direction-specific private stills and the lazily initialized prototype bank.
 SHELL.push('./src/frequency/temperature-direction.js','./src/frequency/temperature-prototypes.js',
   './src/frequency/temperature-english-candidates.js',
   './src/frequency/temperature-visuals.js',
@@ -156,7 +165,6 @@ SHELL.push(
 );
 
 SHELL.push('./assets/experimental-aec3/index.js','./assets/experimental-aec3/webrtc-audio-processing.wasm');
-
 self.addEventListener('install',event=>event.waitUntil(
   caches.open(CACHE).then(c=>c.addAll(SHELL)).then(()=>self.skipWaiting())
 ));
@@ -196,7 +204,8 @@ self.addEventListener('fetch',event=>{
   }
 
   // The voice worker owns a checksum-verified cache; avoid duplicate media storage.
-  if(url.pathname.includes('/assets/voice-1202/') || url.pathname.includes('/assets/temperature-1202/')) {
+  if(url.pathname.includes('/assets/voice-1202/') || url.pathname.includes('/assets/voice-a3/') ||
+     url.pathname.includes('/assets/temperature-1202/')) {
     event.respondWith(fetch(event.request).then(withIsolationHeaders));
     return;
   }

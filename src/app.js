@@ -1,11 +1,12 @@
+import {A3_RECORDING, bindQwenVoiceSetting, selectedEmmaRecording} from './emma-voice-selection.js';
 import { installSemanticPanel } from './semantic/panel.js';
 import { enhanceChoiceSelect, syncChoiceButtons } from './settings-choice-buttons.js';
 import { createSemanticController } from './semantic/controller.js';
 import { ConversationHistory, historyEnabled, createHistoryEntry } from './conversation-history.js';
-import { installFeatureScreens } from './feature-screens.js';
+import { singleSentenceReply, installFeatureScreens } from './feature-screens.js?v=a3-v7';
 import { SOFT_PALETTES, VIVID_PALETTES, FILLED_PALETTES, normalizeFilledPalette, normalizeSoftPalette, normalizeVividPalette, normalizeColorSettings, shiftingPalette, GRADIENT_CYCLE_MS, GRADIENT_DESCRIPTIONS } from './emma-color-palettes.js';
-import { EmmaMicrophone } from './audio-capture.js?v=20261021-ui-audit-v4';
-import {persistentMicrophoneEnabled, shouldReleaseMicrophoneForReply, compareHiddenMicrophoneSnapshots, HiddenAudioPipelineProbe} from './microphone-continuity.js';
+import { EmmaMicrophone } from './audio-capture.js?v=speex-bgm-r1';
+import {persistentMicrophoneEnabled, shouldReleaseMicrophoneForReply, compareHiddenMicrophoneSnapshots, HiddenAudioPipelineProbe, foregroundCaptureProblem} from './microphone-continuity.js';
 import { MoonshineAsrClient } from './asr-client.js';
 import { TurnRevisions } from './turn-revisions.js';
 import { LiteResponseEngine, isMeaningfulUtterance } from './lite-response-engine.js';
@@ -15,7 +16,7 @@ import { inspectMoonshineCacheInventory, inspectMoonshineManifestCache } from '.
 import { MultilingualClient } from './multilingual/client.js';
 import {MOONSHINE_SPECIALIST_LANGUAGES,FIXED_ASR_LANGUAGES,FIXED_ASR_MODELS,createFixedLocaleAsr} from './multilingual/specialist-asr.js';
 import { LanguageSemanticClient } from './multilingual/semantic-client.js';
-import { installLanguageUI } from './multilingual/ui.js?v=20261104-why-page-r1';
+import { installLanguageUI } from './multilingual/ui.js?v=20261127-language-last';
 import { describeError } from './multilingual/translations.js?v=20261022-speech-language-redetect-r1';
 import { createConfirmation } from './multilingual/confirmation.js';
 import { meaningfulSpeech, LANGUAGE_KEY } from './multilingual/core.js';
@@ -24,9 +25,11 @@ import {WHISPER_THREAD_KEY,WHISPER_LANGUAGE_MODE_KEY,normalizeThreads,normalizeL
 import {installWhisperPerformanceControls} from './multilingual/performance-controls.js';
 import {importAcftModel,hasImportedAcftModel} from './multilingual/acft-model-store.js';
 import {chooseEnglishResumeGreeting} from './resume-greeting.js';
-import {EmmaBgm, DEFAULT_BGM_VOLUME} from './emma-bgm.js?v=conversation-bgm-volume-r1';
+import {EmmaBgm, DEFAULT_BGM_VOLUME} from './emma-bgm.js?v=speex-bgm-r1';
 import {emmaBgmTracks} from './emma-bgm-tracks.js';
 
+import { createBlackScreenMode } from './black-screen-mode.js';
+const blackScreen = createBlackScreenMode({onExit:()=>stopEmma(),onReply:()=>forceReplyNow(),canReply:()=>running&&!preparingConversation&&!processing&&!speaking});
 const $ = (id) => document.getElementById(id);
 const VISUAL_CUE_TRIAL = document.documentElement.dataset.visualCueTrial === 'true';
 const ui = {
@@ -59,7 +62,7 @@ const ui = {
 };
 
 const CURRENT_SETUP_REVISION = 'moonshine-streaming-qwen3-prerecorded-1202-v11';
-const WEB_BUILD = '20261121-public-v1.2.1';
+const WEB_BUILD = '20261109-public-v1.3.0';
 
 const STORAGE = {
   setupRevision:'emma_web_setup_revision',
@@ -71,6 +74,7 @@ const STORAGE = {
   autoRespond:'emma_auto_respond',
   endpointMode:'emma_endpoint_mode',
   playSentenceCount:'emma_play_sentence_count',
+  conversationSentenceCount:'emma_conversation_sentence_count',
   asrModel:'emma_asr_model',
   asrReload:'emma_asr_reload',
   tutorialDone:'emma_web_tutorial_completed_v1',
@@ -155,7 +159,7 @@ let asrInfoCache=null, ttsInfoCache=null, ttsWorkerSignature='';
 let running=false, workersReady=false, processing=false, speaking=false;
 let persistentMicSession=false;
 let conversationBgmRequested=false;
-let conversationBgmMode='aec3';
+let conversationBgmMode='speex';
 let conversationBgmSong=null;
 let conversationBgmUnavailable=false;
 const conversationBgm=new EmmaBgm(error=>{
@@ -168,6 +172,7 @@ const bgmPreview=new EmmaBgm(error=>{
   stopBgmPreview('曲を再生できませんでした。');
 });
 let lastReplyMicMode='unmeasured';
+let foregroundMicCheckPending=false, foregroundMicCheckPromise=null;
 let micRestartAttempts=0;
 let micRestartFailures=0;
 let lastMicRestartError='none';
@@ -248,8 +253,8 @@ function initVisualCues(){
     settings.apply();
   }).catch(error=>{enabled.checked=false;enabled.disabled=true;recordRuntimeDiagnosticEvent('visual-cue-unavailable',error);});
 }
-function audioCacheKey(text){
-  return [getTtsSignature(),String(text||'')].join('|');
+function audioCacheKey(text,recordingText){
+  return JSON.stringify([getTtsSignature(),text,recordingText]);
 }
 
 
@@ -393,6 +398,7 @@ initUi();
 function initUi() {
   initVisualCues();
   initLanguages();
+  blackScreen.bind(document.getElementById('blackScreenEnabled'));
   if(ui.webBuild){
     const build=document.createElement('bdi');build.dir='ltr';build.dataset.noI18n='';build.textContent=WEB_BUILD;
     ui.webBuild.replaceChildren(document.createTextNode('Web build: '),build);
@@ -438,6 +444,13 @@ function initUi() {
     ui.semanticStatus.textContent=status.message;
     if(languageUI.language!=='ja' && status.error)languageUI.setStatus('モデルを準備できませんでした。再試行してください。');
   });
+  const sentenceCount=$('conversationSentenceCount');
+  sentenceCount.value=String(preferredSentenceCount(STORAGE.conversationSentenceCount));
+  sentenceCount.disabled=getTtsSignature()!==A3_RECORDING;
+  enhanceChoiceSelect(sentenceCount);
+  sentenceCount.addEventListener('change',()=>{
+    localStorage.setItem(STORAGE.conversationSentenceCount,sentenceCount.value);
+  });
   const historyCheckbox=$('historyEnabled');
   historyCheckbox.checked=historyEnabled(localStorage);
   historyCheckbox.addEventListener('change',()=>localStorage.setItem('emma_history_enabled',String(historyCheckbox.checked)));
@@ -450,8 +463,9 @@ function initUi() {
     translate:value=>languageUI.translate(value),
     confirmAction,
     describeError:error=>{console.error('Feature screen:',error);return describeError(error,languageUI.language);},
-    playSentenceCount:()=>localStorage.getItem(STORAGE.playSentenceCount)==='3'?3:1,
+    playSentenceCount:()=>preferredSentenceCount(STORAGE.playSentenceCount),
     setPlaySentenceCount:count=>localStorage.setItem(STORAGE.playSentenceCount,count===3?'3':'1'),
+    usePartialPlayback:()=>getTtsSignature()===A3_RECORDING,
     avatar:()=>{ const avatar=ui.avatar.cloneNode(true); avatar.removeAttribute('id'); avatar.querySelectorAll('[id]').forEach(el=>el.removeAttribute('id')); return avatar; }
   });
   const colors = normalizeColorSettings(localStorage.getItem(STORAGE.colorMode), localStorage.getItem(STORAGE.vivid));
@@ -521,6 +535,15 @@ function initUi() {
 }
 
 function bindEvents() {
+  bindQwenVoiceSetting($('useLegacyQwenVoice'), ui.developerTools, async () => {
+    $('conversationSentenceCount').disabled=getTtsSignature()!==A3_RECORDING;
+    await stopEmma();
+    try { await initVoice(); }
+    catch (error) {
+      console.error('Emma voice change:', error);
+      setState('error','音声を準備できませんでした','接続を確認し、もう一度お試しください。');
+    }
+  });
   ui.mainButton.addEventListener('click',async()=>{
     unlockPlaybackAudioFromGesture();
     await startEmma();
@@ -733,10 +756,10 @@ function bindEvents() {
     const epoch=conversationEpoch;
     const response=await semanticPanel.respond(text,'',{isCurrent:()=>epoch===conversationEpoch});
     if(!response)return;
-    const english=stripAiSpeakerLabel(response.english);
+    const {text:english,recordingText}=conversationReply(response.english);
     showConversation(text,english,response.scene);
     await ensureWorkersForDebug();
-    await speakResponse(english,{temperatureDirection:response.temperatureDirection});
+    await speakResponse(english,{recordingText,temperatureDirection:response.temperatureDirection});
   });
 
   document.addEventListener('visibilitychange',async()=>{
@@ -754,7 +777,8 @@ function bindEvents() {
         finishHiddenCaptureObservation('visible');
         updateMicContinuityStatus();
       }
-      if(running && ui.keepAwake.checked) await requestWakeLock();
+      requestForegroundMicrophoneCheck();
+      if(running && (ui.keepAwake.checked || blackScreen.active)) await requestWakeLock();
     }
   });
   window.addEventListener('pagehide',()=>{
@@ -763,8 +787,76 @@ function bindEvents() {
     requestBackgroundModelContinuation();
   },{capture:true});
   window.addEventListener('pageshow',event=>{
-    if(event.persisted)startConversationBgm();
+    if(event.persisted){startConversationBgm();requestForegroundMicrophoneCheck();}
   });
+}
+
+function requestForegroundMicrophoneCheck() {
+  if(!running||document.visibilityState!=='visible')return;
+  foregroundMicCheckPending=true;
+  void checkForegroundMicrophone();
+}
+
+async function checkForegroundMicrophone() {
+  if(!foregroundMicCheckPending||foregroundMicCheckPromise||!running||
+     preparingConversation||processing||speaking||document.visibilityState!=='visible')return;
+  foregroundMicCheckPending=false;
+  const epoch=conversationEpoch;
+  const current=()=>running&&epoch===conversationEpoch&&document.visibilityState==='visible';
+  foregroundMicCheckPromise=(async()=>{
+    const previous=mic;
+    let problem=previous?null:'missing-input';
+    if(previous) {
+      try{await previous.ensureActive();}catch{problem='audio-context-suspended';}
+      if(!current())return;
+      if(mic!==previous){foregroundMicCheckPending=true;return;}
+      if(!problem) {
+        const before=previous.getDiagnostics(),vadBefore=previous.getVADDiagnostics();
+        await delay(1200);
+        if(!current())return;
+        if(mic!==previous){foregroundMicCheckPending=true;return;}
+        if(preparingConversation||processing||speaking){foregroundMicCheckPending=true;return;}
+        problem=foregroundCaptureProblem(before,previous.getDiagnostics(),vadBefore,previous.getVADDiagnostics());
+      }
+    }
+    if(!problem)return;
+    if(preparingConversation||processing||speaking){foregroundMicCheckPending=true;return;}
+    recordRuntimeDiagnosticEvent('foreground-microphone-'+problem,Error(problem));
+    setState('thinking','マイクを起動しています','バックグラウンドから戻った後の音声入力を確認しています。');
+    // Rebuild the entire capture graph, not only the getUserMedia track:
+    // AudioWorklet or the Silero worker may have stalled as well.
+    conversationBgm.stop();
+    if(previous&&mic===previous) {
+      mic=null;
+      await previous.stop();
+    }
+    if(!current())return;
+    await startMoonshineCapture();
+    if(!current())return;
+    const replacement=mic;
+    if(!replacement)throw Error('Microphone restart produced no capture');
+    await replacement.ensureActive();
+    const before=replacement.getDiagnostics(),vadBefore=replacement.getVADDiagnostics();
+    await delay(1200);
+    if(!current()||mic!==replacement)return;
+    const remaining=foregroundCaptureProblem(before,replacement.getDiagnostics(),
+      vadBefore,replacement.getVADDiagnostics());
+    if(remaining)throw Error('Microphone restart did not recover capture: '+remaining);
+    setState('listening',`${getAiName()}が聞いています`,
+      languageUI.language==='ja'?'いつもどおり日本語で赤ちゃんへ話しかけてください。':
+        '選択した言語で赤ちゃんに話しかけてください。');
+  })().catch(async error=>{
+    if(!current())return;
+    recordRuntimeDiagnosticEvent('foreground-microphone-recovery-failed',error);
+    // Do not leave the Stop button and "listening" UI on a dead mic.
+    await stopEmma();
+    setState('error','マイクの再開に失敗しました','「呼びかけを始める」を押して再開してください。');
+  }).finally(()=>{
+    foregroundMicCheckPromise=null;
+    if(foregroundMicCheckPending&&running&&document.visibilityState==='visible')
+      void checkForegroundMicrophone();
+  });
+  return foregroundMicCheckPromise;
 }
 
 function showScreen(name,{autoStart=true}={}) {
@@ -1142,13 +1234,15 @@ async function startEmma({ auto = false } = {}) {
   languageUI.confirm();
   if(running || preparingConversation || processing || speaking || featureScreens?.isOpen() || ui.mainButton.disabled) return;
   const epoch=++conversationEpoch;
+  blackScreen.prepare({fullscreen:!auto});
+  foregroundMicCheckPending=false;
   multilingual?.resetSpeechLanguage();
   multilingualAsrDiagnostic.cachedLanguage=null;
   sessionId=crypto.randomUUID();
   ui.mainButton.disabled=true;
   preparingConversation=true;
   try {
-    if(!(await ensureMoonshineIsolation({isCurrent:()=>epoch===conversationEpoch,manualStartAfterReload:true}))) return;
+    if(!(await ensureMoonshineIsolation({isCurrent:()=>epoch===conversationEpoch,manualStartAfterReload:true}))) { if(epoch===conversationEpoch)blackScreen.close(); return; }
 
     // Always try the real microphone first. Do not gate startup on the
     // Permissions API: Android/Brave/Chrome may report "prompt" even when the
@@ -1217,13 +1311,15 @@ async function startEmma({ auto = false } = {}) {
     ui.manualReplyButton.classList.remove('hidden');
     updateAudioUnlockUi();
     startConversationBgm();
-    if(ui.keepAwake.checked) await requestWakeLock();
+    if(ui.keepAwake.checked || blackScreen.requested) await requestWakeLock();
     if(epoch!==conversationEpoch)return;
+    blackScreen.show();
     setState('listening',`${getAiName()}が聞いています`,
       languageUI.language==='ja'?'いつもどおり日本語で赤ちゃんへ話しかけてください。必要なら「今すぐAIが返事する」で区切れます。':
         '選択した言語で赤ちゃんに話しかけてください。');
   } catch(error) {
     if(epoch!==conversationEpoch)return;
+    blackScreen.close();
     console.error(error);
     running=false;
     stopConversationBgm();
@@ -1257,7 +1353,7 @@ async function playConversationGreeting(epoch) {
     if(epoch!==conversationEpoch)return;
     const greeting=chooseEnglishResumeGreeting(topics,previousEnglishResumeGreeting);
     if(greeting) {
-      // Greeting and regular replies both use the same Qwen3 recorded English clips.
+      // Greeting and regular replies share the selected English recording bank.
       // No Japanese voice or platform speech-synthesis fallback.
       previousEnglishResumeGreeting=greeting;
       showConversation('',greeting,'greeting');
@@ -1304,6 +1400,8 @@ async function prepareSemanticForConversation({selectionEpoch=modelSelectionEpoc
 }
 
 async function stopEmma() {
+  blackScreen.close();
+  foregroundMicCheckPending=false;
   finishHiddenCaptureObservation('session-stopped');
   visualCue.stop();
   conversationEpoch++;
@@ -1408,11 +1506,11 @@ async function respondGenericallyToManualRequest() {
 
   try {
     const response=semanticPanel.respondGeneric('');
-    const english=stripAiSpeakerLabel(response.english);
+    const {text:english,recordingText}=conversationReply(response.english);
     showConversation('',english);
     processing=false;
     setBusy(false);
-    await speakResponse(english,{entry:createHistoryEntry(sessionId,'',english,'generic')});
+    await speakConversationReply(english,recordingText,'','generic');
   } catch(error) {
     processing=false;
     setBusy(false);
@@ -1438,16 +1536,27 @@ async function forceReplyNow() {
 async function startMoonshineCapture() {
   if(mic) return;
   const epoch=conversationEpoch;
-  const filterBgm=conversationBgmRequested&&(conversationBgmMode==='media'||conversationBgmMode==='aec3');
+  const useSpeex=conversationBgmRequested&&conversationBgmMode==='speex';
+  const filterBgm=conversationBgmRequested&&conversationBgmMode!=='native';
   const capture=new EmmaMicrophone({
     echoCancellation:conversationBgmRequested&&conversationBgmMode==='native',
     bgmContext:filterBgm?ensureAudioContextCreated():null,
     aec3:conversationBgmRequested&&conversationBgmMode==='aec3',
+    speex:useSpeex,
     onAec3Failure:()=>{
       conversationBgmUnavailable=true;
       conversationBgm.stop();
       refreshConversationBgmStatus('AEC3が動作しなかったため、音楽を止めて通常の聞き取りを続けています。');
     },
+    onSpeexFailure:()=>{
+      if(epoch!==conversationEpoch || mic!==capture)return;
+      conversationBgmUnavailable=true;
+      conversationBgm.stop();
+      refreshConversationBgmStatus('SpeexDSPが動作しなかったため、音楽を止めて通常の聞き取りを続けています。');
+    },
+    onSpeechActivity:useSpeex?active=>{
+      if(epoch===conversationEpoch && mic===capture && capture.speexReady) conversationBgm.setDucked(active);
+    }:null,
     endpointMode:localStorage.getItem(STORAGE.endpointMode)==='legacy'?'legacy':'silero',
     onWarning:message=>{if(epoch===conversationEpoch)showNotice('従来方式で会話します',message);},
     onError:async error=>{if(epoch===conversationEpoch){await stopEmma();setState('error','音声の判定が中断しました',error.message);}},
@@ -1557,7 +1666,14 @@ async function initWorkers() {
 
 let voiceInitialization;
 async function initVoice() {
-  if(voiceInitialization)return voiceInitialization;
+  if (voiceInitialization) {
+    try { await voiceInitialization; }
+    catch (error) {
+      if (getTtsSignature() === ttsWorkerSignature) throw error;
+    }
+    if (getTtsSignature() !== ttsWorkerSignature) return initVoice();
+    return;
+  }
   voiceInitialization=(async()=>{
     const signature=getTtsSignature();
   if(!(ttsWorker && ttsInfoCache && ttsWorkerSignature===signature)){
@@ -1566,13 +1682,13 @@ async function initVoice() {
     ttsInfoCache=null;
     ttsWorkerSignature=signature;
     ttsInfoCache=await new Promise((resolve,reject)=>{
-      ttsWorker=new Worker(new URL('./tts-worker.js?v=20261021-audio-recovery-v2',import.meta.url),{type:'module'});
+      ttsWorker=new Worker(new URL('./tts-worker.js?v=a3-v6',import.meta.url),{type:'module'});
       ttsWorker.onmessage=(event)=>handleTtsMessage(event,resolve,reject);
       ttsWorker.onerror=event=>{
         console.error('Recorded audio worker failed:',event);
         reject(new Error('音声の準備または再生に失敗しました。'));
       };
-      ttsWorker.postMessage({ type:'init' });
+      ttsWorker.postMessage({ type:'init', recording:signature });
     });
   }
 
@@ -1756,7 +1872,7 @@ function handleTtsMessage(event,readyResolve,readyReject) {
         const cached=q.generated.slice(0,q.total||q.generated.length).filter(Boolean);
         if(cached.length){
           preparedAudio.delete(q.cacheKey);
-          preparedAudio.set(q.cacheKey,cached);
+          preparedAudio.set(q.cacheKey,{blobs:cached,playbackDurationMs:q.playbackDurationMs});
           if(preparedAudio.size>24)preparedAudio.delete(preparedAudio.keys().next().value);
         }
       }
@@ -1819,6 +1935,8 @@ async function transcribeUtterance(audio,{manual=false,revision=null}={}) {
     }
     if(!japanese)languageUI.setStatus('音声認識でエラーが発生しました');
     setState('error','音声認識でエラーが発生しました',friendlyError(error));
+  }finally{
+    if(foregroundMicCheckPending&&!processing&&!speaking)void checkForegroundMicrophone();
   }
 }
 
@@ -1841,13 +1959,13 @@ async function processTranscript(text,{manual=false,revision=null}={}) {
   const response=await semanticPanel.respond(clean,'',{isCurrent:()=>isLiveTurn(revision,epoch)});
   if(!isLiveTurn(revision,epoch))return;
   if(!response){processing=false;setBusy(false);restoreUnspokenTurn();return;}
-  const english=stripAiSpeakerLabel(response.english);
+  const {text:english,recordingText}=conversationReply(response.english);
   showConversation(clean,english,response.scene);
   // A speculative TTS is still an active turn: keep manual reply disabled,
   // while allowing the microphone/VAD to detect a continuation.
   processing=revision!==null;
   setBusy(revision!==null);
-  await speakResponse(english,{entry:createHistoryEntry(sessionId,clean,english,response.scene),revision,temperatureDirection:response.temperatureDirection});
+  await speakConversationReply(english,recordingText,clean,response.scene,{revision,temperatureDirection:response.temperatureDirection});
   // Do not complete the tutorial here: the speculative playback commit resets
   // turnRevisions, so isLiveTurn(revision) is no longer true after playback.
 }
@@ -1888,10 +2006,27 @@ async function restoreMicrophoneAfterEmmaVoice() {
   }
 }
 
-async function speakResponse(text,{entry=null,revision=null,temperatureDirection=null}={}) {
+function preferredSentenceCount(settingKey) {
+  return localStorage.getItem(settingKey)==='1' ? 1 : 3;
+}
+
+function conversationReply(responseText) {
+  const recordingText=stripAiSpeakerLabel(responseText);
+  const shorten=getTtsSignature()===A3_RECORDING && preferredSentenceCount(STORAGE.conversationSentenceCount)===1;
+  return {text:shorten ? singleSentenceReply(recordingText) : recordingText,recordingText};
+}
+
+function speakConversationReply(text,recordingText,parentText,scene,options) {
+  const entry=createHistoryEntry(sessionId,parentText,text,scene);
+  if(recordingText!==text)entry.recordingText=recordingText;
+  return speakResponse(text,{...options,entry,recordingText});
+}
+
+async function speakResponse(text,{entry=null,revision=null,temperatureDirection=null,recordingText=text}={}) {
   visualCue.preload(text,{temperatureDirection});
   const epoch=conversationEpoch;
-  if(!ttsWorker)throw Error('AIの声がまだ準備されていません');
+  if (!ttsWorker || !ttsInfoCache || ttsWorkerSignature !== getTtsSignature()) await initVoice();
+  if (epoch !== conversationEpoch) return;
   const speculative=revision!==null;
   // Re-read the user's experiment choice at each reply, not just at session
   // startup; this also covers changing Settings while a conversation is active.
@@ -1915,7 +2050,7 @@ async function speakResponse(text,{entry=null,revision=null,temperatureDirection
     recordHiddenPipelineEvent('reply-start');
   }
   const requestId=++requestSeq;
-  const cacheKey=audioCacheKey(text);
+  const cacheKey=audioCacheKey(text,recordingText);
   const ttsRequestStartedAt=diagnosticNow();
   audioQueues.set(requestId,{
     items:new Map(),next:0,total:0,playing:false,generationDone:false,
@@ -1934,11 +2069,13 @@ async function speakResponse(text,{entry=null,revision=null,temperatureDirection
   try{
     const cached=preparedAudio.get(cacheKey);
     if(cached){
-      cached.forEach((blob,index)=>queue.items.set(index,blob));
-      queue.total=cached.length;queue.generationDone=true;
+      cached.blobs.forEach((blob,index)=>queue.items.set(index,blob));
+      queue.playbackDurationMs=cached.playbackDurationMs;
+      queue.total=cached.blobs.length;queue.generationDone=true;
       queue.generationResolve?.();
       pumpAudio(requestId);
-    }else ttsWorker.postMessage({type:'speak',requestId,text,nameHints:[]});
+    }else ttsWorker.postMessage({type:'speak',requestId,text:recordingText,nameHints:[],
+      excerptText:recordingText===text ? undefined : text});
     if(speculative){
       await generationReady;
       if(!valid())return;
@@ -1991,9 +2128,15 @@ async function speakResponse(text,{entry=null,revision=null,temperatureDirection
     audioQueues.delete(requestId);
     if(micReleased && running && epoch===conversationEpoch){
       try{await restoreMicrophoneAfterEmmaVoice();}
-      catch(error){console.error('Microphone restore failed after Emma voice.',error);}
+      catch(error){
+        console.error('Microphone restore failed after Emma voice.',error);
+        await stopEmma();
+        setState('error','マイクの再開に失敗しました','「呼びかけを始める」を押して再開してください。');
+      }
     }
   }
+  if(foregroundMicCheckPending&&running&&epoch===conversationEpoch)
+    await checkForegroundMicrophone();
   if(!valid())return;
   if(running)setState('listening',`${getAiName()}が聞いています`,
     languageUI.language==='ja'?'いつもどおり日本語で赤ちゃんへ話しかけてください。':
@@ -2010,6 +2153,7 @@ function enqueueAudio(m) {
     lastTtsFirstChunkMillis=Math.round(diagnosticNow()-q.ttsRequestStartedAt);
     updateWebTimingDiagnostics();
   }
+  q.playbackDurationMs=m.playbackDurationMs;
   q.items.set(m.index,m.blob);
   q.generated[m.index]=m.blob;
   q.total=Math.max(q.total,m.index+1);
@@ -2049,9 +2193,9 @@ function conversationBgmEnabled() {
 function preferredConversationBgmMode() {
   try {
     const choice=localStorage.getItem(STORAGE.conversationBgmMode);
-    if(choice==='media'||choice==='native'||choice==='aec3')return choice;
+    if(choice==='speex'||choice==='media'||choice==='native'||choice==='aec3')return choice;
   } catch {}
-  return 'aec3';
+  return 'speex';
 }
 
 function selectedConversationBgmSong() {
@@ -2172,6 +2316,7 @@ function refreshConversationBgmStatus(text='') {
 
 function canPlayConversationBgm() {
   if(!conversationBgmRequested||conversationBgmUnavailable||!mic)return false;
+  if(conversationBgmMode==='speex')return Boolean(mic.speexReady && mic.bgmReference && mic.node===mic.bgmReference);
   if(conversationBgmMode==='media'||conversationBgmMode==='aec3')return Boolean(mic.bgmReference && mic.node===mic.bgmReference && (conversationBgmMode!=='aec3'||mic.aec3Ready));
   const echoCancellation=mic.stream?.getAudioTracks()[0]?.getSettings().echoCancellation;
   return echoCancellation===true||echoCancellation==='all';
@@ -2280,19 +2425,23 @@ async function playBlob(blob,requestId) {
   if(!audioQueues.has(requestId))return;
   if(audioContext.state!=='running')await waitForPlaybackAudio();
   if(!audioQueues.has(requestId))return;
-  const source=audioContext.createBufferSource();
-  activeAudioSource=source;
-  // The adopted AAC bank already has matched volume and intentional pauses.
   const prerecorded=blob.type==='audio/mp4';
   const playbackBuffer=prerecorded ? decoded : trimAudioSilence(decoded);
+  const q=audioQueues.get(requestId);
+  const durationMs=q?.playbackDurationMs;
+  if(durationMs!==undefined && (!Number.isInteger(durationMs) || durationMs<=0 ||
+     durationMs>=playbackBuffer.duration*1000))
+    throw Error('音声の再生範囲を確認できません。');
+  const source=audioContext.createBufferSource();
+  activeAudioSource=source;
   source.buffer=playbackBuffer;
   const gainNode=audioContext.createGain();
   gainNode.gain.value=prerecorded ? 1 : calculatePlaybackGain(playbackBuffer);
   const analyser=audioContext.createAnalyser();
   analyser.fftSize=256;
   source.connect(gainNode).connect(analyser).connect(audioContext.destination);
-  // AEC3 receives the same Emma playback signal as the speaker, alongside BGM.
-  if(mic?.aec3Ready && mic.bgmReference && mic.context===audioContext)
+  // The WASM canceller receives the same Emma playback signal as the speaker, alongside BGM.
+  if((mic?.aec3Ready || mic?.speexReady) && mic.bgmReference && mic.context===audioContext)
     gainNode.connect(mic.bgmReference,0,1);
   const data=new Uint8Array(analyser.frequencyBinCount);
   let raf;
@@ -2306,8 +2455,8 @@ async function playBlob(blob,requestId) {
     raf=requestAnimationFrame(animate);
   };
   const ended=new Promise(resolve=>source.onended=resolve);
-  source.start();
-  const q=audioQueues.get(requestId);
+  if(durationMs!==undefined)source.start(0,0,durationMs/1000);
+  else source.start();
   const cueToken=visualCue.begin(q?.text,{temperatureDirection:q?.temperatureDirection});
   if(q && !q.firstAudioRecorded){
     q.firstAudioRecorded=true;
@@ -2670,7 +2819,7 @@ function updateAiNameUi() {
 }
 
 function getTtsSignature() {
-  return 'qwen3-prerecorded-voice1202-v1';
+  return selectedEmmaRecording();
 }
 
 function updateAsrModelStatus() {
@@ -2804,9 +2953,9 @@ async function buildWebDiagnosticReport() {
     `tts.prefetchFailed=${voicePrefetchDiagnostic.failed}`,
     `tts.prefetchLastFile=${voicePrefetchDiagnostic.lastFile??'none'}`,
     `tts.prefetchReason=${String(voicePrefetchDiagnostic.reason??'none').replace(/[\r\n]/g,' ').slice(0,160)}`,
-    'tts.model=Qwen3-TTS pre-generated',
-    'tts.voice=Mitsukotoba-1202',
-    'tts.generationSeed=1202',
+    'tts.recording='+getTtsSignature(),
+    'tts.model='+(ttsInfoCache?.model||'not initialized'),
+    'tts.voice='+(ttsInfoCache?.voice||'not initialized'),
     'tts.loudnessTarget=-20LUFS',
     'tts.prerecordedPlaybackGain=1.0',
     'tts.fallbackTargetPeak=0.92',
@@ -2823,7 +2972,7 @@ async function buildWebDiagnosticReport() {
     `history.enabled=${historyEnabled(localStorage)}`,
     `autoRespond=${ui.autoRespond?.checked!==false}`,
     `keepAwake=${ui.keepAwake?.checked!==false}`,
-    `playSentenceCount=${localStorage.getItem(STORAGE.playSentenceCount)==='3'?3:1}`,
+    `playSentenceCount=${preferredSentenceCount(STORAGE.playSentenceCount)}`,
     `colorMode=${localStorage.getItem(STORAGE.colorMode)||'vivid'}`,
     `tts.firstChunkMs=${lastTtsFirstChunkMillis??'unmeasured'}`,
     `tts.generationCompleteMs=${lastTtsGenerationCompleteMillis??'unmeasured'}`,
@@ -2983,7 +3132,7 @@ async function ensureMoonshineIsolation({isCurrent=()=>true,manualStartAfterRelo
     throw new Error('このブラウザではMoonshineに必要なService Workerを利用できません。');
   }
 
-  const registration=await navigator.serviceWorker.register('./service-worker.js?v=1.2.1',{updateViaCache:'none'});
+  const registration=await navigator.serviceWorker.register('./service-worker.js?v=20261104-settings-why-r1',{updateViaCache:'none'});
   await registration.update().catch(()=>{});
 
   const candidate=registration.installing || registration.waiting;
@@ -3022,6 +3171,6 @@ window.addEventListener('load',()=>{
   if(!VISUAL_CUE_TRIAL && 'serviceWorker' in navigator) {
     // Register for offline assets now. Reload for isolation only when ASR starts,
     // so background setup cannot discard settings or Japanese text being edited.
-    navigator.serviceWorker.register('./service-worker.js?v=1.2.1',{updateViaCache:'none'}).catch(error=>console.warn('Service Worker setup:',error));
+    navigator.serviceWorker.register('./service-worker.js?v=20261104-settings-why-r1',{updateViaCache:'none'}).catch(error=>console.warn('Service Worker setup:',error));
   }
 });

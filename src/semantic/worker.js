@@ -1,6 +1,6 @@
 import {loadFrequencyClassifier,applyFrequencyClassifier} from '../frequency/classifier.js';
 import {classifyTemperatureWithEncoder} from '../frequency/temperature-direction.js';
-import {selectRuriAxes} from '../interaction/ruri-routing.js';
+import {selectRuriCAxes, RURI_C_SOURCE} from '../interaction/ruri-routing.js';
 let frequencyModel;
 import { classifyEmbedding, decodeHead } from './core.js';
 import { createRuriTokenizer } from './tokenize.js';
@@ -87,8 +87,8 @@ self.onmessage = async ({ data }) => {
       try {
         const result = applyFrequencyClassifier(embedding,classifyEmbedding(embedding,heads,config.topic_thresholds),frequencyModel,'ja');
         // Reuse the same verified Ruri ONNX session to embed six cached prototypes
-        // only when the original model has detected the temperature Topic.
-        if(selectRuriAxes(result.topic,result.interaction).topic==='temperature'){
+        // only when policy C selects the temperature Topic.
+        if(selectRuriCAxes(result.topic,result.interaction).topic==='temperature'){
           const encodePrototype=async text=>{
             const tokenIds=tokenizer(text);
             if(!tokenIds.length||tokenIds.length>config.max_length)throw Error('Temperature prototype length invalid');
@@ -101,7 +101,7 @@ self.onmessage = async ({ data }) => {
           result.temperatureDirection=await classifyTemperatureWithEncoder(embedding,result,'ruri','ja',encodePrototype);
         }
         const diagnostics = data.diagnostics ? { tokenIds: ids, embedding } : {};
-        self.postMessage({ type: 'result', requestId, result: { ...result, elapsedMs: performance.now() - start, ...diagnostics } });
+        self.postMessage({ type: 'result', requestId, result: { ...result, source: RURI_C_SOURCE, elapsedMs: performance.now() - start, ...diagnostics } });
       } finally { for (const tensor of Object.values(output)) tensor.dispose(); }
     }
   } catch (error) { self.postMessage({ type: 'error', requestId, message: error.message || '意味判定でエラーが発生しました。' }); }

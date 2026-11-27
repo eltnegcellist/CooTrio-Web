@@ -204,3 +204,21 @@ export class HiddenAudioPipelineProbe {
     };
   }
 }
+
+/**
+ * Decide whether a foreground microphone really resumed. Track state alone
+ * is insufficient: Android can keep a live MediaStream while PCM or Silero
+ * stops advancing. Compare counters over a visible, 1.2-second probe.
+ * No audio samples or transcript text are retained.
+ */
+export function foregroundCaptureProblem(before,after,beforeVad=null,afterVad=null) {
+  if(!after||after.contextState!=='running'||!(after.liveTracks>0)||after.mutedTracks>0)
+    return 'input-inactive';
+  if(!before||!(after.frames>before.frames))return 'pcm-stalled';
+  if(Number.isFinite(before.nonzeroFrames)&&Number.isFinite(after.nonzeroFrames)&&
+     after.nonzeroFrames===before.nonzeroFrames)return 'zero-pcm';
+  if(beforeVad?.backend==='silero'&&afterVad?.backend==='silero'&&
+     afterVad.sent>beforeVad.sent&&afterVad.received<=beforeVad.received&&
+     afterVad.pending>=24)return 'silero-stalled';
+  return null;
+}

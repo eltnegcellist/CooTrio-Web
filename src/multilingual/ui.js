@@ -142,8 +142,8 @@ export function installLanguageUI({document=globalThis.document,storage=globalTh
     const file=voskArchiveInput.files?.[0];
     if(file)setStatus('Vosk archive selected. Start Emma to validate and cache offline.');
   });
-  // Language first; manual Vosk import developer-only.
-  settings?.querySelector('header')?.after(settingsCard);
+  // Language is the last setting. Keep the license link as a footer.
+  settings?.insertBefore(settingsCard,settings.querySelector('#licenseSettings'));
   const appSharing=installSettingsSharing({document});
   const whyPage=installWhyPage({document});
   const about=document.querySelector('#aboutScreen .screen-content');

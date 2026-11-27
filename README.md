@@ -24,6 +24,8 @@ The app path differs from the old site. You may need to download models again, g
 
 ### Releases
 
+v1.3.0 adds Emma’s A3 recordings, three-sentence playback by default, and an optional blank screen during conversations.
+
 This repository contains official CooTrio Web releases. Release versions, model identifiers, and application file hashes are recorded in `release-manifest.json`.
 
 ### Third-party notices
@@ -51,6 +53,8 @@ Ruriモデルは[既存のruri_int8](https://github.com/eltnegcellist/ruri_int8)
 旧サイトとはアプリのパスが異なります。モデルの再取得、マイクの再許可、PWAの再インストールが必要になる場合があります。旧サイトの保存状態の引き継ぎは保証しません。
 
 ### リリース
+
+v1.3.0では、EmmaのA3音源、既定の3文再生、会話中に画面を黒くする設定を追加しました。
 
 このリポジトリではCooTrio Webの正式リリースを公開しています。リリースのバージョン、モデル識別情報、アプリファイルのハッシュは `release-manifest.json` に記録しています。
 

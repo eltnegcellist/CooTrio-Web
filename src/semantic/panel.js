@@ -1,4 +1,5 @@
 import { createSemanticController } from './controller.js';
+import { RURI_C_SOURCE } from '../interaction/ruri-routing.js';
 const INTENT={invitation:'誘い・提案',observation:'観察',report:'報告',praise:'褒める',question:'質問',reassurance:'安心させる',generic:'対象外・不明'};
 const STATE={future:'これからへの言及',ongoing:'進行中への言及',completed:'完了への言及',not_done:'未実施への言及',unspecified:'状態不明'};
 
@@ -26,14 +27,17 @@ export function installSemanticPanel({controller,engine,beforeChange,storage=loc
     const route=(routingHistory||[]).at(-1);
     if(route && route.route===lastResponse.scene){
       const percent=x=>typeof x==='number' ? (x*100).toFixed(1)+'%' : '—';
+      if(route.policy===RURI_C_SOURCE)lines.push(['分類方式','Ruri C']);
       lines.push(['Ruri Topic（生判定）',`${route.topicRaw||'—'} / ${percent(route.topicProbability)} / ${route.topicStatus}`],
         ['Ruri Interaction（生判定）',`${route.interactionRaw||'—'} / ${percent(route.interactionProbability)} / ${route.interactionStatus}`],
         ['英文の採用経路',route.route],['選択理由',route.reason]);
     }
     if(result?.topic){
+      const usesC=result.source===RURI_C_SOURCE;
+      const topicId=usesC ? result.topic.rawId ?? result.topic.id : result.topic.id;
       const scoreDetail=document.createElement('span');
-      scoreDetail.append(result.topic.id,' (',document.createTextNode('分類スコア'),' ',(result.topic.probability*100).toFixed(1),'%, ',document.createTextNode('候補差'),' ',(result.topic.margin*100).toFixed(1),' ',document.createTextNode('ポイント'),')');
-      lines.push(['意味で選んだ話題',scoreDetail]);
+      scoreDetail.append(topicId,' (',document.createTextNode('分類スコア'),' ',(result.topic.probability*100).toFixed(1),'%, ',document.createTextNode('候補差'),' ',(result.topic.margin*100).toFixed(1),' ',document.createTextNode('ポイント'),')');
+      lines.push([usesC ? 'Topicの1位候補' : '意味で選んだ話題',scoreDetail]);
       // E5 publishes only Topic and Interaction. These extra heads belong to Ruri.
       if(result.intent)lines.push(['インテント（参考）',INTENT[result.intent.id]]);
       if(result.state)lines.push(['状態（参考）',STATE[result.state.id]]);

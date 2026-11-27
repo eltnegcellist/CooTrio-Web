@@ -9,7 +9,7 @@
   <meta name="apple-mobile-web-app-title" content="みつことば" />
   <link rel="icon" href="./icons/mitsukotoba-baby-abc-v2-192.png?v=20260930-icon-r1" type="image/png" sizes="192x192" />
   <link rel="apple-touch-icon" href="./icons/mitsukotoba-baby-abc-v2-192.png?v=20260930-icon-r1" sizes="192x192" />
-  <link rel="stylesheet" href="./styles.css?v=1.2.1" />
+  <link rel="stylesheet" href="./styles.css?v=conversation-aec3-r6" />
   <title>みつことば</title>
 </head>
 <body>
@@ -502,6 +502,16 @@
         </header>
 
         <article class="card">
+          <div class="choice-setting">
+            <label class="choice-setting-title" for="conversationSentenceCount">会話で読む文の数</label>
+            <select id="conversationSentenceCount">
+              <option value="1">1文</option>
+              <option value="3" selected>3文</option>
+            </select>
+          </div>
+        </article>
+
+        <article class="card">
           <h2>見た目</h2>
           <div class="choice-setting"><span class="choice-setting-title">キャラクターの色</span>
             <select id="colorMode">
@@ -541,10 +551,16 @@
           <p id="gradientDescription" class="small muted"></p>
         </article>
 
+        <article id="englishIllustrationSettings" class="card">
+          <h2>英語のイラスト</h2>
+          <label class="toggle-line"><span>英語の内容を表すイラストを表示する</span><span class="switch"><input id="visualCueEnabled" type="checkbox" checked aria-describedby="visualCueHelp" /><span></span></span></label>
+          <p id="visualCueHelp" class="small muted">話している英語に合うイラストや動きを表示します。対応するイラストがない場合はEmmaを表示します。</p>
+        </article>
+
         <article id="conversationBgmSettings" class="card hidden" data-no-i18n>
           <h2>会話中の音楽</h2>
           <label class="toggle-line"><span>エマが起きたら音楽を流す</span><span class="switch"><input id="conversationBgmEnabled" type="checkbox" aria-describedby="conversationBgmHelp" /><span></span></span></label>
-          <p id="conversationBgmHelp" class="small muted">標準では、音楽と一緒にWebRTC AEC3のエコーキャンセルがオンになります。Androidではメディア音量を使います。</p>
+          <p id="conversationBgmHelp" class="small muted">標準設定ではメディア音量で再生し、話し始めると音楽を自動で小さくします。</p>
           <div class="choice-setting">
             <div>
               <label class="choice-setting-title" for="conversationBgmVolume">BGMの音量</label>
@@ -572,10 +588,10 @@
           <p id="bgmPreviewStatus" class="small muted" role="status"></p>
         </article>
 
-        <article id="englishIllustrationSettings" class="card">
-          <h2>英語のイラスト</h2>
-          <label class="toggle-line"><span>英語の内容を表すイラストを表示する</span><span class="switch"><input id="visualCueEnabled" type="checkbox" checked aria-describedby="visualCueHelp" /><span></span></span></label>
-          <p id="visualCueHelp" class="small muted">話している英語に合うイラストや動きを表示します。対応するイラストがない場合はEmmaを表示します。</p>
+        <article class="card">
+          <h2>画面オフモード</h2>
+          <label class="toggle-line"><span>画面オフモードを使う</span><span class="switch"><input id="blackScreenEnabled" type="checkbox" aria-describedby="blackScreenHelp" /><span></span></span></label>
+          <p id="blackScreenHelp" class="small muted">赤ちゃんにスマートフォンの画面を見せずに、英語の呼びかけを楽しめるモードです。会話中は画面が真っ黒になり、赤ちゃんが画面に触れても、誤タッチで元の画面に戻らないようになっています。<br>画面をタップすると操作ボタンが表示され、長押しでAIに返答を促したり、会話を終了したりできます。</p>
         </article>
 
 
@@ -613,6 +629,10 @@
 <h3>会話履歴</h3><label class="toggle-line"><span>端末内に会話履歴を残す</span><span class="switch"><input id="historyEnabled" type="checkbox" checked /><span></span></span></label>
 <h3>Web版の動作</h3>
           <label class="toggle-line">
+            <span>従来のQwen音声を使う</span>
+            <span class="switch"><input id="useLegacyQwenVoice" type="checkbox" aria-label="従来のQwen音声を使う" /><span></span></span>
+          </label>
+          <label class="toggle-line">
             <span>みつことば利用中は画面をスリープさせない</span>
             <span class="switch"><input id="keepAwake" type="checkbox" checked /><span></span>
           </label>
@@ -628,12 +648,13 @@
             <div class="choice-setting">
               <label class="choice-setting-title" for="conversationBgmMode">音量とエコーキャンセル</label>
               <select id="conversationBgmMode" aria-describedby="conversationBgmModeHelp">
-                <option value="aec3">WebRTC AEC3・メディア音量（標準）</option>
+                <option value="speex">SpeexDSP・メディア音量（標準）</option>
+                <option value="aec3">WebRTC AEC3・メディア音量</option>
                 <option value="native">端末のエコーキャンセル・通話音量</option>
                 <option value="media">旧アプリ内のエコーキャンセル・メディア音量（試験用）</option>
               </select>
             </div>
-            <p id="conversationBgmModeHelp" class="small muted">変更は次の会話から適用されます。</p>
+            <p id="conversationBgmModeHelp" class="small muted">SpeexDSPでは、Sileroが発話を検出すると音楽を設定音量の25%に下げます。変更は次の会話から適用されます。</p>
           </section>
 <section id="developerJapaneseAsr">
           <h3>音声認識モデル（日本語・開発者用）</h3>
@@ -666,7 +687,7 @@
             </section>
             <div class="tts-diagnostics">
               <strong>Web音声パラメータ</strong>
-              <span>採用したQwen3-TTS音声 / 生成seed1202</span>
+              <span>標準：A3</span>
               <span>AAC / 24kHz mono / 音量目標 -20 LUFS</span>
               <span id="webTimingDiagnostics">直近計測: 未計測</span>
             </div>
@@ -867,6 +888,6 @@
     </div>
   </main>
 
-  <script type="module" src="./src/app.js?v=1.2.1"></script>
+  <script type="module" src="./src/app.js?v=a3-v7"></script>
 </body>
 </html>
